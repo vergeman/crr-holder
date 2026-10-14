@@ -1,17 +1,57 @@
+# Imports
 import sqlite3
 from contextlib import closing
 
 from fastapi import FastAPI
+from pydantic import BaseModel
+
+from queries import get_metadata, get_summary
+
+
+# Preparation: response models also define the generated HTTP contract.
+class Report(BaseModel):
+    reportId: int
+    publicationDate: str
+
+
+class AccountHolder(BaseModel):
+    accountHolder: str
+    legalName: str | None
+
+
+class Metadata(BaseModel):
+    reportId: int
+    reports: list[Report]
+    accountHolders: list[AccountHolder]
+    settlementPoints: list[str]
+
+
+class HedgeTypeMwh(BaseModel):
+    OPT: float
+    OBL: float
+
+
+class Summary(BaseModel):
+    reportId: int
+    totalMwh: float
+    accountHolderCount: int
+    settlementPointCount: int
+    directedPathCount: int
+    hedgeTypeMwh: HedgeTypeMwh
+
 
 app = FastAPI()
 
 
-@app.get("/api/account-holders")
-def account_holders() -> list[str]:
-    # Read the prepared dataset without changing it.
+# Output: keep each request on the existing read-only dataset.
+@app.get("/api/metadata", response_model=Metadata, operation_id="getMetadata")
+def metadata(report_id: int | None = None, account_holder: str | None = None):
     with closing(sqlite3.connect("file:/data/crr.sqlite?mode=ro", uri=True)) as db:
-        rows = db.execute(
-            "SELECT account_holder FROM account_holders ORDER BY account_holder"
-        ).fetchall()
+        return get_metadata(db, report_id, account_holder)
 
-    return [row[0] for row in rows]
+
+@app.get("/api/summary", response_model=Summary, operation_id="getSummary")
+def summary(report_id: int | None = None, account_holder: str | None = None,
+            settlement_point: str | None = None):
+    with closing(sqlite3.connect("file:/data/crr.sqlite?mode=ro", uri=True)) as db:
+        return get_summary(db, report_id, account_holder, settlement_point)
