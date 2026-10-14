@@ -101,6 +101,7 @@ dd { margin: 0; font-weight: 600; }
 /* The MapLibre basemap fills the stage below all floating panels. */
 .geographic-footprint { position: absolute; inset: 0; padding: 0; border: 0; border-radius: 0; }
 .map-canvas { position: absolute; inset: 0; background: #e8eef1; }
+.map-information:empty { display: none; }
 .map-information { position: absolute; top: 12px; right: 58px; width: 310px; max-width: calc(100% - 80px);
   max-height: min(50%, 330px); overflow-y: auto; padding: 10px 12px;
   background: #ffffffed; border: 1px solid #dce2e7; border-radius: 6px; box-shadow: 0 3px 16px #20303c18; }
@@ -113,16 +114,13 @@ dd { margin: 0; font-weight: 600; }
 .marker-button:hover, .marker-button:focus-visible, .marker-button[aria-pressed="true"] {
   outline: 3px solid #15232f; outline-offset: 2px; opacity: 1; z-index: 1;
 }
-.map-legend-coverage, .map-legend { font-size: .8rem; overflow-wrap: anywhere; }
-.map-legend { margin-top: 8px; }
-.map-legend summary { cursor: pointer; }
-.map-legend-scale { margin-top: 12px; height: 8px;
-  background: linear-gradient(to right, hsl(210 60% 45%), hsl(120 60% 45%), hsl(30 60% 45%)); }
-.map-legend-labels { display: flex; justify-content: space-between; gap: 8px; margin-top: 6px; }
-
 .map-point-details { position: absolute; z-index: 5; pointer-events: none;
   box-sizing: border-box; width: 260px; max-width: calc(100% - 16px); margin: 0; padding: 8px 10px;
   font-size: 12px; background: #ffffffed; border: 1px solid #bdc9d2; border-radius: 4px; }
+.map-legend { align-self: flex-end; flex-shrink: 0; width: 180px; margin-right: 16px; }
+.map-legend-scale { height: 8px; border-radius: 4px;
+  background: linear-gradient(to right, #256e9e, #2d4155, #b83d41); }
+.map-legend-labels { display: flex; justify-content: space-between; margin-top: 4px; font-size: 10px; color: #52616b; }
 
 /* Paired discovery tables stack on narrow screens. */
 .discovery-lists { display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr); gap: 16px; }
@@ -156,6 +154,7 @@ dd { margin: 0; font-weight: 600; }
   main > header { gap: 10px; padding: 10px 12px; }
   .explorer-heading { flex: 1; margin-right: 0; }
   main > header > label { order: 1; }
+  main > header > .map-legend { order: 3; }
   main > header > .portfolio-filters { order: 2; flex-basis: 100%; min-width: 0; }
   main > header h1 { font-size: 1rem; }
   main > header select { min-width: 0; width: 130px; font-size: .8rem; }
@@ -163,9 +162,7 @@ dd { margin: 0; font-weight: 600; }
   .workspace > aside { top: 64px; left: 8px; width: 290px;
     max-height: min(40%, max(100px, calc(100% - var(--holdings-space) - 48px))); }
   .workspace > aside section { padding: 12px; }
-  .map-information { top: 8px; left: 8px; right: 54px; width: auto; max-width: none; max-height: 40%; }
-  .map-legend[open] { max-height: 140px; overflow-y: auto; }
-  .map-legend { display: inline-block; }
+  .map-information { top: auto; bottom: 80px; left: 8px; right: 54px; width: auto; max-width: none; max-height: 140px; }
   .discovery-lists { grid-template-columns: 1fr; }
   .portfolio-summary-columns { gap: 12px; }
   .portfolio-filter-controls label { flex: 1 1 140px; }

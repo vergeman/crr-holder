@@ -9,7 +9,7 @@ import CRRHoldingsPanel, {
   boundCRRHoldingsPanelHeight,
   ContractDetailsModal,
 } from "./components/holdings";
-import Map from "./components/map";
+import Map, { Legend } from "./components/map";
 import "./style.css";
 
 const queryClient = new QueryClient();
@@ -125,6 +125,7 @@ function CRRExplorer() {
           onClear={clearFilters}
           loading={portfolioLoading}
         />
+        <Legend />
         <label>
           Report
           <select

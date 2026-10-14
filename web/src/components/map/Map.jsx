@@ -4,7 +4,6 @@ import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import MarkerButton from "./MarkerButton";
-import Legend from "./Legend";
 import MapControls from "./MapControls";
 import MapStatus from "./MapStatus";
 import MapPointDetails from "./MapPointDetails";
@@ -100,7 +99,6 @@ export default function Map({
     .sort((a, b) => inventory(b) - inventory(a));
 
   // Coordinate coverage stays part of inventory, not marker placement.
-  const missing = (points ?? []).filter((point) => !located(point));
   const detail = points?.find((point) => point.settlementPoint === activePoint);
 
   // Only plain canvas clicks clear selection; markers and controls are separate.
@@ -218,7 +216,6 @@ export default function Map({
             mwhNumber={mwhNumber}
           />
         )}
-        <Legend dataReady={dataReady} missing={missing} mwhNumber={mwhNumber} />
       </div>
     </section>
   );
