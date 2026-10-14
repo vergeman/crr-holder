@@ -7,7 +7,8 @@ import SinkHoldings from './SinkHoldings';
 const monthLabel = (month) => new Date(`${month}T00:00:00Z`).toLocaleDateString(
   'en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
 
-export default function SourceHoldings({ reportId, accountHolder, settlementPoint, mwhNumber }) {
+export default function SourceHoldings({ reportId, accountHolder, settlementPoint,
+  mwhNumber, onCellSelect, onSourceCollapse }) {
   const query = useSourceHoldings(reportId, accountHolder, settlementPoint);
   const [expanded, setExpanded] = useState(new Set());
   const scroll = useRef(null);
@@ -16,6 +17,7 @@ export default function SourceHoldings({ reportId, accountHolder, settlementPoin
   const page = query.data?.pages[0];
 
   function toggle(source) {
+    if (expanded.has(source)) onSourceCollapse(source);
     setExpanded((previous) => {
       const next = new Set(previous);
       if (next.has(source)) next.delete(source);
@@ -82,7 +84,8 @@ export default function SourceHoldings({ reportId, accountHolder, settlementPoin
                 {expanded.has(row.source) && <SinkHoldings
                   reportId={reportId} accountHolder={accountHolder}
                   settlementPoint={settlementPoint} source={row.source}
-                  deliveryMonths={page.deliveryMonths} mwhNumber={mwhNumber} />}
+                  deliveryMonths={page.deliveryMonths} mwhNumber={mwhNumber}
+                  onCellSelect={onCellSelect} />}
                 </Fragment>)}</tbody>
             </table>
           </div>}

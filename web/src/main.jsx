@@ -1,9 +1,10 @@
 // Imports
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useMetadata, useSummary } from './data/hooks';
 import SourceHoldings from './SourceHoldings';
+import ContractDrawer from './ContractDrawer';
 import './style.css';
 
 // Preparation
@@ -114,6 +115,8 @@ function CRRExplorer() {
   const [reportId, setReportId] = useState(null);
   const [accountHolder, setAccountHolder] = useState('');
   const [settlementPoint, setSettlementPoint] = useState('');
+  const [selection, setSelection] = useState(null);
+  const cellButton = useRef(null);
   const reportMetadata = useMetadata(reportId);
   const metadata = useMetadata(reportId, accountHolder);
   const summary = useSummary(reportId, accountHolder, settlementPoint);
@@ -125,20 +128,43 @@ function CRRExplorer() {
   }, [reportId, reportMetadata.data]);
 
   function changeReport(value) {
+    setSelection(null);
     setReportId(Number(value));
     setAccountHolder('');
     setSettlementPoint('');
   }
 
   function changeHolder(value) {
+    setSelection(null);
     // Transformation: reset the old point before both requests start.
     setAccountHolder(value);
     setSettlementPoint('');
   }
 
   function clearFilters() {
+    setSelection(null);
     setAccountHolder('');
     setSettlementPoint('');
+  }
+
+  function changePoint(value) {
+    setSelection(null);
+    setSettlementPoint(value);
+  }
+
+  function clearHolder() {
+    setSelection(null);
+    setAccountHolder('');
+  }
+
+  function selectCell(cell, button) {
+    cellButton.current = button;
+    setSelection(cell);
+  }
+
+  function closeDetails() {
+    setSelection(null);
+    if (cellButton.current?.isConnected) cellButton.current.focus({ preventScroll: true });
   }
 
   // Output
@@ -179,7 +205,7 @@ function CRRExplorer() {
             </label>
             <label>Settlement Point
               <select value={settlementPoint} disabled={!metadata.data || metadata.isError}
-                onChange={(event) => setSettlementPoint(event.target.value)}>
+                onChange={(event) => changePoint(event.target.value)}>
                 <option value="">
                   {metadata.isError ? 'Unable to load settlement points' :
                     !metadata.data ? 'Loading settlement points...' : 'All Settlement Points'}
@@ -198,7 +224,7 @@ function CRRExplorer() {
                 <PortfolioSummary summary={summary.data} />
                 <Discovery summary={summary.data} accountHolder={accountHolder}
                   settlementPoint={settlementPoint} onHolderSelect={changeHolder}
-                  onPointSelect={setSettlementPoint} onHolderClear={() => setAccountHolder('')} />
+                  onPointSelect={changePoint} onHolderClear={clearHolder} />
               </>}
         </aside>
         <section className="map-placeholder" aria-labelledby="map-heading">
@@ -208,7 +234,14 @@ function CRRExplorer() {
       </div>
       <SourceHoldings key={`${reportId}/${accountHolder}/${settlementPoint}`}
         reportId={reportId} accountHolder={accountHolder}
-        settlementPoint={settlementPoint} mwhNumber={mwhNumber} />
+        settlementPoint={settlementPoint} mwhNumber={mwhNumber}
+        onCellSelect={selectCell} onSourceCollapse={(source) => {
+          if (selection?.source === source) setSelection(null);
+        }} />
+      {selection && <ContractDrawer
+        key={`${selection.source}/${selection.sink}/${selection.deliveryMonth}/${selection.hedgeType}`}
+        reportId={reportId} accountHolder={accountHolder} settlementPoint={settlementPoint}
+        selection={selection} mwhNumber={mwhNumber} onClose={closeDetails} />}
     </main>
   );
 }

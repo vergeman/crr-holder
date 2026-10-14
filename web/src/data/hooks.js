@@ -44,3 +44,15 @@ export function useSinkHoldings(reportId, accountHolder, settlementPoint, source
     staleTime: 60_000,
   });
 }
+
+// Output: only an open cell requests details under its full portfolio identity.
+export function useContractHoldings(reportId, accountHolder, settlementPoint, selection) {
+  return useQuery({
+    queryKey: ['contract-holdings', reportId, accountHolder, settlementPoint,
+      selection.source, selection.sink, selection.deliveryMonth, selection.hedgeType],
+    queryFn: ({ signal }) => dataProvider.getContractHoldings(
+      { reportId, accountHolder, settlementPoint, ...selection }, signal),
+    enabled: reportId != null,
+    staleTime: 60_000,
+  });
+}

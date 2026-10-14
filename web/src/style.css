@@ -80,3 +80,23 @@ dd { margin: 0; font-weight: 600; }
 .source-expand { padding: 2px 6px; margin-right: 6px; }
 .holdings-scroll .sink-row th, .holdings-scroll .sink-state th { padding-left: 32px; }
 .holdings-scroll .sink-state th { white-space: normal; font-weight: normal; }
+
+/* Output: cell controls and a nonmodal drawer keep portfolio navigation available. */
+.contract-cell { border: 0; background: transparent; color: #256e9e; padding: 2px 4px; }
+.contract-cell:hover { text-decoration: underline; }
+.contract-drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 5;
+  box-sizing: border-box; width: min(540px, 100vw); padding: 20px;
+  overflow-y: auto; background: white; border-left: 1px solid #dce2e7;
+  box-shadow: -4px 0 16px #20303c20;
+}
+.contract-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.contract-total { position: sticky; top: 0; background: white; padding: 12px 0; z-index: 1; }
+.contract-holder { margin-top: 12px; border-top: 1px solid #dce2e7; }
+.contract-drawer summary { cursor: pointer; padding: 12px 0; }
+.contract-drawer summary > strong { float: right; margin-left: 8px; }
+.contract-drawer summary small { display: block; color: #52616b; overflow-wrap: anywhere; }
+.contract-tou { margin-left: 20px; }
+.contract-tou ul { list-style: none; padding: 0; }
+.contract-tou li { padding: 12px 0; border-top: 1px solid #dce2e7; }
+.contract-tou li span { display: block; margin-top: 4px; }
