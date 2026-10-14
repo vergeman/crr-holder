@@ -38,6 +38,19 @@
 - In fixtures, separate setup, execution, and assertions.
 - Explain purpose or a non-obvious choice; avoid narrating every statement.
 
+## Frontend organization
+
+- Group components by feature under `web/src/components/`.
+- Keep page entry points focused on shared state, queries, and coordination.
+- Name components after the data type or value they render, and name state and
+  handlers after what they control. Avoid vague names.
+- Keep component implementations in named files. Use directory index files
+  to expose feature entry points; keep internal imports direct.
+- Use Prettier for JS/JSX formatting and preserve unrelated user edits.
+- Place details where they have enough space and remain reachable alongside
+  existing scrolling and floating panels. Check the complete interaction on
+  desktop and narrow screens.
+
 ## Validation reporting
 
 - Describe planned tests briefly in plain English: what behavior they check
@@ -54,4 +67,5 @@
 - Keep every commit-message line within 80 characters.
 - Fold follow-up changes into the appropriate implementation commit group when
   requested.
+- Keep formatting-only changes in separate commits from behavior and refactors.
 - Do not push unless explicitly instructed.
