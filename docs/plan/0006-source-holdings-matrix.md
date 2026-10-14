@@ -85,7 +85,9 @@ Return this response shape:
 * Initially request 20 sources. Show more sources appends another 20 complete
   rows; hide the button when `nextOffset` is null and disable it while loading.
 * Use horizontal scrolling for months and keep source labels visible with a
-  sticky first column. Reuse existing numeric formatting; zero remains visible.
+  sticky first column. Round displayed MWh up to whole numbers across summary,
+  discovery rankings, source totals, and monthly cells; zero remains visible.
+  Keep MW formatting and underlying calculations unrounded.
 * Above the matrix, show the filtered holdings range, for example
   "Holdings: Jan–Mar 2029", and a native "Jump to first holdings" button.
   The range identifies the endpoints; months between them may contain zeros.
@@ -185,3 +187,4 @@ Return this response shape:
 * Browser: paging, positioning, scrolling, filter resets, and request states passed.
 * Orval regenerated automatically; generated output remains ignored.
 * Source totals follow-up: API reconciliation and browser column/scroll checks passed.
+* MWh display: whole-number ceiling formatting verified; MW remains unchanged.

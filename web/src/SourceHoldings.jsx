@@ -6,7 +6,7 @@ import { useSourceHoldings } from './data/hooks';
 const monthLabel = (month) => new Date(`${month}T00:00:00Z`).toLocaleDateString(
   'en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
 
-export default function SourceHoldings({ reportId, accountHolder, settlementPoint, number }) {
+export default function SourceHoldings({ reportId, accountHolder, settlementPoint, mwhNumber }) {
   const query = useSourceHoldings(reportId, accountHolder, settlementPoint);
   const scroll = useRef(null);
   const firstMonth = useRef(null);
@@ -57,10 +57,10 @@ export default function SourceHoldings({ reportId, accountHolder, settlementPoin
               </thead>
               <tbody>{query.data.pages.flatMap((part) => part.sources).map((row) =>
                 <tr key={row.source}><th scope="row">{row.source}</th>
-                  <td>{number.format(row.totalOptMwh)}</td>
-                  <td>{number.format(row.totalOblMwh)}</td>
+                  <td>{mwhNumber.format(row.totalOptMwh)}</td>
+                  <td>{mwhNumber.format(row.totalOblMwh)}</td>
                   {row.months.flatMap((month) => ['OPT', 'OBL'].map((type) =>
-                    <td key={`${month.deliveryMonth}/${type}`}>{number.format(month[type])}</td>))}
+                    <td key={`${month.deliveryMonth}/${type}`}>{mwhNumber.format(month[type])}</td>))}
                 </tr>)}</tbody>
             </table>
           </div>}
