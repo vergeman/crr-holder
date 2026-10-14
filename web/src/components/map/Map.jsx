@@ -49,6 +49,7 @@ export default function Map({
   const [mapLoadAttempt, setMapLoadAttempt] = useState(0);
   // Hover/focus shows point details; selectedPoint filters the portfolio on click.
   const [activePoint, setActivePoint] = useState(null);
+  const [detailPosition, setDetailPosition] = useState(null);
   const dataFailed = summary.isError || isoSummary.isError;
   const dataReady = summary.data && isoSummary.data && !dataFailed;
   const points = dataReady ? summary.data.geographicFootprint : null;
@@ -100,6 +101,60 @@ export default function Map({
   const missing = (points ?? []).filter((point) => !located(point));
   const detail = points?.find((point) => point.settlementPoint === activePoint);
 
+  // Only plain canvas clicks clear selection; markers and controls are separate.
+  useEffect(() => {
+    if (!map) return;
+    let dragged = false;
+    const start = () => {
+      dragged = false;
+    };
+    const drag = () => {
+      dragged = true;
+    };
+    const clear = (event) => {
+      if (!dragged && event.originalEvent.target === map.getCanvas())
+        onPointSelect("");
+    };
+    map.on("mousedown", start);
+    map.on("dragstart", drag);
+    map.on("click", clear);
+    return () => {
+      map.off("mousedown", start);
+      map.off("dragstart", drag);
+      map.off("click", clear);
+    };
+  }, [map, onPointSelect]);
+
+  // Track the MapPointDetails hover box position as its marker moves on screen.
+  useEffect(() => {
+    if (!map || !detail) {
+      setDetailPosition(null);
+      return;
+    }
+    const position = () => {
+      const pixel = map.project([detail.longitude, detail.latitude]);
+      const width = map.getContainer().clientWidth;
+      const height = map.getContainer().clientHeight;
+      setDetailPosition({
+        left: Math.max(
+          8,
+          Math.min(width - Math.min(260, width - 16) - 8, pixel.x + 32)
+        ),
+        top: Math.max(
+          8,
+          Math.min(height - 88, pixel.y < 100 ? pixel.y + 32 : pixel.y - 88)
+        ),
+      });
+    };
+    position();
+    map.on("move", position);
+    map.on("resize", position);
+    return () => {
+      map.off("move", position);
+      map.off("resize", position);
+    };
+  }, [map, detail]);
+
   function retryMap() {
     setMap(null);
     setMapError(false);
@@ -131,6 +186,13 @@ export default function Map({
             mwhNumber={mwhNumber}
           />
         ))}
+      {detail && detailPosition && (
+        <MapPointDetails
+          detail={detail}
+          position={detailPosition}
+          mwhNumber={mwhNumber}
+        />
+      )}
       <div className="map-information">
         <MapControls
           canReset={Boolean(map && isoPoints)}
@@ -148,7 +210,6 @@ export default function Map({
         {dataReady && (
           <MapPointDetails
             points={points}
-            detail={detail}
             hasLocatedPoints={mapped.length > 0}
             mwhNumber={mwhNumber}
           />

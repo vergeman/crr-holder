@@ -39,7 +39,10 @@ export default function MarkerButton({
         point.sourceMwh
       )} MWh, sink ${mwhNumber.format(point.sinkMwh)} MWh`}
       aria-pressed={selected}
-      onClick={() => onSelect(point.settlementPoint)}
+      onClick={(event) => {
+        event.stopPropagation();
+        onSelect(point.settlementPoint);
+      }}
       onMouseEnter={() => onActive(point.settlementPoint)}
       onMouseLeave={(event) => {
         if (document.activeElement !== event.currentTarget) onActive(null);

@@ -111,12 +111,16 @@ dd { margin: 0; font-weight: 600; }
 .marker-button:hover, .marker-button:focus-visible, .marker-button[aria-pressed="true"] {
   outline: 3px solid #15232f; outline-offset: 2px; opacity: 1; z-index: 1;
 }
-.map-point-details, .map-legend-coverage, .map-legend { font-size: .8rem; overflow-wrap: anywhere; }
+.map-legend-coverage, .map-legend { font-size: .8rem; overflow-wrap: anywhere; }
 .map-legend { margin-top: 8px; }
 .map-legend summary { cursor: pointer; }
 .map-legend-scale { margin-top: 12px; height: 8px;
   background: linear-gradient(to right, hsl(210 60% 45%), hsl(120 60% 45%), hsl(30 60% 45%)); }
 .map-legend-labels { display: flex; justify-content: space-between; gap: 8px; margin-top: 6px; }
+
+.map-point-details { position: absolute; z-index: 5; pointer-events: none;
+  box-sizing: border-box; width: 260px; max-width: calc(100% - 16px); margin: 0; padding: 8px 10px;
+  font-size: 12px; background: #ffffffed; border: 1px solid #bdc9d2; border-radius: 4px; }
 
 /* Paired discovery tables stack on narrow screens. */
 .discovery-lists { display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr); gap: 16px; }
