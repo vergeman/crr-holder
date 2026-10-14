@@ -29,8 +29,11 @@
 ## Readability
 
 - Separate distinct phases with blank lines and very brief comments.
-- Identify each input file's import section.
-- Label preparation, import, transformation, validation, and output phases.
+- Keep imports grouped at the top of each input file.
+- Make preparation, import, transformation, validation, and output phases clear
+  through structure and brief, natural comments where useful. These are concepts,
+  not literal comment phrases, headings, or prefixes such as "Preparation:" or
+  "Transformation:". Omit labels that merely narrate the code.
 - In SQL, briefly identify intermediate results and each comparison.
 - In fixtures, separate setup, execution, and assertions.
 - Explain purpose or a non-obvious choice; avoid narrating every statement.
