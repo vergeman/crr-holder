@@ -44,6 +44,11 @@ function CRRExplorer() {
 
   useEffect(() => {
     if (reportId === null && reportMetadata.data) {
+      // Reuse default metadata when switching to the resolved report ID.
+      queryClient.setQueryData(
+        ["metadata", reportMetadata.data.reportId, ""],
+        reportMetadata.data
+      );
       setReportId(reportMetadata.data.reportId);
     }
   }, [reportId, reportMetadata.data]);
