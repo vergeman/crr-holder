@@ -101,10 +101,6 @@ dd { margin: 0; font-weight: 600; }
 /* The MapLibre basemap fills the stage below all floating panels. */
 .geographic-footprint { position: absolute; inset: 0; padding: 0; border: 0; border-radius: 0; }
 .map-canvas { position: absolute; inset: 0; background: #e8eef1; }
-.map-information:empty { display: none; }
-.map-information { position: absolute; top: 12px; right: 58px; width: 310px; max-width: calc(100% - 80px);
-  max-height: min(50%, 330px); overflow-y: auto; padding: 10px 12px;
-  background: #ffffffed; border: 1px solid #dce2e7; border-radius: 6px; box-shadow: 0 3px 16px #20303c18; }
 .map-controls { display: flex; }
 .map-controls button { padding: 0; font-size: 22px; }
 .maplibregl-ctrl-top-right { display: flex; flex-direction: column; align-items: flex-end; }
@@ -162,7 +158,6 @@ dd { margin: 0; font-weight: 600; }
   .workspace > aside { top: 64px; left: 8px; width: 290px;
     max-height: min(40%, max(100px, calc(100% - var(--holdings-space) - 48px))); }
   .workspace > aside section { padding: 12px; }
-  .map-information { top: auto; bottom: 80px; left: 8px; right: 54px; width: auto; max-width: none; max-height: 140px; }
   .discovery-lists { grid-template-columns: 1fr; }
   .portfolio-summary-columns { gap: 12px; }
   .portfolio-filter-controls label { flex: 1 1 140px; }

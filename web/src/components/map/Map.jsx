@@ -5,7 +5,6 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import MarkerButton from "./MarkerButton";
 import MapControls from "./MapControls";
-import MapStatus from "./MapStatus";
 import MapPointDetails from "./MapPointDetails";
 
 // Let Vite bundle the worker and resolve its production asset URL.
@@ -45,8 +44,6 @@ export default function Map({
   const container = useRef(null);
   const mapFitted = useRef(false); // Fit report bounds once to preserve later pan/zoom.
   const [map, setMap] = useState(null);
-  const [mapError, setMapError] = useState(false);
-  const [mapLoadAttempt, setMapLoadAttempt] = useState(0);
   // Hover/focus shows point details; selectedPoint filters the portfolio on click.
   const [activePoint, setActivePoint] = useState(null);
   const [detailPosition, setDetailPosition] = useState(null);
@@ -58,33 +55,26 @@ export default function Map({
   useEffect(() => {
     // Keep the map and camera when portfolio filters change;
     // recreate the map when the selected report (report_id) changes.
-    let instance;
-    try {
-      instance = new maplibregl.Map({
-        container: container.current,
-        style: basemap,
-        center: texasLatLng,
-        zoom: 5,
-        renderWorldCopies: false,
-        attributionControl: false,
-      });
-      instance.addControl(
-        new maplibregl.NavigationControl({ showCompass: false }),
-        "top-right"
-      );
-      instance.on("error", () => setMapError(true));
-      instance.on("style.load", () => setMapError(false));
-      setMap(instance);
-      mapFitted.current = false;
-    } catch {
-      setMapError(true);
-    }
+    const instance = new maplibregl.Map({
+      container: container.current,
+      style: basemap,
+      center: texasLatLng,
+      zoom: 5,
+      renderWorldCopies: false,
+      attributionControl: false,
+    });
+    instance.addControl(
+      new maplibregl.NavigationControl({ showCompass: false }),
+      "top-right"
+    );
+    setMap(instance);
+    mapFitted.current = false;
 
-    // Remove WebGL resources and listeners when changing reports or retrying.
+    // Remove WebGL resources and listeners when changing reports.
     return () => {
-      instance?.remove();
+      instance.remove();
     };
-  }, [mapLoadAttempt]);
+  }, []);
 
   useEffect(() => {
     if (map && isoPoints && !mapFitted.current) {
@@ -158,18 +148,7 @@ export default function Map({
     };
   }, [map, detail]);
 
-  function retryMap() {
-    setMap(null);
-    setMapError(false);
-    setMapLoadAttempt(mapLoadAttempt + 1);
-  }
-
-  function retryData() {
-    summary.refetch();
-    isoSummary.refetch();
-  }
-
-  // Controls and coverage float over the basemap with the other panels.
+  // Markers, hover details, and controls float over the basemap.
   return (
     <section
       className="geographic-footprint"
@@ -204,22 +183,6 @@ export default function Map({
           mwhNumber={mwhNumber}
         />
       )}
-      <div className="map-information">
-        <MapStatus
-          mapError={mapError}
-          dataFailed={dataFailed}
-          dataReady={dataReady}
-          onRetryMap={retryMap}
-          onRetryData={retryData}
-        />
-        {dataReady && (
-          <MapPointDetails
-            points={points}
-            hasLocatedPoints={mapped.length > 0}
-            mwhNumber={mwhNumber}
-          />
-        )}
-      </div>
     </section>
   );
 }
