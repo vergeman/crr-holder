@@ -2,10 +2,11 @@
 import sqlite3
 from contextlib import closing
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from pydantic import BaseModel
 
 from queries import get_metadata, get_summary
+from holdings import get_source_holdings
 
 
 # Preparation: response models also define the generated HTTP contract.
@@ -53,6 +54,30 @@ class Summary(BaseModel):
     topSettlementPoints: list[RankedSettlementPoint]
 
 
+# Preparation: source matrix response contract.
+class HoldingsMonth(HedgeTypeMwh):
+    deliveryMonth: str
+
+
+class SourceHolding(BaseModel):
+    source: str
+    totalMwh: float
+    months: list[HoldingsMonth]
+
+
+class HoldingsRange(BaseModel):
+    firstMonth: str
+    lastMonth: str
+
+
+class SourceHoldings(BaseModel):
+    reportId: int
+    deliveryMonths: list[str]
+    holdingsRange: HoldingsRange | None
+    sources: list[SourceHolding]
+    nextOffset: int | None
+
+
 app = FastAPI()
 
 
@@ -68,3 +93,16 @@ def summary(report_id: int | None = None, account_holder: str | None = None,
             settlement_point: str | None = None):
     with closing(sqlite3.connect("file:/data/crr.sqlite?mode=ro", uri=True)) as db:
         return get_summary(db, report_id, account_holder, settlement_point)
+
+
+# Output
+@app.get("/api/holdings/sources", response_model=SourceHoldings,
+         operation_id="getSourceHoldings")
+def source_holdings(report_id: int | None = None,
+                    account_holder: str | None = None,
+                    settlement_point: str | None = None,
+                    limit: int = Query(20, ge=1, le=100),
+                    offset: int = Query(0, ge=0)):
+    with closing(sqlite3.connect("file:/data/crr.sqlite?mode=ro", uri=True)) as db:
+        return get_source_holdings(db, report_id, account_holder,
+                                   settlement_point, limit, offset)
