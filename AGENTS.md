@@ -35,6 +35,16 @@
 - In fixtures, separate setup, execution, and assertions.
 - Explain purpose or a non-obvious choice; avoid narrating every statement.
 
+## Validation reporting
+
+- Describe planned tests briefly in plain English: what behavior they check
+  and why it matters. Keep individual cases, fixture values, expected totals,
+  and assertion mechanics in test code, not the plan.
+- State required verification commands without translating tests into prose.
+- Keep validation results to terse bullets stating the check and outcome.
+- Include only required measurements and material limitations or failures.
+- Do not repeat acceptance criteria, test mechanics, or execution history.
+
 ## Commits
 
 - Use conventional commit subjects and concise bullet-point bodies.

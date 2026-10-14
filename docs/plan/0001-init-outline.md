@@ -59,10 +59,15 @@ returns to the market view for the selected report.
 
 ### 3.2 - Rankings and Discovery
 
-* Add top account-holder and settlement-point rankings to `/api/summary`.
-* Build the discovery lists and connect ranking clicks to the shared filters.
-* Display account-holder names from the existing directory.
-* Verify that ranking clicks produce the corresponding filtered summary.
+Detailed plan: [0005 - Rankings and Discovery](0005-rankings-discovery.md).
+
+* Add top-ten account-holder and settlement-point rankings by contractual MWh
+  under the current filters to `/api/summary`.
+* Show both discovery lists side by side, stacking on narrow screens, and connect
+  ranking clicks to the shared filters.
+* Display holder identifiers and available legal names from the existing directory.
+* Verify holder clicks clear the settlement-point filter and settlement-point
+  clicks retain the holder; each updates the corresponding filtered summary.
 
 Output: users can discover holders and settlement points through rankings.
 

@@ -27,7 +27,35 @@ dd { margin: 0; font-weight: 600; }
 .opt { background: #256e9e; }
 .obl { background: #ac6e26; }
 .map-placeholder { min-height: 400px; background: #edf1f4; }
+
+/* Output: paired discovery lists fit the sidebar and stack on narrow screens. */
+.discovery-lists { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.ranking-heading { display: flex; align-items: center; gap: 6px; position: relative; }
+.ranking-heading h3 { font-size: .95rem; cursor: help; }
+.ranking-clear { margin-left: auto; padding: 4px 6px; font-size: .8rem; }
+.ranking-clear:disabled { cursor: default; }
+.ranking-tooltip {
+  display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 1;
+  padding: 10px; background: #20303c; color: white; font-size: .85rem;
+  border-radius: 4px;
+}
+.ranking-heading h3:hover ~ .ranking-tooltip,
+.ranking-heading h3:focus ~ .ranking-tooltip { display: block; }
+.ranking-list ol { list-style: none; margin: 0; padding: 0; }
+.ranking-list li + li { margin-top: 6px; }
+.ranking-row {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 8px;
+  width: 100%; padding: 8px; text-align: left; border: 1px solid #dce2e7;
+  border-radius: 4px; background: #f8fafb; color: inherit; font-size: .85rem;
+}
+.ranking-row:hover { background: #edf1f4; }
+.ranking-rank { color: #52616b; }
+.ranking-identity { overflow-wrap: anywhere; }
+.ranking-identity > span { display: block; color: #52616b; margin-top: 3px; }
+.ranking-mwh { grid-column: 2; }
+
 @media (max-width: 760px) {
   header { align-items: flex-start; flex-direction: column; }
   .workspace { grid-template-columns: 1fr; }
+  .discovery-lists { grid-template-columns: 1fr; }
 }

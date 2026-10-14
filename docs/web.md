@@ -9,6 +9,12 @@ Top down we get birds eye overview to detailed inventory
 
 ## Initial Full Page
 
+* Discover shows Top Accounts and Top Settlement Points side by side,
+  stacking on narrow screens. Both lists remain visible; there is no toggle.
+* Point rankings count holdings where the point is source or sink. An A-to-B
+  holding contributes to both A and B, so point totals must not be added to
+  obtain portfolio MWh. Same-endpoint holdings count once for that point.
+
 * Market or ""portfolio" summary
 * e-charts are now subsumed by the filters
 
@@ -65,17 +71,13 @@ Top down we get birds eye overview to detailed inventory
 │                                       │                                                         │
 │ DISCOVER                              │                                                         │
 │                                       │                                                         │
-│ [ Account Holders | Settlement Points]│                                                         │
+│ TOP ACCOUNTS       TOP SETTLEMENTS    │                                                         │
 │                                       │                                                         │
-│ TOP ACCOUNT HOLDERS                   │                                                         │
-│                                       │                                                         │
-│  1. XLUREP                107M   ↗    │                                                         │
-│  2. XNRGLD                 89M   ↗    │                                                         │
-│  3. XMEA1                  86M   ↗    │                                                         │
-│  4. XDARBY                 76M   ↗    │                                                         │
-│  5. ...                              │                                                         │
-│  ...                                  │                                                         │
-│ 10. ...                               │                                                         │
+│ 1. XLUREP  107M    1. HB_NORTH   …    │                                                         │
+│ 2. XNRGLD   89M    2. HB_HOUSTON …    │                                                         │
+│ 3. XMEA1    86M    3. …               │                                                         │
+│ …                 …                   │                                                         │
+│ 10. …             10. …               │                                                         │
 │                                       │                                                         │
 ├───────────────────────────────────────┴─────────────────────────────────────────────────────────┤
 │                                      ⋮ Drag to resize                                          │
