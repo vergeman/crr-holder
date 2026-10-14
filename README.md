@@ -59,6 +59,40 @@ time, and individual SQL query times. Query timings exclude initialization.
 Use browser network tools to distinguish a fresh download from an HTTP-cache hit.
 The existing development command still uses the API for HTTP client generation.
 
+### WASM verification
+
+Verified in headless Chromium on 2026-10-13 using the S3 snapshot and this
+worktree's API. Both HTTP-selected and WASM-selected Vite production builds
+passed, including separate worker and WASM assets in the WASM build.
+
+Market, XNRGLD, HB_NORTH, and combined XNRGLD/HB_NORTH summaries matched the API
+for all counts and OPT/OBL totals, with MWh tolerance
+`1e-6 + 1e-10 * abs(expected)`. Market and XNRGLD metadata matched the API,
+including ordering, legal names, and point choices. The same four filter cases
+displayed matching summary metrics in the existing UI, without runtime exceptions.
+
+A fresh browser profile downloaded 348,983,296 bytes in 8,148.7 ms; opening the
+query-only database took 262.3 ms. The worker recorded exactly one database
+request across the query comparisons and UI filter changes.
+
+Representative measurements after initialization are below. WASM values include
+worker messaging; API values include the local HTTP round trip. These are single
+representative observations on this machine, not a benchmark suite.
+
+| Operation | WASM (ms) | API (ms) |
+|---|---:|---:|
+| Market summary | 2,958.8 | 2,673.0 |
+| XNRGLD summary | 1.5 | 7.4 |
+| HB_NORTH summary | 1,225.7 | 1,427.3 |
+| XNRGLD + HB_NORTH summary | 1.2 | 7.9 |
+| Market metadata | 1,083.7 | 860.3 |
+| XNRGLD metadata | 447.0 | 377.5 |
+
+The database is reused in worker memory within a page session. After a reload,
+reuse depends on the browser's HTTP cache. The tested S3 response supplied ETag
+and Last-Modified validators but no explicit Cache-Control lifetime; a reload
+can revalidate or download again. This experiment adds no persistent storage.
+
 After dependency changes, rebuild and refresh the frontend dependency volume:
 
 ```sh
