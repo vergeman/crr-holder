@@ -58,7 +58,6 @@ export default function SourceHoldings({
   // Output: an additional-page error keeps the successful pages visible.
   return (
     <div className="source-holdings">
-      <p>Contractual MWh</p>
       {!page ? (
         query.isError ? (
           <p role="alert">Unable to load holdings.</p>

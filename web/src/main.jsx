@@ -26,7 +26,7 @@ function CRRExplorer() {
   const [settlementPoint, setSettlementPoint] = useState("");
   const [selection, setSelection] = useState(null);
   const cellButton = useRef(null);
-  const [crrHoldingsPanelVisible, setCRRHoldingsPanelVisible] = useState(true);
+  const [crrHoldingsPanelVisible, setCRRHoldingsPanelVisible] = useState(false);
   const [crrHoldingsPanelHeight, setCRRHoldingsPanelHeight] = useState(() =>
     boundCRRHoldingsPanelHeight(window.innerHeight * 0.35)
   );
@@ -200,6 +200,11 @@ function CRRExplorer() {
         <CRRHoldingsPanel
           reportId={reportId}
           accountHolder={accountHolder}
+          accountHolderName={
+            reportMetadata.data?.accountHolders.find(
+              (holder) => holder.accountHolder === accountHolder
+            )?.legalName
+          }
           settlementPoint={settlementPoint}
           mwhNumber={mwhNumber}
           crrHoldingsPanelVisible={crrHoldingsPanelVisible}

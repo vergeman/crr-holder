@@ -39,7 +39,9 @@ export default function SinkHoldings({
             <span>No sinks match these filters.</span>
           )}
         </th>
-        <td colSpan={2 + deliveryMonths.length * 2} />
+        <td />
+        <td />
+        <td colSpan={deliveryMonths.length * 2} />
       </tr>
     );
   }

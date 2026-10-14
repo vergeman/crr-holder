@@ -76,7 +76,7 @@ button:disabled, select:disabled {
 .control-icon:hover { border-color: transparent; background: #edf3f7; }
 .control-icon:disabled { border-color: transparent; background: transparent; }
 .control-caret { display: block; width: 14px; height: 14px; }
-.holdings-toggle[aria-expanded="false"] .control-caret { transform: rotate(180deg); }
+.holdings-toggle[aria-expanded="false"] .control-caret { transform: rotate(-90deg); }
 
 /* Native disclosures retain keyboard activation with a borderless caret. */
 summary { list-style: none; }
@@ -168,19 +168,60 @@ dd { margin: 0; font-weight: 600; }
 }
 
 /* Complete months scroll while source identifiers remain visible. */
-.source-holdings { min-width: 0; }
+.source-holdings { display: flex; flex-direction: column; height: 100%; min-height: 0; min-width: 0; max-width: 100%; }
+.source-holdings > p, .holdings-range, .source-holdings > button { flex-shrink: 0; }
 .holdings-range { display: flex; gap: 16px; align-items: center; margin-bottom: 12px; }
-.holdings-scroll { overflow-x: auto; position: relative; margin-bottom: 12px; }
+/* Keep both scrollbar tracks at the visible matrix edges. */
+.holdings-scroll { flex: 1; min-height: 0; max-width: 100%; overflow: auto; position: relative; margin-bottom: 12px;
+  scrollbar-color: #8b9fac #edf1f4; scrollbar-width: auto; }
+.holdings-scroll::-webkit-scrollbar { width: 14px; height: 14px; }
+.holdings-scroll::-webkit-scrollbar-track { background: #edf1f4; }
+.holdings-scroll::-webkit-scrollbar-thumb { background: #8b9fac; border: 3px solid #edf1f4; border-radius: 7px; }
 .holdings-scroll table { border-collapse: separate; border-spacing: 0; }
 .holdings-scroll th, .holdings-scroll td {
   padding: 8px 12px; border-bottom: 1px solid #dce2e7;
   border-right: 1px solid #dce2e7; white-space: nowrap; text-align: right;
   min-width: 80px;
 }
-.holdings-scroll thead th { background: #edf1f4; text-align: center; }
+.holdings-scroll thead th { position: sticky; top: 0; z-index: 2;
+  box-sizing: border-box; height: 26px; padding: 4px 8px;
+  font-size: 11px; line-height: 17px; background: #edf1f4; text-align: center; }
+.holdings-scroll thead tr:nth-child(2) th { top: 26px; }
 .holdings-scroll th[rowspan], .holdings-scroll tbody th {
   position: sticky; left: 0; z-index: 1; background: white; text-align: left;
-  min-width: 160px;
+  box-sizing: border-box; width: 180px; min-width: 180px; max-width: 180px;
+  white-space: normal; overflow-wrap: anywhere;
+}
+.holdings-scroll thead th[rowspan] { top: 0; z-index: 3; }
+/* Source and both totals stay beside the scrolling delivery months. */
+.holdings-scroll tbody td:nth-child(2),
+.holdings-scroll tbody td:nth-child(3) {
+  position: sticky; z-index: 1; background: white;
+  box-sizing: border-box; width: 104px; min-width: 104px; max-width: 104px;
+}
+.holdings-scroll tbody td:nth-child(2),
+.holdings-scroll thead tr:first-child th:nth-child(2),
+.holdings-scroll thead tr:nth-child(2) th:first-child { left: 180px; }
+.holdings-scroll tbody td:nth-child(3),
+.holdings-scroll thead tr:nth-child(2) th:nth-child(2) { left: 284px; }
+.holdings-scroll thead tr:first-child th:nth-child(2),
+.holdings-scroll thead tr:nth-child(2) th:nth-child(-n+2) { z-index: 3; }
+.holdings-scroll thead tr:nth-child(2) th:nth-child(-n+2) { min-width: 104px; }
+.holdings-scroll .sink-state td:nth-child(4) { position: static; }
+@media (max-width: 760px) {
+  .holdings-scroll th[rowspan], .holdings-scroll tbody th {
+    width: 120px; min-width: 120px; max-width: 120px; padding-left: 4px; padding-right: 4px;
+  }
+  .holdings-scroll tbody td:nth-child(2), .holdings-scroll tbody td:nth-child(3) {
+    width: 84px; min-width: 84px; max-width: 84px; padding-left: 4px; padding-right: 4px;
+  }
+  .holdings-scroll thead tr:nth-child(2) th:nth-child(-n+2) { min-width: 84px; }
+  .holdings-scroll tbody td:nth-child(2),
+  .holdings-scroll thead tr:first-child th:nth-child(2),
+  .holdings-scroll thead tr:nth-child(2) th:first-child { left: 120px; }
+  .holdings-scroll tbody td:nth-child(3),
+  .holdings-scroll thead tr:nth-child(2) th:nth-child(2) { left: 204px; }
+  .holdings-scroll .sink-row th, .holdings-scroll .sink-state th { padding-left: 12px; }
 }
 
 /* Expanded sinks and request states remain beside their source. */
@@ -237,23 +278,32 @@ dd { margin: 0; font-weight: 600; }
 .contract-table th:nth-child(4), .contract-table td:nth-child(4) { text-align: left; }
 
 /* Hide content without unmounting the matrix; resize its scrollable area. */
-.holdings-panel { position: absolute; bottom: 36px; left: 16px; right: 16px; z-index: 4;
+.holdings-panel { position: absolute; bottom: 0; left: 16px; right: 52px; z-index: 4;
   min-width: 0; padding: 12px 16px; max-height: calc(100% - 90px);
   display: flex; flex-direction: column; box-sizing: border-box; box-shadow: 0 -3px 20px #20303c24; }
 .holdings-panel-body:not([hidden]) { display: flex; flex-direction: column; min-height: 0; }
 .holdings-panel-header, .holdings-resize { flex-shrink: 0; }
 .holdings-panel-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.holdings-content { overflow-y: auto; min-height: 0; }
+.holdings-panel-header h2 { min-width: 0; overflow-wrap: anywhere; }
+.holdings-toggle { display: flex; align-items: center; gap: 8px; width: 100%;
+  padding: 0; border: 0; background: transparent; text-align: left;
+  font-size: inherit; font-weight: inherit; }
+.holdings-toggle .control-caret { flex-shrink: 0; }
+.holdings-toggle:hover { background: transparent; }
+.holdings-scroll { overscroll-behavior: contain; }
+.holdings-content { overflow: hidden; min-height: 0; min-width: 0; }
 .holdings-resize {
-  margin: 12px 0; padding: 6px; text-align: center; color: #52616b;
-  background: #edf1f4; cursor: ns-resize; touch-action: none; user-select: none;
+  position: absolute; top: -5px; left: 0; right: 0; height: 10px;
+  display: grid; place-items: center; cursor: ns-resize;
+  touch-action: none; user-select: none;
 }
+.holdings-resize[hidden] { display: none; }
+.holdings-resize > span { width: 48px; height: 3px; border-radius: 2px; background: #8b9fac; }
 .holdings-resize:focus-visible { outline: 2px solid #256e9e; }
 
 @media (max-width: 760px) {
-  .holdings-panel { left: 8px; right: 8px; padding: 8px 12px; }
+  .holdings-panel { left: 8px; right: 44px; padding: 8px 12px; }
   .holdings-panel-header h2 { font-size: .9rem; }
-  .holdings-panel-header button { font-size: .8rem; }
 }
 
 @media (max-width: 760px) {
