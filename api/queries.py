@@ -2,6 +2,7 @@
 import sqlite3
 
 from filters import holdings_filter
+from geography import get_geographic_footprint
 from rankings import get_top_account_holders, get_top_settlement_points
 
 
@@ -101,6 +102,8 @@ def get_summary(db: sqlite3.Connection, report_id=None, account_holder=None,
     return {
         "reportId": report_id,
         "totalMwh": row[0],
+        "geographicFootprint": get_geographic_footprint(
+            db, report_id, account_holder, settlement_point),
         "accountHolderCount": row[1],
         "settlementPointCount": row[2],
         "directedPathCount": row[3],

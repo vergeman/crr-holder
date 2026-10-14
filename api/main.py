@@ -1,4 +1,3 @@
-# Imports
 import sqlite3
 from contextlib import closing
 from datetime import date
@@ -11,7 +10,7 @@ from queries import get_metadata, get_summary
 from holdings import get_source_holdings, get_sink_holdings, get_contract_holdings
 
 
-# Preparation: response models also define the generated HTTP contract.
+# Response models also define the generated HTTP contract.
 class Report(BaseModel):
     reportId: int
     publicationDate: str
@@ -45,6 +44,14 @@ class RankedSettlementPoint(BaseModel):
     totalMwh: float
 
 
+class GeographicPoint(BaseModel):
+    settlementPoint: str
+    longitude: float | None
+    latitude: float | None
+    sourceMwh: float
+    sinkMwh: float
+
+
 class Summary(BaseModel):
     reportId: int
     totalMwh: float
@@ -54,9 +61,10 @@ class Summary(BaseModel):
     hedgeTypeMwh: HedgeTypeMwh
     topAccountHolders: list[RankedAccountHolder]
     topSettlementPoints: list[RankedSettlementPoint]
+    geographicFootprint: list[GeographicPoint]
 
 
-# Preparation: source matrix response contract.
+# Source matrix response contract.
 class HoldingsMonth(HedgeTypeMwh):
     deliveryMonth: str
 
@@ -95,7 +103,7 @@ class SinkHoldings(BaseModel):
     sinks: list[SinkHolding]
 
 
-# Preparation: original contract fields are stored once in the response hierarchy.
+# Original contract fields are stored once in the response hierarchy.
 class Contract(BaseModel):
     crrId: int
     segmentId: int
@@ -131,7 +139,7 @@ class ContractHoldings(BaseModel):
 
 
 def validate_delivery_month(value):
-    # Validation: accept only real first-of-month ISO dates.
+    # Accept only real first-of-month ISO dates.
     parsed = date.fromisoformat(value)
     if parsed.day != 1 or parsed.isoformat() != value:
         raise ValueError('Use a first-of-month ISO date (YYYY-MM-01).')
@@ -141,7 +149,7 @@ def validate_delivery_month(value):
 app = FastAPI()
 
 
-# Output: keep each request on the existing read-only dataset.
+# Keep each request on the existing read-only dataset.
 @app.get("/api/metadata", response_model=Metadata, operation_id="getMetadata")
 def metadata(report_id: int | None = None, account_holder: str | None = None):
     with closing(sqlite3.connect("file:/data/crr.sqlite?mode=ro", uri=True)) as db:
@@ -155,7 +163,6 @@ def summary(report_id: int | None = None, account_holder: str | None = None,
         return get_summary(db, report_id, account_holder, settlement_point)
 
 
-# Output
 @app.get("/api/holdings/sources", response_model=SourceHoldings,
          operation_id="getSourceHoldings")
 def source_holdings(report_id: int | None = None,
@@ -168,7 +175,7 @@ def source_holdings(report_id: int | None = None,
                                    settlement_point, limit, offset)
 
 
-# Output: expanded sources use the same read-only report and portfolio filters.
+# Expanded sources use the same read-only report and portfolio filters.
 @app.get("/api/holdings/sources/{source}/sinks", response_model=SinkHoldings,
          operation_id="getSinkHoldings")
 def sink_holdings(source: str, report_id: int | None = None,
@@ -178,7 +185,7 @@ def sink_holdings(source: str, report_id: int | None = None,
         return get_sink_holdings(db, source, report_id, account_holder, settlement_point)
 
 
-# Output: cell details retain one report and the same portfolio selection.
+# Cell details retain one report and the same portfolio selection.
 @app.get("/api/holdings/contracts", response_model=ContractHoldings,
          operation_id="getContractHoldings")
 def contract_holdings(source: str, sink: str,
