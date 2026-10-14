@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useMetadata, useSummary } from './data/hooks';
+import SourceHoldings from './SourceHoldings';
 import './style.css';
 
 // Preparation
@@ -202,6 +203,9 @@ function CRRExplorer() {
           <p>Map coming in Sprint 4.</p>
         </section>
       </div>
+      <SourceHoldings key={`${reportId}/${accountHolder}/${settlementPoint}`}
+        reportId={reportId} accountHolder={accountHolder}
+        settlementPoint={settlementPoint} number={number} />
     </main>
   );
 }

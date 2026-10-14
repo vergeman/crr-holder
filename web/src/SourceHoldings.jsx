@@ -1,0 +1,70 @@
+// Imports
+import { useEffect, useRef } from 'react';
+import { useSourceHoldings } from './data/hooks';
+
+// Preparation: month-only formatting avoids timezone changes to delivery dates.
+const monthLabel = (month) => new Date(`${month}T00:00:00Z`).toLocaleDateString(
+  'en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
+
+export default function SourceHoldings({ reportId, accountHolder, settlementPoint, number }) {
+  const query = useSourceHoldings(reportId, accountHolder, settlementPoint);
+  const scroll = useRef(null);
+  const firstMonth = useRef(null);
+  const positioned = useRef(false);
+  const page = query.data?.pages[0];
+
+  function jump() {
+    if (scroll.current && firstMonth.current) {
+      const stickyWidth = scroll.current.querySelector('th').offsetWidth;
+      scroll.current.scrollLeft = firstMonth.current.offsetLeft - stickyWidth;
+    }
+  }
+
+  // Transformation: position once per selection; appended pages retain scrolling.
+  useEffect(() => {
+    if (page && !positioned.current) {
+      jump();
+      positioned.current = true;
+    }
+  }, [page]);
+
+  // Output: an additional-page error keeps the successful pages visible.
+  return (
+    <section className="source-holdings" aria-labelledby="holdings-heading">
+      <h2 id="holdings-heading">CRR Holdings</h2>
+      <p>Contractual MWh</p>
+      {!page ? query.isError ? <p role="alert">Unable to load holdings.</p> :
+        <p role="status">Loading holdings...</p> : <>
+        {page.holdingsRange && <div className="holdings-range">
+          <span>Holdings: {monthLabel(page.holdingsRange.firstMonth)}–{monthLabel(page.holdingsRange.lastMonth)}</span>
+          <button type="button" onClick={jump}>Jump to first holdings</button>
+        </div>}
+        {page.sources.length === 0 ? <p>No holdings match these filters.</p> :
+          <div className="holdings-scroll" ref={scroll} tabIndex={0}
+            role="region" aria-label="Source holdings by delivery month">
+            <table>
+              <thead>
+                <tr><th rowSpan={2} scope="col">Source</th>
+                  {page.deliveryMonths.map((month) => <th key={month} colSpan={2}
+                    scope="colgroup" ref={month === page.holdingsRange?.firstMonth ? firstMonth : null}>
+                    {monthLabel(month)}</th>)}
+                </tr>
+                <tr>{page.deliveryMonths.flatMap((month) => ['OPT', 'OBL'].map((type) =>
+                  <th key={`${month}/${type}`} scope="col">{type}</th>))}</tr>
+              </thead>
+              <tbody>{query.data.pages.flatMap((part) => part.sources).map((row) =>
+                <tr key={row.source}><th scope="row">{row.source}</th>
+                  {row.months.flatMap((month) => ['OPT', 'OBL'].map((type) =>
+                    <td key={`${month.deliveryMonth}/${type}`}>{number.format(month[type])}</td>))}
+                </tr>)}</tbody>
+            </table>
+          </div>}
+        {query.isFetchNextPageError && <p role="alert">Unable to load more sources. Try again.</p>}
+        {query.hasNextPage && <button type="button" disabled={query.isFetchingNextPage}
+          onClick={() => query.fetchNextPage()}>
+          {query.isFetchingNextPage ? 'Loading sources...' : 'Show more sources'}
+        </button>}
+      </>}
+    </section>
+  );
+}
