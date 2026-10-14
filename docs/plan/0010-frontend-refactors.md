@@ -87,6 +87,9 @@ layout changes. Use the review points before starting the next stage.
 * Make the entire ranking row clickable, including totals; retain keyboard
   activation, loading guards, and subtle hover and selected states.
 
+* Use back arrows for clearing and ellipses with full-name hover titles.
+  Keep ten-row rankings; pagination and custom selectors remain follow-ups.
+
 * Review prompt: show the portfolio and discovery layouts on desktop and narrow
   screens. Ask for feedback on widths, density, hierarchy, and selection styling
   before proceeding to holdings changes.
@@ -103,8 +106,11 @@ layout changes. Use the review points before starting the next stage.
   filters; use the full holder name without trailing `(CRRAH)`, falling back
   to its code.
 
-* Sit flush with the map bottom and contain matrix scrolling, keeping controls
-  and attribution reachable on desktop and narrow screens.
+* Sit flush with the workspace bottom and contain matrix scrolling, keeping
+  controls reachable on desktop and narrow screens.
+
+* Start expanded content at 45% viewport height. Compact rows and carets;
+  distinguish normal-weight totals with blue tint and a divider.
 
 * Keep a visible, draggable horizontal scrollbar at the matrix bottom.
   Freeze Source and both Total MWh columns during horizontal scrolling.
@@ -147,9 +153,11 @@ layout changes. Use the review points before starting the next stage.
 ### 7. Map controls and presentation
 
 * Show `MapPointDetails` as a floating hover panel near the active marker,
-  also available on keyboard focus. Keep empty and unlocated-point messages
-  separate from hover-only details. Offset the panel from its marker and disable
+  also available on keyboard focus. Offset the panel from its marker and disable
   pointer interception so it does not obscure the marker or cause hover flicker.
+
+* Use three aligned detail rows: bold SP name, Source MWh, and Sink MWh.
+  Remove the former map loading/error/retry/empty-state panel.
 
 * Remove Clear point from `MapControls`. Clear the settlement-point filter on
   map-background clicks; marker clicks select without immediately clearing,
@@ -177,6 +185,14 @@ layout changes. Use the review points before starting the next stage.
   and the revised map controls. Ask for feedback on the proposed color direction,
   size tradeoff, legend readability, and panel placement; wait for review before
   marking visual acceptance complete.
+
+### 8. Split comparison workspace
+
+* Keep Portfolio/Discover left (680px default, resizable); map and holdings
+  share the right. Preserve independent scrolling and holdings height resizing.
+
+* Keep rankings side by side on desktop; stack panes on narrow screens.
+  Resize the map with its pane and fit report bounds without sidebar padding.
 
 ## Delivery-month decision
 
@@ -212,8 +228,8 @@ layout changes. Use the review points before starting the next stage.
 
 * [x] `CRRHoldingsPanel` starts minimized and can be expanded from its control.
 
-* [x] The holdings panel sits flush with the map's bottom edge without clipping
-  its controls or obstructing attribution.
+* [x] Holdings sits flush with the workspace bottom, with compact rows,
+  distinct normal-weight totals, and a larger default expansion height.
 
 * [x] A visible draggable scrollbar reaches all holdings columns; Source and
   totals stay frozen, with compact sticky date/OPT/OBL headers and sink states.
@@ -241,9 +257,14 @@ layout changes. Use the review points before starting the next stage.
 * [x] Discovery uses wider tables with single-line desktop headings, separate
   code and long-name columns, aligned totals, and mouse/keyboard selection.
 
+* [x] Compact rankings use back arrows and name ellipses; portfolio and holdings
+  remain visible together in resizable panes that stack on narrow screens.
+
 * [x] Point details appear on hover/focus; map-background clicks clear point
   selection while drags, marker, panel, and control interactions do not clear it.
   The hover panel does not obscure markers or intercept pointer events.
+
+* [x] Hover details use aligned rows; the old map status box is removed.
 
 * [x] Reset view sits beside +/−; attribution is omitted for now. The header
   gradient matches the blue–dark-blue–red marker colors.
@@ -265,6 +286,8 @@ layout changes. Use the review points before starting the next stage.
 
 * Check portfolio and discovery layouts on desktop and narrow screens, including
   mouse and keyboard selection, to verify readable tables and reachable filters.
+
+* Check pane resizing, independent scrolling, and adjacent holdings updates.
 
 * Check marker hover/focus, background clearing, and reset alongside floating
   panels; compare market and filtered marker sizes and legend colors to verify
