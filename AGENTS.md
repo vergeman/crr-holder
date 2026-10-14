@@ -18,6 +18,14 @@
 - Run the verification specified by the plan. Repeat expensive checks only when
   a failure or unresolved concern justifies it.
 
+## Development environment
+
+- Before starting a Docker Compose development environment, inspect the project's
+  Compose configuration and existing service status with `docker compose ps`.
+- Reuse running development services for implementation and verification. Do not
+  start a second environment or recreate or restart containers unless a required
+  change or an observed failure makes it necessary.
+
 ## Readability
 
 - Separate distinct phases with blank lines and very brief comments.
