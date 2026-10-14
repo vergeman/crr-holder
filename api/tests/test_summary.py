@@ -1,49 +1,15 @@
 # Imports
-import sqlite3
 import unittest
-from pathlib import Path
 
+from fixtures import create_fixture_db
 from queries import get_metadata, get_summary, resolve_report
-
-
-# Preparation: literals mirror the exact eight-row fixture in plan 0004.
-REPORTS = [(1, "2026-09-01"), (2, "2026-10-01")]
-HOLDERS = [("X", "Holder X"), ("Y", None), ("Z", "Holder Z")]
-POINTS = [(point,) for point in "ABCDE"]
-HOLDINGS = [
-    (1, "X", "A", "B", "2026-10-01", "OPT", 10, 0, 0),
-    (1, "Z", "D", "A", "2026-10-01", "OBL", 20, 0, 0),
-    (2, "X", "A", "B", "2026-10-01", "OPT", 8, 2, 0),
-    (2, "X", "A", "B", "2026-11-01", "OPT", 10, 5, 5),
-    (2, "X", "B", "A", "2026-10-01", "OBL", 0, 30, 0),
-    (2, "X", "A", "A", "2026-10-01", "OPT", 0, 0, 40),
-    (2, "Y", "C", "D", "2026-10-01", "OBL", 50, 0, 0),
-    (2, "Y", "C", "A", "2026-10-01", "OPT", 20, 20, 20),
-]
 
 
 class SummaryTests(unittest.TestCase):
     def setUp(self):
-        # Setup: load the existing schema, without persisting a fixture database.
-        self.db = sqlite3.connect(":memory:")
-        schema = Path(__file__).resolve().parents[2] / "db/crr/sql/schema.sql"
-        if not schema.exists():
-            schema = Path("/data/sql/schema.sql")  # Existing read-only Compose mount.
-        self.db.executescript(schema.read_text())
-        self.db.executemany("INSERT INTO reports VALUES (?, ?)", REPORTS)
-        self.db.executemany(
-            "INSERT INTO account_holders (account_holder, legal_name) VALUES (?, ?)", HOLDERS
-        )
-        self.db.executemany(
-            "INSERT INTO settlement_points (settlement_point) VALUES (?)", POINTS
-        )
-        self.db.executemany(
-            "INSERT INTO crr_monthly_holdings VALUES (?, ?, ?, ?, ?, ?, 0, 0, 0, ?, ?, ?)",
-            HOLDINGS,
-        )
-
-    def tearDown(self):
-        self.db.close()
+        # Setup: each test owns its fresh in-memory connection.
+        self.db = create_fixture_db()
+        self.addCleanup(self.db.close)
 
     def test_summary_filters(self):
         cases = [
