@@ -8,3 +8,7 @@ __pycache__/
 # Generated dataset and temporary builds.
 db/crr/*.sqlite*
 db/crr/.*.tmp*
+
+# Generated frontend dependencies and builds.
+web/node_modules/
+web/dist/
