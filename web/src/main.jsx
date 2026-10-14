@@ -35,6 +35,15 @@ function CRRExplorer() {
   const metadata = useMetadata(reportId, accountHolder);
   const summary = useSummary(reportId, accountHolder, settlementPoint);
   const isoSummary = useSummary(reportId, "", "");
+  // Derived from TanStack-managed query state: isPending means no result yet.
+  // isPlaceholderData means the previous selection is shown as a placeholder
+  // while the request for the current selection is in flight. Cached results
+  // for the current selection remain usable during background refreshes.
+  const portfolioLoading =
+    summary.isPending ||
+    summary.isPlaceholderData ||
+    metadata.isPending ||
+    reportMetadata.isPending;
 
   useEffect(() => {
     if (reportId === null && reportMetadata.data) {
@@ -137,7 +146,14 @@ function CRRExplorer() {
         }}
       >
         <aside>
-          <div className="portfolio-overview">
+          {!summary.data && !summary.isError && (
+            <p role="status">Loading portfolio...</p>
+          )}
+          <div
+            className="portfolio-overview"
+            hidden={!summary.data && !summary.isError}
+            aria-busy={portfolioLoading}
+          >
             <PortfolioFilters
               reportMetadata={reportMetadata}
               metadata={metadata}
@@ -146,6 +162,7 @@ function CRRExplorer() {
               onHolderSelect={changeAccountHolder}
               onPointSelect={changeSettlementPoint}
               onClear={clearFilters}
+              loading={portfolioLoading}
             />
             {summary.isError ? (
               <p role="alert">Unable to load portfolio summary.</p>
@@ -164,6 +181,7 @@ function CRRExplorer() {
               onHolderSelect={changeAccountHolder}
               onPointSelect={changeSettlementPoint}
               onHolderClear={clearAccountHolder}
+              loading={portfolioLoading}
             />
           )}
         </aside>

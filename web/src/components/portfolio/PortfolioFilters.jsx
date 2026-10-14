@@ -6,9 +6,14 @@ export default function PortfolioFilters({
   onHolderSelect,
   onPointSelect,
   onClear,
+  loading,
 }) {
   return (
-    <section className="portfolio-filters" aria-labelledby="filters-heading">
+    <section
+      className="portfolio-filters"
+      aria-labelledby="filters-heading"
+      aria-busy={loading}
+    >
       <details open>
         <summary>
           <h2 id="filters-heading">Explore Holdings</h2>
@@ -18,7 +23,7 @@ export default function PortfolioFilters({
             Account Holder
             <select
               value={accountHolder}
-              disabled={!reportMetadata.data}
+              disabled={loading || !reportMetadata.data}
               onChange={(event) => onHolderSelect(event.target.value)}
             >
               <option value="">All Account Holders</option>
@@ -34,7 +39,7 @@ export default function PortfolioFilters({
             Settlement Point
             <select
               value={settlementPoint}
-              disabled={!metadata.data || metadata.isError}
+              disabled={loading || !metadata.data || metadata.isError}
               onChange={(event) => onPointSelect(event.target.value)}
             >
               <option value="">
@@ -55,7 +60,12 @@ export default function PortfolioFilters({
           {metadata.isError && (
             <p role="alert">Unable to load settlement points.</p>
           )}
-          <button onClick={onClear}>Clear Filters</button>
+          <button disabled={loading} onClick={onClear}>
+            Clear Filters
+          </button>
+          <span className="portfolio-filter-status" role="status">
+            {loading ? "Updating…" : ""}
+          </span>
         </div>
       </details>
     </section>

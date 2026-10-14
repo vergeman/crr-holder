@@ -7,6 +7,7 @@ function RankingTable({
   onClear,
   selected,
   mwhNumber,
+  loading,
   pointTotals = false,
 }) {
   const explanation =
@@ -33,7 +34,7 @@ function RankingTable({
         <button
           type="button"
           className="ranking-clear control-icon"
-          disabled={!selected}
+          disabled={loading || !selected}
           aria-label={`Clear ${title} filter`}
           title={`Clear ${title} filter`}
           onClick={onClear}
@@ -44,7 +45,7 @@ function RankingTable({
       {rows.length === 0 ? (
         <p>No holdings match these filters.</p>
       ) : (
-        <table className="ranking-table">
+        <table className="ranking-table" aria-busy={loading}>
           <thead>
             <tr>
               <th scope="col">
@@ -57,6 +58,9 @@ function RankingTable({
             {rows.map((row) => (
               <tr
                 key={row[identifierKey]}
+                onClick={() => {
+                  if (!loading) onSelect(row[identifierKey]);
+                }}
                 className={
                   selected === row[identifierKey]
                     ? "ranking-selected"
@@ -68,7 +72,7 @@ function RankingTable({
                     type="button"
                     className="ranking-identity"
                     aria-pressed={selected === row[identifierKey]}
-                    onClick={() => onSelect(row[identifierKey])}
+                    disabled={loading}
                   >
                     <strong>{row.legalName || row[identifierKey]}</strong>
                     {row.legalName && <span>{row[identifierKey]}</span>}
@@ -94,6 +98,7 @@ export default function Discovery({
   onHolderSelect,
   onPointSelect,
   onHolderClear,
+  loading,
 }) {
   // Both rankings belong to the same currently selected portfolio.
   return (
@@ -105,6 +110,7 @@ export default function Discovery({
         <div className="discovery-lists">
           <RankingTable
             mwhNumber={mwhNumber}
+            loading={loading}
             id="top-accounts"
             title="Top Accounts"
             rows={summary.topAccountHolders}
@@ -115,6 +121,7 @@ export default function Discovery({
           />
           <RankingTable
             mwhNumber={mwhNumber}
+            loading={loading}
             id="top-points"
             title="Top Settlement Points"
             rows={summary.topSettlementPoints}

@@ -247,3 +247,10 @@ dd { margin: 0; font-weight: 600; }
     margin: 0; border: 0; border-radius: 0;
   }
 }
+
+.portfolio-overview[hidden] { display: none; }
+.portfolio-filter-status { align-self: end; min-width: 70px; height: 30px; display: flex; align-items: center; color: #52616b; font-size: 12px; }
+.ranking-table tbody tr { cursor: pointer; }
+.ranking-table[aria-busy="true"] tbody tr { cursor: wait; opacity: .6; }
+.ranking-identity:disabled { background: transparent; color: inherit; }
+.ranking-table tbody tr:focus-within { background: #f3f7fa; }
