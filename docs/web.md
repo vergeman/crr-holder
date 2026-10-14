@@ -105,6 +105,14 @@ Top down we get birds eye overview to detailed inventory
 
 ## CRR Holdings Component
 
+* Expand a source to load all matching sinks beneath it, aligned with Total MWh
+  and monthly OPT/OBL columns. Multiple sources may remain expanded.
+* Source totals stay visible and unchanged. Loading, empty, and errors appear
+  beneath the affected source; errors show "Unable to load sinks." and a native
+  Retry button, with no icon. Keep these states visible near the sticky label.
+* Collapse hides sink rows; reopening can reuse cached data. Filter changes reset
+  expansions, while Show more sources preserves expansions and horizontal scroll.
+
 * Separate options (OPT) and obligations (OBL)
   * recall the option delta thought experiment; but time considerations and
     scope creep, treat this more of an inventory then a "risk" sheet.
