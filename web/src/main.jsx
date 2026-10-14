@@ -1,4 +1,4 @@
-import { PortfolioPanel } from "./components/portfolio";
+import { PortfolioPanel, ReportSelector } from "./components/portfolio";
 import PortfolioSummary from "./components/portfolio/PortfolioSummary";
 import PortfolioFilters from "./components/portfolio/PortfolioFilters";
 import Discovery from "./components/portfolio/Discovery";
@@ -108,23 +108,11 @@ function CRRExplorer() {
           loading={portfolioLoading}
         />
         <Legend />
-        <label>
-          Report
-          <select
-            value={reportId ?? ""}
-            disabled={!reportMetadata.data}
-            onChange={(event) => changeReport(event.target.value)}
-          >
-            {!reportMetadata.data && (
-              <option value="">Loading reports...</option>
-            )}
-            {reportMetadata.data?.reports.map((report) => (
-              <option key={report.reportId} value={report.reportId}>
-                {report.publicationDate}
-              </option>
-            ))}
-          </select>
-        </label>
+        <ReportSelector
+          reportMetadata={reportMetadata}
+          reportId={reportId}
+          onReportSelect={changeReport}
+        />
       </header>
       {reportMetadata.isError && (
         <p role="alert">Unable to load report filters.</p>
