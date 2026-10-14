@@ -47,6 +47,62 @@ function PortfolioSummary({ summary }) {
   );
 }
 
+function RankingList({ id, title, rows, identifierKey, onSelect, pointTotals = false }) {
+  const explanation = 'Ranked by contractual MWh for the current filters.' +
+    (pointTotals ? ' Each holding counts toward its source and sink; identical endpoints ' +
+      'count once. Do not add settlement-point totals to calculate portfolio MWh.' : '');
+
+  // Output: native buttons share the dropdown handlers and expose tooltip descriptions.
+  return (
+    <div className="ranking-list" aria-labelledby={`${id}-heading`}>
+      <div className="ranking-heading">
+        <h3 id={`${id}-heading`}>{title}</h3>
+        <span className="ranking-info">
+          <button type="button" aria-label={`About ${title}`}
+            aria-describedby={`${id}-tooltip`}>i</button>
+          <span className="ranking-tooltip" id={`${id}-tooltip`} role="tooltip">
+            {explanation}
+          </span>
+        </span>
+      </div>
+      {rows.length === 0 ? <p>No holdings match these filters.</p> : (
+        <ol>
+          {rows.map((row, index) => (
+            <li key={row[identifierKey]}>
+              <button type="button" className="ranking-row"
+                onClick={() => onSelect(row[identifierKey])}>
+                <span className="ranking-rank">{index + 1}</span>
+                <span className="ranking-identity">
+                  <strong>{row[identifierKey]}</strong>
+                  {row.legalName && <span>{row.legalName}</span>}
+                </span>
+                <span className="ranking-mwh">{number.format(row.totalMwh)} MWh</span>
+              </button>
+            </li>
+          ))}
+        </ol>
+      )}
+    </div>
+  );
+}
+
+function Discovery({ summary, onHolderSelect, onPointSelect }) {
+  // Output: both lists belong to the same currently selected portfolio.
+  return (
+    <section aria-labelledby="discover-heading">
+      <h2 id="discover-heading">Discover</h2>
+      <div className="discovery-lists">
+        <RankingList id="top-accounts" title="Top Accounts"
+          rows={summary.topAccountHolders} identifierKey="accountHolder"
+          onSelect={onHolderSelect} />
+        <RankingList id="top-points" title="Top Settlement Points"
+          rows={summary.topSettlementPoints} identifierKey="settlementPoint"
+          onSelect={onPointSelect} pointTotals />
+      </div>
+    </section>
+  );
+}
+
 function CRRExplorer() {
   // Preparation: keep independent holder choices available as points refresh.
   const [reportId, setReportId] = useState(null);
@@ -132,7 +188,11 @@ function CRRExplorer() {
           </section>
           {summary.isError ? <p role="alert">Unable to load portfolio summary.</p> :
             !summary.data ? <p role="status">Loading portfolio summary...</p> :
-              <PortfolioSummary summary={summary.data} />}
+              <>
+                <PortfolioSummary summary={summary.data} />
+                <Discovery summary={summary.data} onHolderSelect={changeHolder}
+                  onPointSelect={setSettlementPoint} />
+              </>}
         </aside>
         <section className="map-placeholder" aria-labelledby="map-heading">
           <h2 id="map-heading">Geographic Footprint</h2>
