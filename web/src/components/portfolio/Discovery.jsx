@@ -1,11 +1,11 @@
-function RankingList({
+function RankingTable({
   id,
   title,
   rows,
   identifierKey,
   onSelect,
   onClear,
-  filtered,
+  selected,
   mwhNumber,
   pointTotals = false,
 }) {
@@ -33,7 +33,7 @@ function RankingList({
         <button
           type="button"
           className="ranking-clear control-icon"
-          disabled={!filtered}
+          disabled={!selected}
           aria-label={`Clear ${title} filter`}
           title={`Clear ${title} filter`}
           onClick={onClear}
@@ -44,26 +44,43 @@ function RankingList({
       {rows.length === 0 ? (
         <p>No holdings match these filters.</p>
       ) : (
-        <ol>
-          {rows.map((row, index) => (
-            <li key={row[identifierKey]}>
-              <button
-                type="button"
-                className="ranking-row"
-                onClick={() => onSelect(row[identifierKey])}
+        <table className="ranking-table">
+          <thead>
+            <tr>
+              <th scope="col">
+                {pointTotals ? "Settlement Point" : "Account Holder"}
+              </th>
+              <th scope="col">Total MWh</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr
+                key={row[identifierKey]}
+                className={
+                  selected === row[identifierKey]
+                    ? "ranking-selected"
+                    : undefined
+                }
               >
-                <span className="ranking-rank">{index + 1}</span>
-                <span className="ranking-identity">
-                  <strong>{row[identifierKey]}</strong>
-                  {row.legalName && <span>{row.legalName}</span>}
-                </span>
-                <span className="ranking-mwh">
-                  {mwhNumber.format(row.totalMwh)} MWh
-                </span>
-              </button>
-            </li>
-          ))}
-        </ol>
+                <td>
+                  <button
+                    type="button"
+                    className="ranking-identity"
+                    aria-pressed={selected === row[identifierKey]}
+                    onClick={() => onSelect(row[identifierKey])}
+                  >
+                    <strong>{row.legalName || row[identifierKey]}</strong>
+                    {row.legalName && <span>{row[identifierKey]}</span>}
+                  </button>
+                </td>
+                <td className="ranking-mwh">
+                  {mwhNumber.format(row.totalMwh)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
     </div>
   );
@@ -78,7 +95,7 @@ export default function Discovery({
   onPointSelect,
   onHolderClear,
 }) {
-  // Both lists belong to the same currently selected portfolio.
+  // Both rankings belong to the same currently selected portfolio.
   return (
     <section aria-labelledby="discover-heading">
       <details open>
@@ -86,7 +103,7 @@ export default function Discovery({
           <h2 id="discover-heading">Discover</h2>
         </summary>
         <div className="discovery-lists">
-          <RankingList
+          <RankingTable
             mwhNumber={mwhNumber}
             id="top-accounts"
             title="Top Accounts"
@@ -94,9 +111,9 @@ export default function Discovery({
             identifierKey="accountHolder"
             onSelect={onHolderSelect}
             onClear={onHolderClear}
-            filtered={!!accountHolder}
+            selected={accountHolder}
           />
-          <RankingList
+          <RankingTable
             mwhNumber={mwhNumber}
             id="top-points"
             title="Top Settlement Points"
@@ -104,7 +121,7 @@ export default function Discovery({
             identifierKey="settlementPoint"
             onSelect={onPointSelect}
             onClear={() => onPointSelect("")}
-            filtered={!!settlementPoint}
+            selected={settlementPoint}
             pointTotals
           />
         </div>
