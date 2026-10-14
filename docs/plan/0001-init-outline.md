@@ -147,10 +147,37 @@ Detailed plan: [0009 - Map Integration](0009-map-integration.md).
 
 Output: geographic exploration integrated with the existing explorer.
 
-### 4.1 - Offset Pagination Benchmark
+### 4.1 - Frontend Refactors
+
+Implementation details, commit groups, acceptance, and validation:
+[0010 - Frontend Refactors](0010-frontend-refactors.md).
+
+* Establish consistent dropdowns, buttons, disclosure carets, and action icons;
+  evaluate lightweight UI and icon libraries before choosing the approach.
+
+* Compress Explore Holdings into horizontal filters and a visually joined,
+  two-column portfolio summary.
+
+* Widen discovery into readable account-holder and settlement-point tables,
+  emphasizing full names, aligned totals, and clear selection states.
+
+* Improve holdings edge resizing, source-cell expansion, and contract-modal
+  hierarchy and spacing; move the holdings pane closer to the bottom edge.
+
+* Refine map hover details, background-click clearing, grouped map controls,
+  compact legend, red/blue encoding, and visible filtered-circle scaling.
+
+* Work in that order, prompting for the control-system decision and staged
+  visual feedback on portfolio/discovery, holdings/modal, and map changes.
+
+Output: a more compact, consistent explorer, with implementation decisions and
+visual feedback captured through staged reviews.
+
+### 4.2 - Offset Pagination Benchmark
 
 * TODO: once the explorer flow is wired, measure first-page and later-page
   source endpoint latency under market, holder, point, and combined filters.
+
 * Assess aggregation cost and increasing offsets before deciding whether
   keyset (cursor) pagination would improve performance.
 
