@@ -33,3 +33,14 @@ export function useSourceHoldings(reportId, accountHolder, settlementPoint) {
     staleTime: 60_000,
   });
 }
+
+// Output: mounted expansions fetch only their source under the active portfolio.
+export function useSinkHoldings(reportId, accountHolder, settlementPoint, source) {
+  return useQuery({
+    queryKey: ['sink-holdings', reportId, accountHolder, settlementPoint, source],
+    queryFn: ({ signal }) => dataProvider.getSinkHoldings(
+      { reportId, accountHolder, settlementPoint, source }, signal),
+    enabled: reportId != null,
+    staleTime: 60_000,
+  });
+}

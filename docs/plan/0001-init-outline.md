@@ -90,6 +90,8 @@ Output: users can explore a portfolio's sources across delivery months.
 
 ### 3.4 - Sink Expansion
 
+Detailed plan: [0007 - Sink Expansion](0007-sink-expansion.md).
+
 * Implement `/api/holdings/sources/{source}/sinks` and load sinks on expansion.
 * Return all matching sinks for an expanded source without pagination or cutoff;
   include all delivery-month cells and retain the shared filters.
@@ -98,7 +100,7 @@ Output: users can explore a portfolio's sources across delivery months.
 * Verify expansion under the shared filters and reconcile sink cells with their
   parent source cells, separately for OPT and OBL.
 
-Output: expanding a source explains its totals through directed source-sink paths.
+Output: expanding a source explains its totals through Source-Sink Pairs.
 
 ### 3.5 - Contract Details and Completed Workspace
 

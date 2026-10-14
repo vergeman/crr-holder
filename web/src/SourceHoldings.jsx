@@ -1,6 +1,7 @@
 // Imports
-import { useEffect, useRef } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { useSourceHoldings } from './data/hooks';
+import SinkHoldings from './SinkHoldings';
 
 // Preparation: month-only formatting avoids timezone changes to delivery dates.
 const monthLabel = (month) => new Date(`${month}T00:00:00Z`).toLocaleDateString(
@@ -8,10 +9,20 @@ const monthLabel = (month) => new Date(`${month}T00:00:00Z`).toLocaleDateString(
 
 export default function SourceHoldings({ reportId, accountHolder, settlementPoint, mwhNumber }) {
   const query = useSourceHoldings(reportId, accountHolder, settlementPoint);
+  const [expanded, setExpanded] = useState(new Set());
   const scroll = useRef(null);
   const firstMonth = useRef(null);
   const positioned = useRef(false);
   const page = query.data?.pages[0];
+
+  function toggle(source) {
+    setExpanded((previous) => {
+      const next = new Set(previous);
+      if (next.has(source)) next.delete(source);
+      else next.add(source);
+      return next;
+    });
+  }
 
   function jump() {
     if (scroll.current && firstMonth.current) {
@@ -56,12 +67,23 @@ export default function SourceHoldings({ reportId, accountHolder, settlementPoin
                   <th key={`${month}/${type}`} scope="col">{type}</th>))}</tr>
               </thead>
               <tbody>{query.data.pages.flatMap((part) => part.sources).map((row) =>
-                <tr key={row.source}><th scope="row">{row.source}</th>
+                <Fragment key={row.source}>
+                <tr><th scope="row"><button type="button" className="source-expand"
+                  aria-expanded={expanded.has(row.source)}
+                  aria-label={`${expanded.has(row.source) ? 'Collapse' : 'Expand'} ${row.source}`}
+                  onClick={() => toggle(row.source)}>
+                  {expanded.has(row.source) ? '▾' : '▸'}
+                </button>{row.source}</th>
                   <td>{mwhNumber.format(row.totalOptMwh)}</td>
                   <td>{mwhNumber.format(row.totalOblMwh)}</td>
                   {row.months.flatMap((month) => ['OPT', 'OBL'].map((type) =>
                     <td key={`${month.deliveryMonth}/${type}`}>{mwhNumber.format(month[type])}</td>))}
-                </tr>)}</tbody>
+                </tr>
+                {expanded.has(row.source) && <SinkHoldings
+                  reportId={reportId} accountHolder={accountHolder}
+                  settlementPoint={settlementPoint} source={row.source}
+                  deliveryMonths={page.deliveryMonths} mwhNumber={mwhNumber} />}
+                </Fragment>)}</tbody>
             </table>
           </div>}
         {query.isFetchNextPageError && <p role="alert">Unable to load more sources. Try again.</p>}

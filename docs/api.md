@@ -54,6 +54,12 @@
   delivery-month cells; pagination never splits a source row.
 * Reset the offset to zero when report, holder, or settlement-point filters change.
   See [Sprint 3.3 contract](plan/0006-source-holdings-matrix.md).
+* Sink expansion returns `reportId`, `source`, `deliveryMonths`, and all matching
+  `sinks`. Each sink has `sink`, `totalOptMwh`, `totalOblMwh`, and monthly numeric
+  `OPT`/`OBL` cells. Use the same continuous report timeline as sources, with zero
+  for missing cells; sort by combined MWh descending, then sink identifier.
+  Retain the shared filters plus the source restriction. See
+  [Sprint 3.4 contract](plan/0007-sink-expansion.md).
 
 * endpoints vs map:
   * if we show an aggregate MWh,it wil just be dominated by the hubs and loading zones, kind of obvious.

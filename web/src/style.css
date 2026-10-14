@@ -75,3 +75,8 @@ dd { margin: 0; font-weight: 600; }
   position: sticky; left: 0; z-index: 1; background: white; text-align: left;
   min-width: 160px;
 }
+
+/* Output: expanded sinks and request states remain beside their source. */
+.source-expand { padding: 2px 6px; margin-right: 6px; }
+.holdings-scroll .sink-row th, .holdings-scroll .sink-state th { padding-left: 32px; }
+.holdings-scroll .sink-state th { white-space: normal; font-weight: normal; }
