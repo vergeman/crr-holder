@@ -13,7 +13,7 @@ maplibregl.setWorkerUrl(workerUrl);
 
 // Coordinates and inventory retain the API's unrounded values.
 const located = (point) => point.longitude !== null && point.latitude !== null;
-const inventory = (point) => point.sourceMwh + point.sinkMwh;
+const totalSourceSinkMwh = (point) => point.sourceMwh + point.sinkMwh;
 const basemap = "https://tiles.openfreemap.org/styles/positron";
 const texasLatLng = { lat: 31, lng: -99 };
 
@@ -93,10 +93,13 @@ export default function Map({
     }
   }, [map, isoPoints]);
 
-  const maximum = Math.max(...(isoPoints ?? []).map(inventory), 1);
+  const maximum = Math.max(
+    ...(points ?? []).filter(located).map(totalSourceSinkMwh),
+    1
+  );
   const mapped = (points ?? [])
     .filter(located)
-    .sort((a, b) => inventory(b) - inventory(a));
+    .sort((a, b) => totalSourceSinkMwh(b) - totalSourceSinkMwh(a));
 
   // Coordinate coverage stays part of inventory, not marker placement.
   const detail = points?.find((point) => point.settlementPoint === activePoint);

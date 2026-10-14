@@ -110,7 +110,7 @@ dd { margin: 0; font-weight: 600; }
 .maplibregl-ctrl-top-right { display: flex; flex-direction: column; align-items: flex-end; }
 .maplibregl-ctrl-top-right .map-controls { order: 1; }
 .marker-button { padding: 0; border: 1px solid white; border-radius: 50%; opacity: .8;
-  box-sizing: content-box; cursor: pointer; }
+  box-sizing: border-box; cursor: pointer; }
 .marker-button:hover, .marker-button:focus-visible, .marker-button[aria-pressed="true"] {
   outline: 3px solid #15232f; outline-offset: 2px; opacity: 1; z-index: 1;
 }
