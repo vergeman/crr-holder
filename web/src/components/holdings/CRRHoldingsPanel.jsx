@@ -1,7 +1,10 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import SourceHoldings from "./SourceHoldings";
 
-export const boundCRRHoldingsPanelHeight = (height) =>
+// The ref saves the starting height and pointer Y for each drag. Pointer movement
+// updates height state, which updates the holdings content's CSS height style.
+// The ref and resize handlers ultimately control the panel's CSS height.
+const boundCRRHoldingsPanelHeight = (height) =>
   Math.max(200, Math.min(window.innerHeight * 0.8, height));
 
 export default function CRRHoldingsPanel({
@@ -11,15 +14,15 @@ export default function CRRHoldingsPanel({
   settlementPoint,
   mwhNumber,
   crrHoldingsPanelVisible,
-  crrHoldingsPanelHeight,
-  viewportHeight,
-  setCRRHoldingsPanelHeight,
   onToggle,
   onCellSelect,
   onSourceCollapse,
   selection,
 }) {
   const resizeStart = useRef(null);
+  const [crrHoldingsPanelHeight, setCRRHoldingsPanelHeight] = useState(() =>
+    boundCRRHoldingsPanelHeight(window.innerHeight * 0.45)
+  );
 
   function startResize(event) {
     if (event.button !== 0) return;
@@ -29,24 +32,30 @@ export default function CRRHoldingsPanel({
   }
 
   function moveResize(event) {
-    if (resizeStart.current) {
-      setCRRHoldingsPanelHeight(
-        boundCRRHoldingsPanelHeight(
-          resizeStart.current.height + resizeStart.current.y - event.clientY
-        )
-      );
-    }
+    if (!resizeStart.current) return;
+    setCRRHoldingsPanelHeight(
+      boundCRRHoldingsPanelHeight(
+        resizeStart.current.height + resizeStart.current.y - event.clientY
+      )
+    );
+  }
+
+  function finishResize(event) {
+    resizeStart.current = null;
+    event.currentTarget.releasePointerCapture(event.pointerId);
+  }
+
+  // Cancellation or lost capture also ends the drag.
+  function cancelResize() {
+    resizeStart.current = null;
   }
 
   function keyboardResize(event) {
-    if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-      event.preventDefault();
-      setCRRHoldingsPanelHeight((height) =>
-        boundCRRHoldingsPanelHeight(
-          height + (event.key === "ArrowUp" ? 20 : -20)
-        )
-      );
-    }
+    if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
+    event.preventDefault();
+    setCRRHoldingsPanelHeight((height) =>
+      boundCRRHoldingsPanelHeight(height + (event.key === "ArrowUp" ? 20 : -20))
+    );
   }
 
   return (
@@ -60,21 +69,14 @@ export default function CRRHoldingsPanel({
         aria-label="Resize holdings panel"
         aria-orientation="horizontal"
         aria-valuemin={200}
-        aria-valuemax={Math.round(viewportHeight * 0.8)}
+        aria-valuemax={Math.round(window.innerHeight * 0.8)}
         aria-valuenow={Math.round(crrHoldingsPanelHeight)}
         aria-valuetext={`${Math.round(crrHoldingsPanelHeight)} pixels`}
         onPointerDown={startResize}
         onPointerMove={moveResize}
-        onPointerUp={(event) => {
-          resizeStart.current = null;
-          event.currentTarget.releasePointerCapture(event.pointerId);
-        }}
-        onPointerCancel={() => {
-          resizeStart.current = null;
-        }}
-        onLostPointerCapture={() => {
-          resizeStart.current = null;
-        }}
+        onPointerUp={finishResize}
+        onPointerCancel={cancelResize}
+        onLostPointerCapture={cancelResize}
         onKeyDown={keyboardResize}
       >
         <span aria-hidden="true" />

@@ -1,2 +1,2 @@
-export { default, boundCRRHoldingsPanelHeight } from "./CRRHoldingsPanel";
+export { default } from "./CRRHoldingsPanel";
 export { default as ContractDetailsModal } from "./ContractDetailsModal";

@@ -1,3 +1,4 @@
+import { PortfolioPanel } from "./components/portfolio";
 import PortfolioSummary from "./components/portfolio/PortfolioSummary";
 import PortfolioFilters from "./components/portfolio/PortfolioFilters";
 import Discovery from "./components/portfolio/Discovery";
@@ -5,10 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useMetadata, useSummary } from "./data/hooks";
-import CRRHoldingsPanel, {
-  boundCRRHoldingsPanelHeight,
-  ContractDetailsModal,
-} from "./components/holdings";
+import CRRHoldingsPanel, { ContractDetailsModal } from "./components/holdings";
 import Map, { Legend } from "./components/map";
 import "./style.css";
 
@@ -26,13 +24,7 @@ function CRRExplorer() {
   const [settlementPoint, setSettlementPoint] = useState("");
   const [selection, setSelection] = useState(null);
   const cellButton = useRef(null);
-  const [portfolioWidth, setPortfolioWidth] = useState(680);
-  const portfolioResizeStart = useRef(null);
   const [crrHoldingsPanelVisible, setCRRHoldingsPanelVisible] = useState(false);
-  const [crrHoldingsPanelHeight, setCRRHoldingsPanelHeight] = useState(() =>
-    boundCRRHoldingsPanelHeight(window.innerHeight * 0.45)
-  );
-  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
   const reportMetadata = useMetadata(reportId);
   const metadata = useMetadata(reportId, accountHolder);
   const summary = useSummary(reportId, accountHolder, settlementPoint);
@@ -52,18 +44,6 @@ function CRRExplorer() {
       setReportId(reportMetadata.data.reportId);
     }
   }, [reportId, reportMetadata.data]);
-
-  useEffect(() => {
-    // Retain the chosen size while reapplying viewport bounds.
-    function resizeViewport() {
-      setViewportHeight(window.innerHeight);
-      setCRRHoldingsPanelHeight((height) =>
-        boundCRRHoldingsPanelHeight(height)
-      );
-    }
-    window.addEventListener("resize", resizeViewport);
-    return () => window.removeEventListener("resize", resizeViewport);
-  }, []);
 
   function changeReport(value) {
     setSelection(null);
@@ -149,13 +129,8 @@ function CRRExplorer() {
       {reportMetadata.isError && (
         <p role="alert">Unable to load report filters.</p>
       )}
-      <div
-        className="workspace"
-        style={{
-          "--portfolio-width": `${portfolioWidth}px`,
-        }}
-      >
-        <aside>
+      <div className="workspace">
+        <PortfolioPanel>
           {!summary.data && !summary.isError && (
             <p role="status">Loading portfolio...</p>
           )}
@@ -189,62 +164,7 @@ function CRRExplorer() {
               )}
             </div>
           </div>
-        </aside>
-        <div
-          className="portfolio-resize"
-          role="separator"
-          tabIndex={0}
-          aria-label="Resize portfolio pane"
-          aria-orientation="vertical"
-          aria-valuemin={320}
-          aria-valuemax={Math.max(320, window.innerWidth - 500)}
-          aria-valuenow={portfolioWidth}
-          onPointerDown={(event) => {
-            if (event.button !== 0) return;
-            portfolioResizeStart.current = {
-              x: event.clientX,
-              width: portfolioWidth,
-            };
-            event.currentTarget.setPointerCapture(event.pointerId);
-            event.preventDefault();
-          }}
-          onPointerMove={(event) => {
-            if (!portfolioResizeStart.current) return;
-            setPortfolioWidth(
-              Math.max(
-                320,
-                Math.min(
-                  window.innerWidth - 500,
-                  portfolioResizeStart.current.width +
-                    event.clientX -
-                    portfolioResizeStart.current.x
-                )
-              )
-            );
-          }}
-          onPointerUp={() => {
-            portfolioResizeStart.current = null;
-          }}
-          onPointerCancel={() => {
-            portfolioResizeStart.current = null;
-          }}
-          onLostPointerCapture={() => {
-            portfolioResizeStart.current = null;
-          }}
-          onKeyDown={(event) => {
-            if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
-            event.preventDefault();
-            setPortfolioWidth((width) =>
-              Math.max(
-                320,
-                Math.min(
-                  window.innerWidth - 500,
-                  width + (event.key === "ArrowRight" ? 20 : -20)
-                )
-              )
-            );
-          }}
-        />
+        </PortfolioPanel>
         <div className="map-holdings-workspace">
           <Map
             key={reportId}
@@ -265,9 +185,6 @@ function CRRExplorer() {
             settlementPoint={settlementPoint}
             mwhNumber={mwhNumber}
             crrHoldingsPanelVisible={crrHoldingsPanelVisible}
-            crrHoldingsPanelHeight={crrHoldingsPanelHeight}
-            viewportHeight={viewportHeight}
-            setCRRHoldingsPanelHeight={setCRRHoldingsPanelHeight}
             onToggle={toggleCRRHoldingsPanel}
             selection={selection}
             onCellSelect={selectCell}
