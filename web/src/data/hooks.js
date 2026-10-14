@@ -1,5 +1,5 @@
 // Imports
-import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
+import { useQuery, useInfiniteQuery, keepPreviousData } from "@tanstack/react-query";
 import { dataProvider } from "./provider";
 
 // Output: keys describe the same filters passed to the selected provider.
@@ -21,6 +21,7 @@ export function useSummary(reportId, accountHolder, settlementPoint) {
         signal
       ),
     enabled: reportId != null,
+    placeholderData: keepPreviousData,
     staleTime: 60_000,
   });
 }

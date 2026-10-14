@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import MarkerButton from "./MarkerButton";
-import Legend from "./Legend";
 import MapControls from "./MapControls";
-import MapStatus from "./MapStatus";
 import MapPointDetails from "./MapPointDetails";
 
 // Let Vite bundle the worker and resolve its production asset URL.
@@ -13,23 +12,23 @@ maplibregl.setWorkerUrl(workerUrl);
 
 // Coordinates and inventory retain the API's unrounded values.
 const located = (point) => point.longitude !== null && point.latitude !== null;
-const inventory = (point) => point.sourceMwh + point.sinkMwh;
+const totalSourceSinkMwh = (point) => point.sourceMwh + point.sinkMwh;
 const basemap = "https://tiles.openfreemap.org/styles/positron";
 const texasLatLng = { lat: 31, lng: -99 };
 
 // Adjust the map's center and zoom so all report points with coordinates fit
-// in the window, leaving padding for the floating panels.
+// in the map pane, leaving room for its controls.
 function fitReport(map, points) {
   const mapped = points.filter(located);
   if (!mapped.length) return;
   const bounds = new maplibregl.LngLatBounds();
   mapped.forEach((point) => bounds.extend([point.longitude, point.latitude]));
-  // Leave room for floating panels without moving filters into map state.
+  // The portfolio and holdings panes sit outside the map canvas.
   const narrow = map.getContainer().clientWidth <= 760;
   map.fitBounds(bounds, {
     padding: narrow
-      ? { top: 100, right: 35, bottom: 100, left: 35 }
-      : { top: 90, right: 100, bottom: 150, left: 420 },
+      ? { top: 35, right: 50, bottom: 35, left: 35 }
+      : { top: 50, right: 60, bottom: 50, left: 50 },
     maxZoom: 9,
     duration: 0,
   });
@@ -45,10 +44,9 @@ export default function Map({
   const container = useRef(null);
   const mapFitted = useRef(false); // Fit report bounds once to preserve later pan/zoom.
   const [map, setMap] = useState(null);
-  const [mapError, setMapError] = useState(false);
-  const [mapLoadAttempt, setMapLoadAttempt] = useState(0);
   // Hover/focus shows point details; selectedPoint filters the portfolio on click.
   const [activePoint, setActivePoint] = useState(null);
+  const [detailPosition, setDetailPosition] = useState(null);
   const dataFailed = summary.isError || isoSummary.isError;
   const dataReady = summary.data && isoSummary.data && !dataFailed;
   const points = dataReady ? summary.data.geographicFootprint : null;
@@ -57,32 +55,31 @@ export default function Map({
   useEffect(() => {
     // Keep the map and camera when portfolio filters change;
     // recreate the map when the selected report (report_id) changes.
-    let instance;
-    try {
-      instance = new maplibregl.Map({
-        container: container.current,
-        style: basemap,
-        center: texasLatLng,
-        zoom: 5,
-        renderWorldCopies: false,
-      });
-      instance.addControl(
-        new maplibregl.NavigationControl({ showCompass: false }),
-        "top-right"
-      );
-      instance.on("error", () => setMapError(true));
-      instance.on("style.load", () => setMapError(false));
-      setMap(instance);
-      mapFitted.current = false;
-    } catch {
-      setMapError(true);
-    }
+    const instance = new maplibregl.Map({
+      container: container.current,
+      style: basemap,
+      center: texasLatLng,
+      zoom: 5,
+      renderWorldCopies: false,
+      attributionControl: false,
+    });
+    instance.addControl(
+      new maplibregl.NavigationControl({ showCompass: false }),
+      "top-right"
+    );
+    setMap(instance);
+    mapFitted.current = false;
 
-    // Remove WebGL resources and listeners when changing reports or retrying.
+    // Resize the canvas when the workspace dividers change its available space.
+    const observer = new ResizeObserver(() => instance.resize());
+    observer.observe(container.current);
+
+    // Remove WebGL resources and listeners when changing reports.
     return () => {
-      instance?.remove();
+      observer.disconnect();
+      instance.remove();
     };
-  }, [mapLoadAttempt]);
+  }, []);
 
   useEffect(() => {
     if (map && isoPoints && !mapFitted.current) {
@@ -91,27 +88,72 @@ export default function Map({
     }
   }, [map, isoPoints]);
 
-  const maximum = Math.max(...(isoPoints ?? []).map(inventory), 1);
+  const maximum = Math.max(
+    ...(points ?? []).filter(located).map(totalSourceSinkMwh),
+    1
+  );
   const mapped = (points ?? [])
     .filter(located)
-    .sort((a, b) => inventory(b) - inventory(a));
+    .sort((a, b) => totalSourceSinkMwh(b) - totalSourceSinkMwh(a));
 
   // Coordinate coverage stays part of inventory, not marker placement.
-  const missing = (points ?? []).filter((point) => !located(point));
   const detail = points?.find((point) => point.settlementPoint === activePoint);
 
-  function retryMap() {
-    setMap(null);
-    setMapError(false);
-    setMapLoadAttempt(mapLoadAttempt + 1);
-  }
+  // Only plain canvas clicks clear selection; markers and controls are separate.
+  useEffect(() => {
+    if (!map) return;
+    let dragged = false;
+    const start = () => {
+      dragged = false;
+    };
+    const drag = () => {
+      dragged = true;
+    };
+    const clear = (event) => {
+      if (!dragged && event.originalEvent.target === map.getCanvas())
+        onPointSelect("");
+    };
+    map.on("mousedown", start);
+    map.on("dragstart", drag);
+    map.on("click", clear);
+    return () => {
+      map.off("mousedown", start);
+      map.off("dragstart", drag);
+      map.off("click", clear);
+    };
+  }, [map, onPointSelect]);
 
-  function retryData() {
-    summary.refetch();
-    isoSummary.refetch();
-  }
+  // Track the MapPointDetails hover box position as its marker moves on screen.
+  useEffect(() => {
+    if (!map || !detail) {
+      setDetailPosition(null);
+      return;
+    }
+    const position = () => {
+      const pixel = map.project([detail.longitude, detail.latitude]);
+      const width = map.getContainer().clientWidth;
+      const height = map.getContainer().clientHeight;
+      setDetailPosition({
+        left: Math.max(
+          8,
+          Math.min(width - Math.min(260, width - 16) - 8, pixel.x + 32)
+        ),
+        top: Math.max(
+          8,
+          Math.min(height - 88, pixel.y < 100 ? pixel.y + 32 : pixel.y - 88)
+        ),
+      });
+    };
+    position();
+    map.on("move", position);
+    map.on("resize", position);
+    return () => {
+      map.off("move", position);
+      map.off("resize", position);
+    };
+  }, [map, detail]);
 
-  // Controls and coverage float over the basemap with the other panels.
+  // Markers, hover details, and controls float over the basemap.
   return (
     <section
       className="geographic-footprint"
@@ -131,30 +173,21 @@ export default function Map({
             mwhNumber={mwhNumber}
           />
         ))}
-      <div className="map-information">
-        <MapControls
-          canReset={Boolean(map && isoPoints)}
-          canClear={Boolean(selectedPoint)}
-          onReset={() => fitReport(map, isoPoints)}
-          onClear={() => onPointSelect("")}
-        />
-        <MapStatus
-          mapError={mapError}
-          dataFailed={dataFailed}
-          dataReady={dataReady}
-          onRetryMap={retryMap}
-          onRetryData={retryData}
-        />
-        {dataReady && (
-          <MapPointDetails
-            points={points}
-            detail={detail}
-            hasLocatedPoints={mapped.length > 0}
-            mwhNumber={mwhNumber}
-          />
+      {map &&
+        createPortal(
+          <MapControls
+            canReset={Boolean(isoPoints)}
+            onReset={() => fitReport(map, isoPoints)}
+          />,
+          map.getContainer().querySelector(".maplibregl-ctrl-top-right")
         )}
-        <Legend dataReady={dataReady} missing={missing} mwhNumber={mwhNumber} />
-      </div>
+      {detail && detailPosition && (
+        <MapPointDetails
+          detail={detail}
+          position={detailPosition}
+          mwhNumber={mwhNumber}
+        />
+      )}
     </section>
   );
 }

@@ -67,8 +67,15 @@ export default function ContractDetailsModal({
     >
       <div className="contract-header">
         <h2 id="contract-heading">CRR Contract Details</h2>
-        <button type="button" autoFocus onClick={closeModal}>
-          Close
+        <button
+          type="button"
+          className="control-icon"
+          aria-label="Close contract details"
+          title="Close contract details"
+          autoFocus
+          onClick={closeModal}
+        >
+          <span aria-hidden="true">×</span>
         </button>
       </div>
       <dl className="contract-selection">
@@ -120,8 +127,10 @@ export default function ContractDetailsModal({
                   <summary>
                     <span className="contract-holder-heading">
                       <span>
-                        {holder.accountHolder}
-                        {holder.legalName && <small>{holder.legalName}</small>}
+                        {holder.legalName || holder.accountHolder}
+                        {holder.legalName && (
+                          <small>{holder.accountHolder}</small>
+                        )}
                       </span>
                       <strong>{mwhNumber.format(holder.totalMwh)} MWh</strong>
                     </span>

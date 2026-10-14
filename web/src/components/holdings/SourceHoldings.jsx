@@ -58,7 +58,6 @@ export default function SourceHoldings({
   // Output: an additional-page error keeps the successful pages visible.
   return (
     <div className="source-holdings">
-      <p>Contractual MWh</p>
       {!page ? (
         query.isError ? (
           <p role="alert">Unable to load holdings.</p>
@@ -130,18 +129,45 @@ export default function SourceHoldings({
                     .flatMap((part) => part.sources)
                     .map((row) => (
                       <Fragment key={row.source}>
-                        <tr>
+                        <tr
+                          className="source-row"
+                          onClick={() => {
+                            if (!expanded.has(row.source)) toggle(row.source);
+                          }}
+                        >
                           <th scope="row">
                             <button
                               type="button"
-                              className="source-expand"
+                              className="source-expand control-icon"
                               aria-expanded={expanded.has(row.source)}
                               aria-label={`${
                                 expanded.has(row.source) ? "Collapse" : "Expand"
                               } ${row.source}`}
-                              onClick={() => toggle(row.source)}
+                              title={`${
+                                expanded.has(row.source) ? "Collapse" : "Expand"
+                              } ${row.source}`}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                toggle(row.source);
+                              }}
                             >
-                              {expanded.has(row.source) ? "▾" : "▸"}
+                              <svg
+                                className="control-caret"
+                                viewBox="0 0 16 16"
+                                aria-hidden="true"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="1.6"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                style={{
+                                  transform: expanded.has(row.source)
+                                    ? "rotate(0deg)"
+                                    : "rotate(-90deg)",
+                                }}
+                              >
+                                <path d="m4 6 4 4 4-4" />
+                              </svg>
                             </button>
                             {row.source}
                           </th>

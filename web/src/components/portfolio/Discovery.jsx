@@ -1,12 +1,18 @@
-function RankingList({
+// The directory suffix is useful in source data but adds noise to rankings.
+function accountDisplayName(name) {
+  return name?.replace(/\s*\(CRRAH\)$/, "") || "";
+}
+
+function RankingTable({
   id,
   title,
   rows,
   identifierKey,
   onSelect,
   onClear,
-  filtered,
+  selected,
   mwhNumber,
+  loading,
   pointTotals = false,
 }) {
   const explanation =
@@ -32,37 +38,65 @@ function RankingList({
         </span>
         <button
           type="button"
-          className="ranking-clear"
-          disabled={!filtered}
+          className="ranking-clear control-icon"
+          disabled={loading || !selected}
           aria-label={`Clear ${title} filter`}
+          title={`Clear ${title} filter`}
           onClick={onClear}
         >
-          Clear
+          <span aria-hidden="true">←</span>
         </button>
       </div>
       {rows.length === 0 ? (
         <p>No holdings match these filters.</p>
       ) : (
-        <ol>
-          {rows.map((row, index) => (
-            <li key={row[identifierKey]}>
-              <button
-                type="button"
-                className="ranking-row"
-                onClick={() => onSelect(row[identifierKey])}
-              >
-                <span className="ranking-rank">{index + 1}</span>
-                <span className="ranking-identity">
-                  <strong>{row[identifierKey]}</strong>
-                  {row.legalName && <span>{row.legalName}</span>}
-                </span>
-                <span className="ranking-mwh">
-                  {mwhNumber.format(row.totalMwh)} MWh
-                </span>
-              </button>
-            </li>
-          ))}
-        </ol>
+        <div className="ranking-scroll">
+          <table className="ranking-table" aria-busy={loading}>
+            <thead>
+              <tr>
+                <th scope="col">{pointTotals ? "Settlement Point" : "Code"}</th>
+                {!pointTotals && <th scope="col">Account Holder</th>}
+                <th scope="col">Total MWh</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr
+                  key={row[identifierKey]}
+                  onClick={() => {
+                    if (!loading) onSelect(row[identifierKey]);
+                  }}
+                  className={
+                    selected === row[identifierKey]
+                      ? "ranking-selected"
+                      : undefined
+                  }
+                >
+                  <td>
+                    <button
+                      type="button"
+                      className="ranking-identity"
+                      disabled={loading}
+                      aria-pressed={selected === row[identifierKey]}
+                    >
+                      {row[identifierKey]}
+                    </button>
+                  </td>
+                  {!pointTotals && (
+                    <td className="ranking-account-name">
+                      <span title={accountDisplayName(row.legalName)}>
+                        {accountDisplayName(row.legalName)}
+                      </span>
+                    </td>
+                  )}
+                  <td className="ranking-mwh">
+                    {mwhNumber.format(row.totalMwh)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
@@ -76,8 +110,9 @@ export default function Discovery({
   onHolderSelect,
   onPointSelect,
   onHolderClear,
+  loading,
 }) {
-  // Both lists belong to the same currently selected portfolio.
+  // Both rankings belong to the same currently selected portfolio.
   return (
     <section aria-labelledby="discover-heading">
       <details open>
@@ -85,25 +120,27 @@ export default function Discovery({
           <h2 id="discover-heading">Discover</h2>
         </summary>
         <div className="discovery-lists">
-          <RankingList
+          <RankingTable
             mwhNumber={mwhNumber}
+            loading={loading}
             id="top-accounts"
             title="Top Accounts"
             rows={summary.topAccountHolders}
             identifierKey="accountHolder"
             onSelect={onHolderSelect}
             onClear={onHolderClear}
-            filtered={!!accountHolder}
+            selected={accountHolder}
           />
-          <RankingList
+          <RankingTable
             mwhNumber={mwhNumber}
+            loading={loading}
             id="top-points"
             title="Top Settlement Points"
             rows={summary.topSettlementPoints}
             identifierKey="settlementPoint"
             onSelect={onPointSelect}
             onClear={() => onPointSelect("")}
-            filtered={!!settlementPoint}
+            selected={settlementPoint}
             pointTotals
           />
         </div>

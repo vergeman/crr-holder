@@ -39,7 +39,9 @@ export default function SinkHoldings({
             <span>No sinks match these filters.</span>
           )}
         </th>
-        <td colSpan={2 + deliveryMonths.length * 2} />
+        <td />
+        <td />
+        <td colSpan={deliveryMonths.length * 2} />
       </tr>
     );
   }
@@ -73,6 +75,7 @@ export default function SinkHoldings({
                     : undefined
                 }
                 aria-label={`${source} to ${row.sink}, ${month.deliveryMonth}, ${type} contract details`}
+                // Pass the clicked button so closing the modal can restore focus.
                 onClick={(event) =>
                   onCellSelect(
                     {

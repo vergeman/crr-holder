@@ -1,22 +1,24 @@
-export default function MapPointDetails({
-  points,
-  detail,
-  hasLocatedPoints,
-  mwhNumber,
-}) {
+export default function MapPointDetails({ detail, position, mwhNumber }) {
   return (
-    <>
-      {points.length === 0 && <p>No holdings match these filters.</p>}
-      {points.length > 0 && !hasLocatedPoints && (
-        <p>No settlement points have both coordinates for this portfolio.</p>
-      )}
-      {detail && (
-        <p className="map-point-details" aria-live="polite">
-          {detail.settlementPoint}
-          {" · "}Source {mwhNumber.format(detail.sourceMwh)} MWh
-          {" · "}Sink {mwhNumber.format(detail.sinkMwh)} MWh
-        </p>
-      )}
-    </>
+    <div className="map-point-details" style={position} aria-live="polite">
+      <table aria-label="Settlement point holdings">
+        <tbody>
+          <tr>
+            <th scope="row">SP name</th>
+            <td>
+              <strong>{detail.settlementPoint}</strong>
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">Source MWh</th>
+            <td>{mwhNumber.format(detail.sourceMwh)}</td>
+          </tr>
+          <tr>
+            <th scope="row">Sink MWh</th>
+            <td>{mwhNumber.format(detail.sinkMwh)}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   );
 }
