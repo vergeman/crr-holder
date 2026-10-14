@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useMetadata, useSummary } from './data/hooks';
 import HoldingsPanel, { boundPanelHeight } from './components/holdings/HoldingsPanel';
 import ContractDrawer from './ContractDrawer';
+import Map from './Map';
 import './style.css';
 
 const queryClient = new QueryClient();
@@ -16,7 +17,7 @@ const mwhNumber = new Intl.NumberFormat('en-US', {
 });
 
 function CRRExplorer() {
-  // keep independent holder choices available as points refresh.
+  // Keep independent holder choices available as points refresh.
   const [reportId, setReportId] = useState(null);
   const [accountHolder, setAccountHolder] = useState('');
   const [settlementPoint, setSettlementPoint] = useState('');
@@ -28,6 +29,7 @@ function CRRExplorer() {
   const reportMetadata = useMetadata(reportId);
   const metadata = useMetadata(reportId, accountHolder);
   const summary = useSummary(reportId, accountHolder, settlementPoint);
+  const isoSummary = useSummary(reportId, '', '');
 
   useEffect(() => {
     if (reportId === null && reportMetadata.data) {
@@ -36,7 +38,7 @@ function CRRExplorer() {
   }, [reportId, reportMetadata.data]);
 
   useEffect(() => {
-    // retain the chosen size while reapplying viewport bounds.
+    // Retain the chosen size while reapplying viewport bounds.
     function resizeViewport() {
       setViewportHeight(window.innerHeight);
       setPanelHeight((height) => boundPanelHeight(height));
@@ -54,7 +56,7 @@ function CRRExplorer() {
 
   function changeHolder(value) {
     setSelection(null);
-    // reset the old point before both requests start.
+    // Reset the old point before both requests start.
     setAccountHolder(value);
     setSettlementPoint('');
   }
@@ -111,7 +113,7 @@ function CRRExplorer() {
         </label>
       </header>
       {reportMetadata.isError && <p role="alert">Unable to load report filters.</p>}
-      <div className="workspace">
+      <div className="workspace" style={{ '--holdings-space': panelVisible ? `${panelHeight + 200}px` : '140px' }}>
         <aside>
           <PortfolioFilters reportMetadata={reportMetadata} metadata={metadata}
             accountHolder={accountHolder} settlementPoint={settlementPoint}
@@ -125,23 +127,21 @@ function CRRExplorer() {
                   onPointSelect={changePoint} onHolderClear={clearHolder} />
               </>}
         </aside>
-        <section className="map-placeholder" aria-labelledby="map-heading">
-          <h2 id="map-heading">Geographic Footprint</h2>
-          <p>Map coming in Sprint 4.</p>
-        </section>
+        <Map key={reportId} summary={summary} isoSummary={isoSummary}
+          selectedPoint={settlementPoint} onPointSelect={changePoint} mwhNumber={mwhNumber} />
+        <HoldingsPanel reportId={reportId} accountHolder={accountHolder}
+          settlementPoint={settlementPoint} mwhNumber={mwhNumber}
+          panelVisible={panelVisible} panelHeight={panelHeight}
+          viewportHeight={viewportHeight} setPanelHeight={setPanelHeight}
+          onToggle={togglePanel} onCellSelect={selectCell}
+          onSourceCollapse={(source) => {
+            if (selection?.source === source) setSelection(null);
+          }} />
+        {selection && <ContractDrawer
+          key={`${selection.source}/${selection.sink}/${selection.deliveryMonth}/${selection.hedgeType}`}
+          reportId={reportId} accountHolder={accountHolder} settlementPoint={settlementPoint}
+          selection={selection} mwhNumber={mwhNumber} onClose={closeDetails} />}
       </div>
-      <HoldingsPanel reportId={reportId} accountHolder={accountHolder}
-        settlementPoint={settlementPoint} mwhNumber={mwhNumber}
-        panelVisible={panelVisible} panelHeight={panelHeight}
-        viewportHeight={viewportHeight} setPanelHeight={setPanelHeight}
-        onToggle={togglePanel} onCellSelect={selectCell}
-        onSourceCollapse={(source) => {
-          if (selection?.source === source) setSelection(null);
-        }} />
-      {selection && <ContractDrawer
-        key={`${selection.source}/${selection.sink}/${selection.deliveryMonth}/${selection.hedgeType}`}
-        reportId={reportId} accountHolder={accountHolder} settlementPoint={settlementPoint}
-        selection={selection} mwhNumber={mwhNumber} onClose={closeDetails} />}
     </main>
   );
 }

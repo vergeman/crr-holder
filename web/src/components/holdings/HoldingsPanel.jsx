@@ -36,7 +36,7 @@ export default function HoldingsPanel({ reportId, accountHolder, settlementPoint
         <button type="button" onClick={onToggle} aria-expanded={panelVisible}
           aria-controls="holdings-content">{panelVisible ? 'Hide' : 'Show'} holdings</button>
       </div>
-      <div hidden={!panelVisible}>
+      <div className="holdings-panel-body" hidden={!panelVisible}>
         <div className="holdings-resize" role="separator" tabIndex={0}
           aria-label="Resize holdings panel" aria-orientation="horizontal"
           aria-valuemin={200} aria-valuemax={Math.round(viewportHeight * 0.8)}

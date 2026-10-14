@@ -1,18 +1,30 @@
-/* Preparation: a small responsive workspace around native controls. */
+/* The header sits above a viewport-sized map workspace. */
 :root {
   font-family: system-ui, sans-serif;
   color: #20303c;
   background: #f3f5f7;
 }
 body { margin: 0; }
-main { max-width: 1400px; margin: auto; padding: 24px; }
-header { display: flex; justify-content: space-between; align-items: center; gap: 24px; }
+main { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+main > header { display: flex; justify-content: space-between; align-items: center; gap: 24px;
+  padding: 12px 24px; background: white; border-bottom: 1px solid #dce2e7; flex-shrink: 0; }
+main > header h1, main > header p { margin: 4px 0; }
+main > header label { margin: 0; }
 h1 { font-size: 1.5rem; }
 h2 { font-size: 1.1rem; }
 p { color: #52616b; }
-.workspace { display: grid; grid-template-columns: minmax(300px, 2fr) 3fr; gap: 20px; }
+.workspace { position: relative; flex: 1; min-height: 0; overflow: hidden; }
+.workspace > aside { position: absolute; top: 16px; left: 16px; z-index: 3;
+  width: 380px; max-width: calc(100% - 92px); max-height: max(120px, calc(100% - var(--holdings-space)));
+  overflow-y: auto; scrollbar-width: thin; pointer-events: none; }
+.workspace > aside > * { pointer-events: auto; }
+.workspace > aside section { box-shadow: 0 3px 16px #20303c24; }
+.workspace > aside > p { background: white; padding: 16px; }
+.workspace > aside details > summary { cursor: pointer; }
+.workspace > aside details > summary h2 { display: inline; font-size: 1rem; }
+.workspace > aside details[open] > summary { margin-bottom: 16px; }
 section { background: white; padding: 20px; border: 1px solid #dce2e7; border-radius: 6px; }
-aside section + section { margin-top: 20px; }
+aside section + section { margin-top: 12px; }
 label { display: block; margin-bottom: 16px; font-weight: 600; }
 select { display: block; width: 100%; margin-top: 6px; padding: 8px; font: inherit; }
 header select { min-width: 170px; }
@@ -26,9 +38,27 @@ dd { margin: 0; font-weight: 600; }
 .bar > div { height: 100%; }
 .opt { background: #256e9e; }
 .obl { background: #ac6e26; }
-.map-placeholder { min-height: 400px; background: #edf1f4; }
+/* The MapLibre basemap fills the stage below all floating panels. */
+.geographic-footprint { position: absolute; inset: 0; padding: 0; border: 0; border-radius: 0; }
+.map-canvas { position: absolute; inset: 0; background: #e8eef1; }
+.map-information { position: absolute; top: 12px; right: 58px; width: 310px; max-width: calc(100% - 80px);
+  max-height: min(50%, 330px); overflow-y: auto; padding: 10px 12px;
+  background: #ffffffed; border: 1px solid #dce2e7; border-radius: 6px; box-shadow: 0 3px 16px #20303c18; }
+.map-controls { display: flex; gap: 8px; flex-wrap: wrap; }
+.map-controls button { padding: 5px 8px; font-size: .85rem; }
+.marker-button { padding: 0; border: 1px solid white; border-radius: 50%; opacity: .8;
+  box-sizing: content-box; cursor: pointer; }
+.marker-button:hover, .marker-button:focus-visible, .marker-button[aria-pressed="true"] {
+  outline: 3px solid #15232f; outline-offset: 2px; opacity: 1; z-index: 1;
+}
+.map-point-details, .map-legend-coverage, .map-legend { font-size: .8rem; overflow-wrap: anywhere; }
+.map-legend { margin-top: 8px; }
+.map-legend summary { cursor: pointer; }
+.map-legend-scale { margin-top: 12px; height: 8px;
+  background: linear-gradient(to right, hsl(210 60% 45%), hsl(120 60% 45%), hsl(30 60% 45%)); }
+.map-legend-labels { display: flex; justify-content: space-between; gap: 8px; margin-top: 6px; }
 
-/* Output: paired discovery lists fit the sidebar and stack on narrow screens. */
+/* Paired discovery lists fit the sidebar and stack on narrow screens. */
 .discovery-lists { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .ranking-heading { display: flex; align-items: center; gap: 6px; position: relative; }
 .ranking-heading h3 { font-size: .95rem; cursor: help; }
@@ -55,12 +85,22 @@ dd { margin: 0; font-weight: 600; }
 .ranking-mwh { grid-column: 2; }
 
 @media (max-width: 760px) {
-  header { align-items: flex-start; flex-direction: column; }
-  .workspace { grid-template-columns: 1fr; }
+  main > header { align-items: center; gap: 10px; padding: 10px 12px; }
+  main > header h1 { font-size: 1rem; }
+  main > header p { font-size: .75rem; }
+  main > header select { min-width: 0; width: 130px; font-size: .8rem; }
+  main > header label { font-size: .75rem; }
+  .workspace > aside { top: 64px; left: 8px; width: 290px;
+    max-height: min(40%, max(100px, calc(100% - var(--holdings-space) - 48px))); }
+  .workspace > aside section { padding: 12px; }
+  .map-information { top: 8px; left: 8px; right: 54px; width: auto; max-width: none; max-height: 40%; }
+  .map-legend[open] { max-height: 140px; overflow-y: auto; }
+  .map-controls { display: inline-flex; margin-right: 10px; }
+  .map-legend { display: inline-block; }
   .discovery-lists { grid-template-columns: 1fr; }
 }
 
-/* Output: complete months scroll while source identifiers remain visible. */
+/* Complete months scroll while source identifiers remain visible. */
 .source-holdings { min-width: 0; }
 .holdings-range { display: flex; gap: 16px; align-items: center; margin-bottom: 12px; }
 .holdings-scroll { overflow-x: auto; position: relative; margin-bottom: 12px; }
@@ -76,16 +116,16 @@ dd { margin: 0; font-weight: 600; }
   min-width: 160px;
 }
 
-/* Output: expanded sinks and request states remain beside their source. */
+/* Expanded sinks and request states remain beside their source. */
 .source-expand { padding: 2px 6px; margin-right: 6px; }
 .holdings-scroll .sink-row th, .holdings-scroll .sink-state th { padding-left: 32px; }
 .holdings-scroll .sink-state th { white-space: normal; font-weight: normal; }
 
-/* Output: cell controls and a nonmodal drawer keep portfolio navigation available. */
+/* Cell controls and a nonmodal drawer keep portfolio navigation available. */
 .contract-cell { border: 0; background: transparent; color: #256e9e; padding: 2px 4px; }
 .contract-cell:hover { text-decoration: underline; }
 .contract-drawer {
-  position: fixed; top: 0; right: 0; bottom: 0; z-index: 5;
+  position: absolute; top: 8px; right: 8px; bottom: 36px; z-index: 5;
   box-sizing: border-box; width: min(540px, 100vw); padding: 20px;
   overflow-y: auto; background: white; border-left: 1px solid #dce2e7;
   box-shadow: -4px 0 16px #20303c20;
@@ -112,12 +152,23 @@ dd { margin: 0; font-weight: 600; }
 .contract-contribution { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: 12px; }
 .contract-contribution strong { text-align: right; font-variant-numeric: tabular-nums; }
 
-/* Output: hide content without unmounting the matrix; resize its scrollable area. */
-.holdings-panel { margin-top: 20px; min-width: 0; }
+/* Hide content without unmounting the matrix; resize its scrollable area. */
+.holdings-panel { position: absolute; bottom: 36px; left: 16px; right: 16px; z-index: 4;
+  min-width: 0; padding: 12px 16px; max-height: calc(100% - 90px);
+  display: flex; flex-direction: column; box-sizing: border-box; box-shadow: 0 -3px 20px #20303c24; }
+.holdings-panel-body:not([hidden]) { display: flex; flex-direction: column; min-height: 0; }
+.holdings-panel-header, .holdings-resize { flex-shrink: 0; }
 .holdings-panel-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.holdings-content { overflow-y: auto; }
+.holdings-content { overflow-y: auto; min-height: 0; }
 .holdings-resize {
   margin: 12px 0; padding: 6px; text-align: center; color: #52616b;
   background: #edf1f4; cursor: ns-resize; touch-action: none; user-select: none;
 }
 .holdings-resize:focus-visible { outline: 2px solid #256e9e; }
+
+@media (max-width: 760px) {
+  .holdings-panel { left: 8px; right: 8px; padding: 8px 12px; }
+  .holdings-panel-header h2 { font-size: .9rem; }
+  .holdings-panel-header button { font-size: .8rem; }
+  .contract-drawer { right: 0; width: 100%; }
+}

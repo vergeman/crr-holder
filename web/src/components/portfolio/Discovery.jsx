@@ -4,7 +4,7 @@ function RankingList({ id, title, rows, identifierKey, onSelect, onClear,
     (pointTotals ? ' Each holding counts toward its source and sink; identical endpoints ' +
       'count once. Do not add settlement-point totals to calculate portfolio MWh.' : '');
 
-  // native buttons share the dropdown handlers and expose tooltip descriptions.
+  // Native buttons share the dropdown handlers and expose tooltip descriptions.
   return (
     <div className="ranking-list" aria-labelledby={`${id}-heading`}>
       <div className="ranking-heading">
@@ -39,19 +39,20 @@ function RankingList({ id, title, rows, identifierKey, onSelect, onClear,
 
 export default function Discovery({ summary, mwhNumber, accountHolder, settlementPoint,
                      onHolderSelect, onPointSelect, onHolderClear }) {
-  // both lists belong to the same currently selected portfolio.
+  // Both lists belong to the same currently selected portfolio.
   return (
     <section aria-labelledby="discover-heading">
-      <h2 id="discover-heading">Discover</h2>
-      <div className="discovery-lists">
-        <RankingList mwhNumber={mwhNumber} id="top-accounts" title="Top Accounts"
-          rows={summary.topAccountHolders} identifierKey="accountHolder"
-          onSelect={onHolderSelect} onClear={onHolderClear} filtered={!!accountHolder} />
-        <RankingList mwhNumber={mwhNumber} id="top-points" title="Top Settlement Points"
-          rows={summary.topSettlementPoints} identifierKey="settlementPoint"
-          onSelect={onPointSelect} onClear={() => onPointSelect('')}
-          filtered={!!settlementPoint} pointTotals />
-      </div>
+      <details open><summary><h2 id="discover-heading">Discover</h2></summary>
+        <div className="discovery-lists">
+          <RankingList mwhNumber={mwhNumber} id="top-accounts" title="Top Accounts"
+            rows={summary.topAccountHolders} identifierKey="accountHolder"
+            onSelect={onHolderSelect} onClear={onHolderClear} filtered={!!accountHolder} />
+          <RankingList mwhNumber={mwhNumber} id="top-points" title="Top Settlement Points"
+            rows={summary.topSettlementPoints} identifierKey="settlementPoint"
+            onSelect={onPointSelect} onClear={() => onPointSelect('')}
+            filtered={!!settlementPoint} pointTotals />
+        </div>
+      </details>
     </section>
   );
 }
