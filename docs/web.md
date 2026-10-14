@@ -232,14 +232,13 @@ App
         │                                   Collapsible / Resizable
         │
         ├── HoldingsMatrix
-        │   ├── SourceRow                   /api/holdings
+        │   ├── SourceRow                   /api/holdings/sources
+        │   ├── Pagination                  offset / nextOffset
         │   └── SinkRow                     /api/holdings/sources/{source}/sinks
         │
         └── ContractDrawer                  /api/holdings/contracts
-            ├── AccountHolderGroup
-            │   └── TimeOfUseGroup
-            │       └── ContractRow
-            │
-            └── Pagination
+            └── AccountHolderGroup
+                └── TimeOfUseGroup
+                    └── ContractRow
 
 ```

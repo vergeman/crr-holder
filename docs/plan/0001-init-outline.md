@@ -73,11 +73,14 @@ Output: users can discover holders and settlement points through rankings.
 
 ### 3.3 - Source Holdings Matrix
 
+Detailed plan: [0006 - Source Holdings Matrix](0006-source-holdings-matrix.md).
+
 * Implement `/api/holdings/sources` and the source-by-delivery-month matrix.
 * Display separate OPT and OBL columns with horizontal month scrolling.
 * Initially show a fixed number of complete source rows; provide "show more
   sources." Define the initial count in the detailed implementation plan.
-* Page sources only; each returned source includes all its delivery-month cells.
+* Page sources only using `limit` and `offset`, returning `nextOffset`; each
+  returned source includes all its delivery-month cells.
 * Sort sources by total contractual MWh across delivery months and both hedge
   types, descending; use the source identifier to break ties.
 * Verify source pagination without duplicates or omissions and reconcile all
@@ -129,6 +132,15 @@ Output: a usable explorer backed by the API. See [API design](../api.md) and
 only source lists require pagination initially.
 
 ## Sprint 4 - Add the Map
+
+### 4.1 - Offset Pagination Benchmark
+
+* TODO: once the explorer flow is wired, measure first-page and later-page
+  source endpoint latency under market, holder, point, and combined filters.
+* Assess aggregation cost and increasing offsets before deciding whether
+  keyset (cursor) pagination would improve performance.
+
+### Map Integration
 
 * Show source and sink footprints using settlement-point coordinates.
 * Connect map selections to the shared filters and holdings views.
