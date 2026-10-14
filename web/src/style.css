@@ -113,6 +113,9 @@ dd { margin: 0; font-weight: 600; }
 .map-point-details { position: absolute; z-index: 5; pointer-events: none;
   box-sizing: border-box; width: 260px; max-width: calc(100% - 16px); margin: 0; padding: 8px 10px;
   font-size: 12px; background: #ffffffed; border: 1px solid #bdc9d2; border-radius: 4px; }
+.map-point-details table { width: 100%; border-collapse: collapse; }
+.map-point-details th { text-align: left; color: #52616b; font-weight: 400; white-space: nowrap; padding-right: 8px; }
+.map-point-details td { text-align: right; overflow-wrap: anywhere; }
 .map-legend { align-self: flex-end; flex-shrink: 0; width: 180px; margin-right: 16px; }
 .map-legend-scale { height: 8px; border-radius: 4px;
   background: linear-gradient(to right, #256e9e, #2d4155, #b83d41); }
