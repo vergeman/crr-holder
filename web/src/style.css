@@ -207,6 +207,20 @@ dd { margin: 0; font-weight: 600; }
 .holdings-scroll thead tr:first-child th:nth-child(2),
 .holdings-scroll thead tr:nth-child(2) th:nth-child(-n+2) { z-index: 3; }
 .holdings-scroll thead tr:nth-child(2) th:nth-child(-n+2) { min-width: 104px; }
+/* Distinguish the frozen totals from individual delivery months. */
+.holdings-scroll thead tr:first-child th:nth-child(2),
+.holdings-scroll thead tr:nth-child(2) th:nth-child(-n+2) {
+  background: #e3edf5; color: #244c68;
+}
+.holdings-scroll tbody td:nth-child(2),
+.holdings-scroll tbody td:nth-child(3) {
+  background: #f0f6fa; color: #244c68;
+}
+.holdings-scroll thead tr:first-child th:nth-child(2),
+.holdings-scroll thead tr:nth-child(2) th:nth-child(2),
+.holdings-scroll tbody td:nth-child(3) { border-right: 2px solid #a6bdce; }
+.holdings-scroll .source-row:hover td:nth-child(2),
+.holdings-scroll .source-row:hover td:nth-child(3) { background: #e3edf5; }
 .holdings-scroll .sink-state td:nth-child(4) { position: static; }
 @media (max-width: 760px) {
   .holdings-scroll th[rowspan], .holdings-scroll tbody th {
