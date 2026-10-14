@@ -7,7 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useMetadata, useSummary } from './data/hooks';
 import HoldingsPanel, { boundPanelHeight } from './components/holdings/HoldingsPanel';
 import ContractDrawer from './ContractDrawer';
-import Map from './Map';
+import Map from './components/map';
 import './style.css';
 
 const queryClient = new QueryClient();
