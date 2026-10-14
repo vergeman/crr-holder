@@ -1,4 +1,3 @@
-# Imports
 import sqlite3
 
 from filters import holdings_filter
@@ -16,14 +15,14 @@ def resolve_report(db: sqlite3.Connection, report_id: int | None) -> int:
 
 
 def get_metadata(db: sqlite3.Connection, report_id=None, account_holder=None) -> dict:
-    # Preparation: resolve one publication snapshot.
+    # Resolve one publication snapshot.
     report_id = resolve_report(db, report_id)
     reports = db.execute(
         "SELECT report_id, publication_date FROM reports "
         "ORDER BY publication_date DESC, report_id DESC"
     ).fetchall()
 
-    # Transformation: holder choices stay independent of portfolio filters.
+    # Holder choices stay independent of portfolio filters.
     holders = db.execute(
         """
         SELECT DISTINCT h.account_holder, a.legal_name
@@ -55,7 +54,6 @@ def get_metadata(db: sqlite3.Connection, report_id=None, account_holder=None) ->
         {"report_id": report_id, "account_holder": account_holder or None},
     ).fetchall()
 
-    # Output
     return {
         "reportId": report_id,
         "reports": [{"reportId": row[0], "publicationDate": row[1]} for row in reports],
@@ -68,12 +66,12 @@ def get_metadata(db: sqlite3.Connection, report_id=None, account_holder=None) ->
 
 def get_summary(db: sqlite3.Connection, report_id=None, account_holder=None,
                 settlement_point=None) -> dict:
-    # Preparation
     report_id = resolve_report(db, report_id)
 
     where, parameters = holdings_filter(report_id, account_holder, settlement_point)
 
-    # Transformation: direct predicates allow use of existing filter indexes.
+    # Filter holdings for the Portfolio Summary panel's totals,
+    # holder/point/source-sink counts, and OPT/OBL mix.
     row = db.execute(
         f"""
         WITH holdings AS (
@@ -85,12 +83,12 @@ def get_summary(db: sqlite3.Connection, report_id=None, account_holder=None,
             -- Unique endpoints across months and instruments.
             SELECT source AS point FROM holdings
             UNION SELECT sink FROM holdings
-        ), paths AS (
-            -- Ordered pairs preserve reversed paths as distinct inventory.
+        ), source_sink AS (
+            -- Count A-to-B and B-to-A as distinct ordered source-sink pairs.
             SELECT DISTINCT source, sink FROM holdings
         )
         SELECT COALESCE(SUM(mwh), 0), COUNT(DISTINCT account_holder),
-               (SELECT COUNT(*) FROM points), (SELECT COUNT(*) FROM paths),
+               (SELECT COUNT(*) FROM points), (SELECT COUNT(*) FROM source_sink),
                COALESCE(SUM(CASE WHEN hedge_type = 'OPT' THEN mwh ELSE 0 END), 0),
                COALESCE(SUM(CASE WHEN hedge_type = 'OBL' THEN mwh ELSE 0 END), 0)
         FROM holdings
@@ -98,7 +96,6 @@ def get_summary(db: sqlite3.Connection, report_id=None, account_holder=None,
         parameters,
     ).fetchone()
 
-    # Output
     return {
         "reportId": report_id,
         "totalMwh": row[0],
