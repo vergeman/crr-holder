@@ -1,7 +1,9 @@
-import { PortfolioPanel, ReportSelector } from "./components/portfolio";
-import PortfolioSummary from "./components/portfolio/PortfolioSummary";
+import {
+  PortfolioOverview,
+  PortfolioPanel,
+  ReportSelector,
+} from "./components/portfolio";
 import PortfolioFilters from "./components/portfolio/PortfolioFilters";
-import Discovery from "./components/portfolio/Discovery";
 import { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -122,39 +124,16 @@ function CRRExplorer() {
       )}
       <div className="workspace">
         <PortfolioPanel>
-          {!summary.data && !summary.isError && (
-            <p role="status">Loading portfolio...</p>
-          )}
-          <div
-            className="portfolio-overview"
-            hidden={!summary.data && !summary.isError}
-            aria-busy={portfolioLoading}
-          >
-            <div className="portfolio-scroll">
-              {summary.isError ? (
-                <p role="alert">Unable to load portfolio summary.</p>
-              ) : !summary.data ? (
-                <p role="status">Loading portfolio summary...</p>
-              ) : (
-                <PortfolioSummary
-                  summary={summary.data}
-                  mwhNumber={mwhNumber}
-                />
-              )}
-              {summary.data && (
-                <Discovery
-                  summary={summary.data}
-                  mwhNumber={mwhNumber}
-                  accountHolder={accountHolder}
-                  settlementPoint={settlementPoint}
-                  onHolderSelect={changeAccountHolder}
-                  onPointSelect={changeSettlementPoint}
-                  onHolderClear={clearAccountHolder}
-                  loading={portfolioLoading}
-                />
-              )}
-            </div>
-          </div>
+          <PortfolioOverview
+            summary={summary}
+            mwhNumber={mwhNumber}
+            accountHolder={accountHolder}
+            settlementPoint={settlementPoint}
+            onHolderSelect={changeAccountHolder}
+            onPointSelect={changeSettlementPoint}
+            onHolderClear={clearAccountHolder}
+            loading={portfolioLoading}
+          />
         </PortfolioPanel>
         <div className="map-holdings-workspace">
           <Map

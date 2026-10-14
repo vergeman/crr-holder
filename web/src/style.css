@@ -29,6 +29,8 @@ p { color: #52616b; }
 .workspace > aside > * { pointer-events: auto; }
 .workspace > aside section { box-shadow: 0 3px 16px #20303c24; }
 .workspace > aside > p { background: white; padding: 16px; }
+.workspace > aside { background: white; }
+.workspace > aside > .portfolio-loading { box-sizing: border-box; width: 100%; flex: 1; margin: 0; }
 .workspace > aside details > summary { cursor: pointer; }
 .workspace > aside details > summary h2 { display: inline; font-size: 1rem; }
 .workspace > aside details[open] > summary { margin-bottom: 16px; }
