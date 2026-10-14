@@ -16,10 +16,16 @@ main > header label { margin: 0; }
 h1 { font-size: 20px; }
 h2 { font-size: 15px; }
 p { color: #52616b; }
-.workspace { position: relative; flex: 1; min-height: 0; overflow: hidden; }
-.workspace > aside { position: absolute; top: 16px; left: 16px; z-index: 3;
-  width: 840px; max-width: calc(100% - 92px); max-height: max(120px, calc(100% - var(--holdings-space)));
-  display: flex; overflow: hidden; pointer-events: none; }
+.workspace { position: relative; flex: 1; min-height: 0; overflow: hidden; display: flex; }
+.workspace > aside { position: relative; flex: 0 0 min(var(--portfolio-width), calc(100% - 500px));
+  min-width: 320px; display: flex; overflow: hidden; }
+.portfolio-resize { width: 8px; flex-shrink: 0; cursor: ew-resize; touch-action: none; background: #dce2e7; }
+.portfolio-resize:hover, .portfolio-resize:focus-visible { background: #8b9fac; }
+.map-holdings-workspace { position: relative; flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.map-holdings-workspace > .geographic-footprint { position: relative; flex: 1; min-height: 160px; }
+.map-holdings-workspace > .holdings-panel { position: relative; bottom: auto; left: auto; right: auto;
+  flex-shrink: 0; max-height: 60%; border-radius: 0; }
+.workspace .discovery-lists { grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr); }
 .workspace > aside > * { pointer-events: auto; }
 .workspace > aside section { box-shadow: 0 3px 16px #20303c24; }
 .workspace > aside > p { background: white; padding: 16px; }
@@ -143,6 +149,8 @@ dd { margin: 0; font-weight: 600; }
 .ranking-identity:disabled { background: transparent; color: inherit; }
 .ranking-table tbody tr:focus-within { background: #f3f7fa; }
 .ranking-table td { padding: 8px 4px; border-bottom: 1px solid #edf1f4; vertical-align: middle; }
+.ranking-account-name { width: 100%; max-width: 0; }
+.ranking-account-name span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ranking-table th:last-child, .ranking-mwh { text-align: right; white-space: nowrap; }
 .ranking-table tbody tr:hover { background: #f3f7fa; }
 .ranking-table .ranking-selected { background: #e8f2f8; }
@@ -158,10 +166,14 @@ dd { margin: 0; font-weight: 600; }
   main > header h1 { font-size: 1rem; }
   main > header select { min-width: 0; width: 130px; font-size: .8rem; }
   main > header label { font-size: .75rem; }
-  .workspace > aside { top: 64px; left: 8px; width: 290px;
-    max-height: min(40%, max(100px, calc(100% - var(--holdings-space) - 48px))); }
+  .workspace { flex-direction: column; }
+  .workspace > aside { flex: 0 0 32%; min-width: 0; width: 100%; }
+  .portfolio-resize { display: none; }
+  .map-holdings-workspace > .geographic-footprint { min-height: 100px; }
+  .map-holdings-workspace > .holdings-panel { max-height: 60%; }
   .workspace > aside section { padding: 12px; }
   .discovery-lists { grid-template-columns: 1fr; }
+  .workspace .discovery-lists { grid-template-columns: 1fr; }
   .portfolio-summary-columns { gap: 12px; }
   .portfolio-filter-controls label { flex: 1 1 140px; }
   .portfolio-filter-controls select { width: 100%; }

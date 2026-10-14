@@ -17,18 +17,18 @@ const basemap = "https://tiles.openfreemap.org/styles/positron";
 const texasLatLng = { lat: 31, lng: -99 };
 
 // Adjust the map's center and zoom so all report points with coordinates fit
-// in the window, leaving padding for the floating panels.
+// in the map pane, leaving room for its controls.
 function fitReport(map, points) {
   const mapped = points.filter(located);
   if (!mapped.length) return;
   const bounds = new maplibregl.LngLatBounds();
   mapped.forEach((point) => bounds.extend([point.longitude, point.latitude]));
-  // Leave room for floating panels without moving filters into map state.
+  // The portfolio and holdings panes sit outside the map canvas.
   const narrow = map.getContainer().clientWidth <= 760;
   map.fitBounds(bounds, {
     padding: narrow
-      ? { top: 100, right: 35, bottom: 100, left: 35 }
-      : { top: 90, right: 100, bottom: 150, left: 420 },
+      ? { top: 35, right: 50, bottom: 35, left: 35 }
+      : { top: 50, right: 60, bottom: 50, left: 50 },
     maxZoom: 9,
     duration: 0,
   });
@@ -70,8 +70,13 @@ export default function Map({
     setMap(instance);
     mapFitted.current = false;
 
+    // Resize the canvas when the workspace dividers change its available space.
+    const observer = new ResizeObserver(() => instance.resize());
+    observer.observe(container.current);
+
     // Remove WebGL resources and listeners when changing reports.
     return () => {
+      observer.disconnect();
       instance.remove();
     };
   }, []);

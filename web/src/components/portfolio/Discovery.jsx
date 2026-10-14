@@ -82,7 +82,13 @@ function RankingTable({
                       {row[identifierKey]}
                     </button>
                   </td>
-                  {!pointTotals && <td>{accountDisplayName(row.legalName)}</td>}
+                  {!pointTotals && (
+                    <td className="ranking-account-name">
+                      <span title={accountDisplayName(row.legalName)}>
+                        {accountDisplayName(row.legalName)}
+                      </span>
+                    </td>
+                  )}
                   <td className="ranking-mwh">
                     {mwhNumber.format(row.totalMwh)}
                   </td>

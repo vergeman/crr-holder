@@ -26,6 +26,8 @@ function CRRExplorer() {
   const [settlementPoint, setSettlementPoint] = useState("");
   const [selection, setSelection] = useState(null);
   const cellButton = useRef(null);
+  const [portfolioWidth, setPortfolioWidth] = useState(680);
+  const portfolioResizeStart = useRef(null);
   const [crrHoldingsPanelVisible, setCRRHoldingsPanelVisible] = useState(false);
   const [crrHoldingsPanelHeight, setCRRHoldingsPanelHeight] = useState(() =>
     boundCRRHoldingsPanelHeight(window.innerHeight * 0.35)
@@ -150,9 +152,7 @@ function CRRExplorer() {
       <div
         className="workspace"
         style={{
-          "--holdings-space": crrHoldingsPanelVisible
-            ? `${crrHoldingsPanelHeight + 200}px`
-            : "140px",
+          "--portfolio-width": `${portfolioWidth}px`,
         }}
       >
         <aside>
@@ -190,35 +190,92 @@ function CRRExplorer() {
             </div>
           </div>
         </aside>
-        <Map
-          key={reportId}
-          summary={summary}
-          isoSummary={isoSummary}
-          selectedPoint={settlementPoint}
-          onPointSelect={changeSettlementPoint}
-          mwhNumber={mwhNumber}
-        />
-        <CRRHoldingsPanel
-          reportId={reportId}
-          accountHolder={accountHolder}
-          accountHolderName={
-            reportMetadata.data?.accountHolders.find(
-              (holder) => holder.accountHolder === accountHolder
-            )?.legalName
-          }
-          settlementPoint={settlementPoint}
-          mwhNumber={mwhNumber}
-          crrHoldingsPanelVisible={crrHoldingsPanelVisible}
-          crrHoldingsPanelHeight={crrHoldingsPanelHeight}
-          viewportHeight={viewportHeight}
-          setCRRHoldingsPanelHeight={setCRRHoldingsPanelHeight}
-          onToggle={toggleCRRHoldingsPanel}
-          selection={selection}
-          onCellSelect={selectCell}
-          onSourceCollapse={(source) => {
-            if (selection?.source === source) setSelection(null);
+        <div
+          className="portfolio-resize"
+          role="separator"
+          tabIndex={0}
+          aria-label="Resize portfolio pane"
+          aria-orientation="vertical"
+          aria-valuemin={320}
+          aria-valuemax={Math.max(320, window.innerWidth - 500)}
+          aria-valuenow={portfolioWidth}
+          onPointerDown={(event) => {
+            if (event.button !== 0) return;
+            portfolioResizeStart.current = {
+              x: event.clientX,
+              width: portfolioWidth,
+            };
+            event.currentTarget.setPointerCapture(event.pointerId);
+            event.preventDefault();
+          }}
+          onPointerMove={(event) => {
+            if (!portfolioResizeStart.current) return;
+            setPortfolioWidth(
+              Math.max(
+                320,
+                Math.min(
+                  window.innerWidth - 500,
+                  portfolioResizeStart.current.width +
+                    event.clientX -
+                    portfolioResizeStart.current.x
+                )
+              )
+            );
+          }}
+          onPointerUp={() => {
+            portfolioResizeStart.current = null;
+          }}
+          onPointerCancel={() => {
+            portfolioResizeStart.current = null;
+          }}
+          onLostPointerCapture={() => {
+            portfolioResizeStart.current = null;
+          }}
+          onKeyDown={(event) => {
+            if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+            event.preventDefault();
+            setPortfolioWidth((width) =>
+              Math.max(
+                320,
+                Math.min(
+                  window.innerWidth - 500,
+                  width + (event.key === "ArrowRight" ? 20 : -20)
+                )
+              )
+            );
           }}
         />
+        <div className="map-holdings-workspace">
+          <Map
+            key={reportId}
+            summary={summary}
+            isoSummary={isoSummary}
+            selectedPoint={settlementPoint}
+            onPointSelect={changeSettlementPoint}
+            mwhNumber={mwhNumber}
+          />
+          <CRRHoldingsPanel
+            reportId={reportId}
+            accountHolder={accountHolder}
+            accountHolderName={
+              reportMetadata.data?.accountHolders.find(
+                (holder) => holder.accountHolder === accountHolder
+              )?.legalName
+            }
+            settlementPoint={settlementPoint}
+            mwhNumber={mwhNumber}
+            crrHoldingsPanelVisible={crrHoldingsPanelVisible}
+            crrHoldingsPanelHeight={crrHoldingsPanelHeight}
+            viewportHeight={viewportHeight}
+            setCRRHoldingsPanelHeight={setCRRHoldingsPanelHeight}
+            onToggle={toggleCRRHoldingsPanel}
+            selection={selection}
+            onCellSelect={selectCell}
+            onSourceCollapse={(source) => {
+              if (selection?.source === source) setSelection(null);
+            }}
+          />
+        </div>
         {selection && (
           <ContractDetailsModal
             key={`${selection.source}/${selection.sink}/${selection.deliveryMonth}/${selection.hedgeType}`}
