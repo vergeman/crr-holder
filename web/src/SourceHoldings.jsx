@@ -8,7 +8,7 @@ const monthLabel = (month) => new Date(`${month}T00:00:00Z`).toLocaleDateString(
   'en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
 
 export default function SourceHoldings({ reportId, accountHolder, settlementPoint,
-  mwhNumber, onCellSelect, onSourceCollapse }) {
+  mwhNumber, onCellSelect, onSourceCollapse, visible }) {
   const query = useSourceHoldings(reportId, accountHolder, settlementPoint);
   const [expanded, setExpanded] = useState(new Set());
   const scroll = useRef(null);
@@ -35,16 +35,15 @@ export default function SourceHoldings({ reportId, accountHolder, settlementPoin
 
   // Transformation: position once per selection; appended pages retain scrolling.
   useEffect(() => {
-    if (page && !positioned.current) {
+    if (page && visible && !positioned.current) {
       jump();
       positioned.current = true;
     }
-  }, [page]);
+  }, [page, visible]);
 
   // Output: an additional-page error keeps the successful pages visible.
   return (
-    <section className="source-holdings" aria-labelledby="holdings-heading">
-      <h2 id="holdings-heading">CRR Holdings</h2>
+    <div className="source-holdings">
       <p>Contractual MWh</p>
       {!page ? query.isError ? <p role="alert">Unable to load holdings.</p> :
         <p role="status">Loading holdings...</p> : <>
@@ -95,6 +94,6 @@ export default function SourceHoldings({ reportId, accountHolder, settlementPoin
           {query.isFetchingNextPage ? 'Loading sources...' : 'Show more sources'}
         </button>}
       </>}
-    </section>
+    </div>
   );
 }

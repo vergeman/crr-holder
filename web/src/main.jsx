@@ -13,6 +13,7 @@ const queryClient = new QueryClient();
 const mwhNumber = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 0, roundingMode: 'ceil',
 });
+const boundPanelHeight = (height) => Math.max(200, Math.min(window.innerHeight * 0.8, height));
 
 function PortfolioSummary({ summary }) {
   const metrics = [
@@ -117,6 +118,10 @@ function CRRExplorer() {
   const [settlementPoint, setSettlementPoint] = useState('');
   const [selection, setSelection] = useState(null);
   const cellButton = useRef(null);
+  const [panelVisible, setPanelVisible] = useState(true);
+  const [panelHeight, setPanelHeight] = useState(() => boundPanelHeight(window.innerHeight * 0.35));
+  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
+  const resizeStart = useRef(null);
   const reportMetadata = useMetadata(reportId);
   const metadata = useMetadata(reportId, accountHolder);
   const summary = useSummary(reportId, accountHolder, settlementPoint);
@@ -126,6 +131,16 @@ function CRRExplorer() {
       setReportId(reportMetadata.data.reportId);
     }
   }, [reportId, reportMetadata.data]);
+
+  useEffect(() => {
+    // Transformation: retain the chosen size while reapplying viewport bounds.
+    function resizeViewport() {
+      setViewportHeight(window.innerHeight);
+      setPanelHeight((height) => boundPanelHeight(height));
+    }
+    window.addEventListener('resize', resizeViewport);
+    return () => window.removeEventListener('resize', resizeViewport);
+  }, []);
 
   function changeReport(value) {
     setSelection(null);
@@ -165,6 +180,32 @@ function CRRExplorer() {
   function closeDetails() {
     setSelection(null);
     if (cellButton.current?.isConnected) cellButton.current.focus({ preventScroll: true });
+  }
+
+  function togglePanel() {
+    if (panelVisible) setSelection(null);
+    setPanelVisible(!panelVisible);
+  }
+
+  function startResize(event) {
+    if (event.button !== 0) return;
+    resizeStart.current = { y: event.clientY, height: panelHeight };
+    event.currentTarget.setPointerCapture(event.pointerId);
+    event.preventDefault();
+  }
+
+  function moveResize(event) {
+    if (resizeStart.current) {
+      setPanelHeight(boundPanelHeight(
+        resizeStart.current.height + resizeStart.current.y - event.clientY));
+    }
+  }
+
+  function keyboardResize(event) {
+    if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+      event.preventDefault();
+      setPanelHeight((height) => boundPanelHeight(height + (event.key === 'ArrowUp' ? 20 : -20)));
+    }
   }
 
   // Output
@@ -232,12 +273,35 @@ function CRRExplorer() {
           <p>Map coming in Sprint 4.</p>
         </section>
       </div>
-      <SourceHoldings key={`${reportId}/${accountHolder}/${settlementPoint}`}
-        reportId={reportId} accountHolder={accountHolder}
-        settlementPoint={settlementPoint} mwhNumber={mwhNumber}
-        onCellSelect={selectCell} onSourceCollapse={(source) => {
-          if (selection?.source === source) setSelection(null);
-        }} />
+      <section className="holdings-panel" aria-labelledby="holdings-heading">
+        <div className="holdings-panel-header">
+          <h2 id="holdings-heading">CRR Holdings</h2>
+          <button type="button" onClick={togglePanel} aria-expanded={panelVisible}
+            aria-controls="holdings-content">{panelVisible ? 'Hide' : 'Show'} holdings</button>
+        </div>
+        <div hidden={!panelVisible}>
+          <div className="holdings-resize" role="separator" tabIndex={0}
+            aria-label="Resize holdings panel" aria-orientation="horizontal"
+            aria-valuemin={200} aria-valuemax={Math.round(viewportHeight * 0.8)}
+            aria-valuenow={Math.round(panelHeight)} aria-valuetext={`${Math.round(panelHeight)} pixels`}
+            onPointerDown={startResize} onPointerMove={moveResize}
+            onPointerUp={(event) => {
+              resizeStart.current = null;
+              event.currentTarget.releasePointerCapture(event.pointerId);
+            }}
+            onPointerCancel={() => { resizeStart.current = null; }}
+            onLostPointerCapture={() => { resizeStart.current = null; }}
+            onKeyDown={keyboardResize}>⋮ Drag to resize</div>
+          <div id="holdings-content" className="holdings-content" style={{ height: panelHeight }}>
+            <SourceHoldings key={`${reportId}/${accountHolder}/${settlementPoint}`}
+              reportId={reportId} accountHolder={accountHolder}
+              settlementPoint={settlementPoint} mwhNumber={mwhNumber} visible={panelVisible}
+              onCellSelect={selectCell} onSourceCollapse={(source) => {
+                if (selection?.source === source) setSelection(null);
+              }} />
+          </div>
+        </div>
+      </section>
       {selection && <ContractDrawer
         key={`${selection.source}/${selection.sink}/${selection.deliveryMonth}/${selection.hedgeType}`}
         reportId={reportId} accountHolder={accountHolder} settlementPoint={settlementPoint}

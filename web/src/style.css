@@ -61,7 +61,7 @@ dd { margin: 0; font-weight: 600; }
 }
 
 /* Output: complete months scroll while source identifiers remain visible. */
-.source-holdings { margin-top: 20px; min-width: 0; }
+.source-holdings { min-width: 0; }
 .holdings-range { display: flex; gap: 16px; align-items: center; margin-bottom: 12px; }
 .holdings-scroll { overflow-x: auto; position: relative; margin-bottom: 12px; }
 .holdings-scroll table { border-collapse: separate; border-spacing: 0; }
@@ -100,3 +100,13 @@ dd { margin: 0; font-weight: 600; }
 .contract-tou ul { list-style: none; padding: 0; }
 .contract-tou li { padding: 12px 0; border-top: 1px solid #dce2e7; }
 .contract-tou li span { display: block; margin-top: 4px; }
+
+/* Output: hide content without unmounting the matrix; resize its scrollable area. */
+.holdings-panel { margin-top: 20px; min-width: 0; }
+.holdings-panel-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.holdings-content { overflow-y: auto; }
+.holdings-resize {
+  margin: 12px 0; padding: 6px; text-align: center; color: #52616b;
+  background: #edf1f4; cursor: ns-resize; touch-action: none; user-select: none;
+}
+.holdings-resize:focus-visible { outline: 2px solid #256e9e; }
