@@ -59,3 +59,19 @@ dd { margin: 0; font-weight: 600; }
   .workspace { grid-template-columns: 1fr; }
   .discovery-lists { grid-template-columns: 1fr; }
 }
+
+/* Output: complete months scroll while source identifiers remain visible. */
+.source-holdings { margin-top: 20px; min-width: 0; }
+.holdings-range { display: flex; gap: 16px; align-items: center; margin-bottom: 12px; }
+.holdings-scroll { overflow-x: auto; position: relative; margin-bottom: 12px; }
+.holdings-scroll table { border-collapse: separate; border-spacing: 0; }
+.holdings-scroll th, .holdings-scroll td {
+  padding: 8px 12px; border-bottom: 1px solid #dce2e7;
+  border-right: 1px solid #dce2e7; white-space: nowrap; text-align: right;
+  min-width: 80px;
+}
+.holdings-scroll thead th { background: #edf1f4; text-align: center; }
+.holdings-scroll th[rowspan], .holdings-scroll tbody th {
+  position: sticky; left: 0; z-index: 1; background: white; text-align: left;
+  min-width: 160px;
+}

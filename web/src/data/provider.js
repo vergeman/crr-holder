@@ -1,5 +1,5 @@
 // Imports
-import { getMetadata, getSummary } from '../generated/client';
+import { getMetadata, getSummary, getSourceHoldings } from '../generated/client';
 
 // Transformation: HTTP details stay outside the query hooks and UI.
 function unwrap(response) {
@@ -10,6 +10,13 @@ function unwrap(response) {
 }
 
 const httpProvider = {
+  async getSourceHoldings({ reportId, accountHolder, settlementPoint, offset }, signal) {
+    return unwrap(await getSourceHoldings({
+      report_id: reportId, offset, limit: 20,
+      ...(accountHolder && { account_holder: accountHolder }),
+      ...(settlementPoint && { settlement_point: settlementPoint }),
+    }, { signal }));
+  },
   async getMetadata({ reportId, accountHolder }, signal) {
     const response = await getMetadata({
       ...(reportId != null && { report_id: reportId }),

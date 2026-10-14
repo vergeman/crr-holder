@@ -3,15 +3,19 @@ import { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useMetadata, useSummary } from './data/hooks';
+import SourceHoldings from './SourceHoldings';
 import './style.css';
 
 // Preparation
 const queryClient = new QueryClient();
-const number = new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 });
+// MWh display rounds up; calculations retain their original precision.
+const mwhNumber = new Intl.NumberFormat('en-US', {
+  maximumFractionDigits: 0, roundingMode: 'ceil',
+});
 
 function PortfolioSummary({ summary }) {
   const metrics = [
-    ['Total Contractual MWh', number.format(summary.totalMwh)],
+    ['Total Contractual MWh', mwhNumber.format(summary.totalMwh)],
     ['Account Holders', summary.accountHolderCount],
     ['Settlement Points', summary.settlementPointCount],
     ['Source-Sink Pairs', summary.directedPathCount],
@@ -34,7 +38,7 @@ function PortfolioSummary({ summary }) {
           <div className="hedge" key={type}>
             <div className="hedge-label">
               <span>{type === 'OPT' ? 'Options' : 'Obligations'} ({type})</span>
-              <span>{number.format(mwh)} MWh · {percent.toFixed(1)}%</span>
+              <span>{mwhNumber.format(mwh)} MWh · {percent.toFixed(1)}%</span>
             </div>
             <div className="bar" aria-hidden="true">
               <div className={type.toLowerCase()} style={{ width: `${percent}%` }} />
@@ -76,7 +80,7 @@ function RankingList({ id, title, rows, identifierKey, onSelect, onClear,
                   <strong>{row[identifierKey]}</strong>
                   {row.legalName && <span>{row.legalName}</span>}
                 </span>
-                <span className="ranking-mwh">{number.format(row.totalMwh)} MWh</span>
+                <span className="ranking-mwh">{mwhNumber.format(row.totalMwh)} MWh</span>
               </button>
             </li>
           ))}
@@ -202,6 +206,9 @@ function CRRExplorer() {
           <p>Map coming in Sprint 4.</p>
         </section>
       </div>
+      <SourceHoldings key={`${reportId}/${accountHolder}/${settlementPoint}`}
+        reportId={reportId} accountHolder={accountHolder}
+        settlementPoint={settlementPoint} mwhNumber={mwhNumber} />
     </main>
   );
 }
