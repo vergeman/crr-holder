@@ -1,6 +1,6 @@
 # 0002 - Prepare Dataset
 
-Type: feat Branch: feat/0002-prepare-dataset Status: planned
+Type: feat Branch: feat/0002-prepare-dataset Status: implemented
 
 ## Goal
 
@@ -92,12 +92,12 @@ Type: feat Branch: feat/0002-prepare-dataset Status: planned
 
 ## Acceptance
 
-* [ ] Documented Docker commands generate `db/crr/crr.sqlite` from the four inputs
+* [x] Documented Docker commands generate `db/crr/crr.sqlite` from the four inputs
       without manual ZIP extraction, with output owned by the host user.
-* [ ] The script loads separate schema, materialization, index, and validation SQL.
-* [ ] Contract fields are stored once in parsed columns; original inputs remain
+* [x] The script loads separate schema, materialization, index, and validation SQL.
+* [x] Contract fields are stored once in parsed columns; original inputs remain
       on disk and no JSON copies are stored in the database.
-* [ ] Raw counts, required TOU hours, and monthly MW/MWh totals reconcile.
-* [ ] OPT/OBL and TOU blocks remain separate, with contracts available for drill-down.
-* [ ] Every source/sink has a settlement-point row with the six retained columns;
+* [x] Raw counts, required TOU hours, and monthly MW/MWh totals reconcile.
+* [x] OPT/OBL and TOU blocks remain separate, with contracts available for drill-down.
+* [x] Every source/sink has a settlement-point row with the six retained columns;
       missing enrichment and coordinates remain null and are counted.
