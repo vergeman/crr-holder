@@ -23,6 +23,7 @@ function CRRExplorer() {
   const [accountHolder, setAccountHolder] = useState("");
   const [settlementPoint, setSettlementPoint] = useState("");
   const [selection, setSelection] = useState(null);
+  // Remember the holdings button that opened the modal so focus can return to it.
   const cellButton = useRef(null);
   const [crrHoldingsPanelVisible, setCRRHoldingsPanelVisible] = useState(false);
   const reportMetadata = useMetadata(reportId);
@@ -76,12 +77,14 @@ function CRRExplorer() {
   }
 
   function selectCell(cell, button) {
+    // Keep the originating DOM element alongside the selected contract cell.
     cellButton.current = button;
     setSelection(cell);
   }
 
   function closeContractDetails() {
     setSelection(null);
+    // Restore focus if the originating button still exists, without scrolling.
     if (cellButton.current?.isConnected)
       cellButton.current.focus({ preventScroll: true });
   }

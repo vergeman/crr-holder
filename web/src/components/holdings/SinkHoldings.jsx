@@ -75,6 +75,7 @@ export default function SinkHoldings({
                     : undefined
                 }
                 aria-label={`${source} to ${row.sink}, ${month.deliveryMonth}, ${type} contract details`}
+                // Pass the clicked button so closing the modal can restore focus.
                 onClick={(event) =>
                   onCellSelect(
                     {
