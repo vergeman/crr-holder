@@ -42,9 +42,9 @@ class RankingTests(unittest.TestCase):
                 ])
 
     def test_ties_and_limit_after_grouping(self):
-        # Setup: local twelve-way ties do not change the shared fixture.
+        # Setup: local ties beyond the result limit do not change the shared fixture.
         self.db.execute("INSERT INTO reports VALUES (3, '2026-11-01')")
-        identifiers = [f"T{index:02}" for index in range(12)]
+        identifiers = [f"T{index:03}" for index in range(102)]
         self.db.executemany(
             "INSERT INTO account_holders (account_holder) VALUES (?)",
             [(identifier,) for identifier in reversed(identifiers)],
@@ -65,11 +65,11 @@ class RankingTests(unittest.TestCase):
         # Assertions: full rows verify alphabetical ties, limit, and self counting.
         self.assertEqual(summary["topAccountHolders"], [
             {"accountHolder": identifier, "legalName": None, "totalMwh": 1}
-            for identifier in identifiers[:10]
+            for identifier in identifiers[:100]
         ])
         self.assertEqual(summary["topSettlementPoints"], [
             {"settlementPoint": identifier, "totalMwh": 1}
-            for identifier in identifiers[:10]
+            for identifier in identifiers[:100]
         ])
 
 

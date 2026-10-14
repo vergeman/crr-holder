@@ -45,8 +45,8 @@ class GeographyTests(unittest.TestCase):
                         self.assertEqual((p['longitude'], p['latitude']), (None, None))
 
     def test_complete_output_includes_zero_inventory(self):
-        # Add 8 points to the fixture's 4, exceeding the top-10 ranking
-        # limit. The last added point has zero MWh and must appear in geography.
+        # Add 8 points to the fixture's 4. The last added point has zero
+        # MWh and must appear in geography.
         # range(1, 9) produces 1 through 8; the upper bound is excluded.
         for i in range(1, 9):
             point = f'Z{i:02}'
@@ -66,8 +66,8 @@ class GeographyTests(unittest.TestCase):
         # Identifier sorting puts Z08 last; it is the added zero-MWh point.
         self.assertEqual(points[-1]['settlementPoint'], 'Z08')
         self.assertEqual(points[-1]['sourceMwh'], 0)
-        # The ranked list remains limited to 10, while geography returns all 12.
-        self.assertEqual(len(summary['topSettlementPoints']), 10)
+        # All 12 points also fit within the ranking limit.
+        self.assertEqual(len(summary['topSettlementPoints']), 12)
 
 
 if __name__ == '__main__':

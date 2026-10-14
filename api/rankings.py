@@ -26,7 +26,7 @@ def get_top_account_holders(db: sqlite3.Connection, report_id, account_holder=No
         FROM totals t
         LEFT JOIN account_holders a ON a.account_holder = t.account_holder
         -- Compare unrounded totals first, identifiers resolve ties.
-        ORDER BY t.total_mwh DESC, t.account_holder ASC LIMIT 10
+        ORDER BY t.total_mwh DESC, t.account_holder ASC LIMIT 100
         """, parameters,
     ).fetchall()
 
@@ -56,7 +56,7 @@ def get_top_settlement_points(db: sqlite3.Connection, report_id, account_holder=
         SELECT point, SUM(mwh) AS total_mwh
         FROM contributions GROUP BY point
         -- Compare unrounded totals first, identifiers resolve ties.
-        ORDER BY total_mwh DESC, point ASC LIMIT 10
+        ORDER BY total_mwh DESC, point ASC LIMIT 100
         """, parameters,
     ).fetchall()
 
