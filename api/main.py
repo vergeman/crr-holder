@@ -108,6 +108,7 @@ class Contract(BaseModel):
 
 class TimeOfUseGroup(BaseModel):
     timeOfUse: str
+    hours: int
     totalMwh: float
     contracts: list[Contract]
 

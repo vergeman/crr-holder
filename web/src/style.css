@@ -96,10 +96,21 @@ dd { margin: 0; font-weight: 600; }
 .contract-drawer summary { cursor: pointer; padding: 12px 0; }
 .contract-drawer summary > strong { float: right; margin-left: 8px; }
 .contract-drawer summary small { display: block; color: #52616b; overflow-wrap: anywhere; }
+.contract-holder-heading {
+  display: inline-grid; grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end; gap: 12px; width: calc(100% - 20px); vertical-align: top;
+}
+.contract-holder-heading > strong { text-align: right; white-space: nowrap; }
 .contract-tou { margin-left: 20px; }
+.contract-holder > .contract-tou:first-of-type { margin-top: 20px; }
 .contract-tou ul { list-style: none; padding: 0; }
 .contract-tou li { padding: 12px 0; border-top: 1px solid #dce2e7; }
-.contract-tou li span { display: block; margin-top: 4px; }
+.contract-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 0; }
+.contract-fields > div { display: block; margin: 0; }
+.contract-fields dt, .contract-contribution > span { font-size: .75rem; color: #697782; }
+.contract-fields dd { margin-top: 3px; font-weight: normal; overflow-wrap: anywhere; }
+.contract-contribution { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: 12px; }
+.contract-contribution strong { text-align: right; font-variant-numeric: tabular-nums; }
 
 /* Output: hide content without unmounting the matrix; resize its scrollable area. */
 .holdings-panel { margin-top: 20px; min-width: 0; }

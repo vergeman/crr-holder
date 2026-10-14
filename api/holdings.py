@@ -127,7 +127,7 @@ def get_contract_holdings(db, source, sink, month, hedge_type, report_id=None,
         )
         SELECT h.account_holder, a.legal_name, h.time_of_use,
                h.crr_id, h.segment_id, h.crr_type, h.start_date, h.end_date,
-               h.mw, h.mw * t.hours AS month_mwh
+               h.mw, t.hours, h.mw * t.hours AS month_mwh
         FROM contracts h
         JOIN tou_hours t ON t.time_of_use = h.time_of_use
                          AND t.delivery_month = :month
@@ -138,13 +138,13 @@ def get_contract_holdings(db, source, sink, month, hedge_type, report_id=None,
     """, parameters)
 
     holders = {}
-    for holder, name, tou, crr_id, segment_id, crr_type, start, end, mw, mwh in rows:
+    for holder, name, tou, crr_id, segment_id, crr_type, start, end, mw, hours, mwh in rows:
         group = holders.setdefault(holder, {
             "accountHolder": holder, "legalName": name, "totalMwh": 0,
             "timeOfUseGroups": {},
         })
         tou_group = group['timeOfUseGroups'].setdefault(tou, {
-            "timeOfUse": tou, "totalMwh": 0, "contracts": [],
+            "timeOfUse": tou, "hours": hours, "totalMwh": 0, "contracts": [],
         })
         tou_group['contracts'].append({
             "crrId": crr_id, "segmentId": segment_id, "crrType": crr_type,

@@ -8,7 +8,7 @@ export default function ContractDrawer({ reportId, accountHolder, settlementPoin
   const query = useContractHoldings(reportId, accountHolder, settlementPoint, selection);
   const closeButton = useRef(null);
   const month = new Date(`${selection.deliveryMonth}T00:00:00Z`).toLocaleDateString(
-    'en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+    'en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
 
   useEffect(() => { closeButton.current.focus(); }, []);
   useEffect(() => {
@@ -40,20 +40,27 @@ export default function ContractDrawer({ reportId, accountHolder, settlementPoin
       {query.data.accountHolders.length === 0 ? <p>No contracts match this cell.</p> :
         query.data.accountHolders.map((holder) => <details key={holder.accountHolder}
           className="contract-holder">
-          <summary><span>{holder.accountHolder}
-            {holder.legalName && <small>{holder.legalName}</small>}</span>
-            <strong>{mwhNumber.format(holder.totalMwh)} MWh</strong></summary>
+          <summary><span className="contract-holder-heading">
+            <span>{holder.accountHolder}
+              {holder.legalName && <small>{holder.legalName}</small>}</span>
+            <strong>{mwhNumber.format(holder.totalMwh)} MWh</strong>
+          </span></summary>
           {holder.timeOfUseGroups.map((group) => <details key={group.timeOfUse}
             className="contract-tou">
             <summary><span>{group.timeOfUse}</span>
               <strong>{mwhNumber.format(group.totalMwh)} MWh</strong></summary>
             <ul>{group.contracts.map((contract) =>
               <li key={`${contract.crrId}/${contract.segmentId}`}>
-                <strong>CRR {contract.crrId} · Segment {contract.segmentId}</strong>
-                <span>{contract.crrType} · {contract.mw} MW</span>
-                <span>{contract.startDate}–{contract.endDate}</span>
-                <span>Selected-month contribution:{' '}
-                  {mwhNumber.format(contract.monthMwh)} MWh</span>
+                <dl className="contract-fields">
+                  <div><dt>CRR</dt><dd>{contract.crrId}</dd></div>
+                  <div><dt>Segment</dt><dd>{contract.segmentId}</dd></div>
+                  <div><dt>Type</dt><dd>{contract.crrType}</dd></div>
+                  <div><dt>Month</dt><dd>{month}</dd></div>
+                  <div><dt>MW</dt><dd>{contract.mw}</dd></div>
+                  <div><dt>{group.timeOfUse} hours</dt><dd>{group.hours}</dd></div>
+                </dl>
+                <div className="contract-contribution"><span>Total MW x {group.timeOfUse}</span>
+                  <strong>{mwhNumber.format(contract.monthMwh)} MWh</strong></div>
               </li>)}</ul>
           </details>)}
         </details>)}

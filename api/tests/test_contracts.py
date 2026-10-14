@@ -54,6 +54,7 @@ class ContractHoldingsTests(unittest.TestCase):
         self.assertIsNone(holders[1]['legalName'])
         self.assertEqual([g['timeOfUse'] for g in groups], ['PeakWD', 'PeakWE', 'Off-peak'])
         self.assertEqual([g['totalMwh'] for g in groups], [45, 10, 0])
+        self.assertEqual([g['hours'] for g in groups], [10, 5, 20])
         self.assertEqual([(c['crrId'], c['segmentId']) for c in groups[0]['contracts']],
                          [(99, 1), (100, 1), (100, 2)])
         self.assertEqual(groups[0]['contracts'][2], {
@@ -86,6 +87,9 @@ class ContractHoldingsTests(unittest.TestCase):
                     for group in holder['timeOfUseGroups']:
                         self.assertEqual(group['totalMwh'], sum(c['monthMwh']
                                                                for c in group['contracts']))
+                        for contract in group['contracts']:
+                            self.assertEqual(contract['monthMwh'],
+                                             contract['mw'] * group['hours'])
         self.assertEqual(self.details(settlement_point='C')['accountHolders'], [])
 
     def test_pair_month_and_instrument_selection(self):
