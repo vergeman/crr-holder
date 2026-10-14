@@ -12,16 +12,16 @@ export default function Legend({ dataReady, missing, mwhNumber }) {
         <span>Sink-dominant</span>
       </div>
       <p>
-        Circle area represents source + sink MWh, with a minimum visible
-        size for zero totals. Endpoint MWh counts both ends of each holding
-        and is not the portfolio total.
+        Circle area represents source + sink MWh, with a minimum visible size
+        for zero totals. Endpoint MWh counts both ends of each holding and is
+        not the portfolio total.
       </p>
       {dataReady && (
         <p className="map-legend-coverage">
           Missing coordinates: {missing.length} points
           {" · "}Source {missingMwh("sourceMwh")} MWh · Sink{" "}
-          {missingMwh("sinkMwh")} MWh. These holdings remain in portfolio
-          and table totals.
+          {missingMwh("sinkMwh")} MWh. These holdings remain in portfolio and
+          table totals.
         </p>
       )}
     </details>

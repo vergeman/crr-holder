@@ -25,7 +25,9 @@ export default function MapStatus({
         </div>
       )}
       {!dataFailed && !dataReady && (
-        <p className="map-status" role="status">Loading geographic footprint...</p>
+        <p className="map-status" role="status">
+          Loading geographic footprint...
+        </p>
       )}
     </>
   );

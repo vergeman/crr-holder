@@ -1,4 +1,9 @@
-export default function MapPointDetails({ points, detail, hasLocatedPoints, mwhNumber }) {
+export default function MapPointDetails({
+  points,
+  detail,
+  hasLocatedPoints,
+  mwhNumber,
+}) {
   return (
     <>
       {points.length === 0 && <p>No holdings match these filters.</p>}
