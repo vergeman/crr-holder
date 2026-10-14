@@ -4,3 +4,7 @@ __pycache__/
 .~lock.*
 *.csv
 *.docx
+
+# Generated dataset and temporary builds.
+db/crr/*.sqlite*
+db/crr/.*.tmp*

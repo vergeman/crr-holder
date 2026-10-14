@@ -23,7 +23,7 @@ Type: feat Branch: feat/0002-prepare-dataset Status: planned
 * Optimize for short, readable code and easy inspection. Use plain functions
   without reusable ingestion abstractions or support for hypothetical inputs.
 * Retain original inputs in `data/`. Store each field once in ordinary columns;
-  no JSON copies or extra audit/location metadata.
+  no JSON copies, filenames, hashes, or extra audit/location metadata.
 * Use only the six tables listed below, defining their columns in `sql/schema.sql`.
   Settlement points contain only `settlement_point`, `longitude`, `latitude`,
   `point_type`, `load_zone`, and `capacity_mw`. Additional columns require discussion.
@@ -46,9 +46,9 @@ Type: feat Branch: feat/0002-prepare-dataset Status: planned
 * Define `reports`, `crr_holdings`, `account_holders`, `tou_hours`,
   `settlement_points`, and `crr_monthly_holdings` in `sql/schema.sql`;
   keep lookup indexes in `sql/indexes.sql`.
-* Keep report identity separate from delivery dates. Record input filenames,
-  known publication dates, and hashes in `reports`. Enforce raw
-  uniqueness with the `(report_id, crr_id, segment_id)` primary key.
+* Keep report identity separate from delivery dates. Store only an integer
+  `report_id` and `publication_date` in `reports`. Enforce raw uniqueness with
+  the `(report_id, crr_id, segment_id)` primary key.
 
 ### 2. Import inputs — commit group 2
 
