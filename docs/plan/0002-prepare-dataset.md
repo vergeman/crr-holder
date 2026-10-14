@@ -61,7 +61,8 @@ Type: feat Branch: feat/0002-prepare-dataset Status: planned
   Use the workbook's hours, including daylight-saving months.
 * Read `settlement_points.features` and match `properties.sp_id` to holdings
   sources/sinks. Interpret Point coordinates as `[longitude, latitude]` and
-  store point type, load zone, and capacity in the six settlement-point columns.
+  store uppercase point type and load zone, plus capacity, in the six
+  settlement-point columns.
 * Give every source/sink a settlement-point row; retain null coordinates for
   missing locations. Hub/load-zone coordinates are representative approximations.
 
