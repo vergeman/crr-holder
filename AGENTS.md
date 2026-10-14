@@ -29,11 +29,27 @@
 ## Readability
 
 - Separate distinct phases with blank lines and very brief comments.
-- Identify each input file's import section.
-- Label preparation, import, transformation, validation, and output phases.
+- Keep imports grouped at the top of each input file.
+- Make preparation, import, transformation, validation, and output phases clear
+  through structure and brief, natural comments where useful. These are concepts,
+  not literal comment phrases, headings, or prefixes such as "Preparation:" or
+  "Transformation:". Omit labels that merely narrate the code.
 - In SQL, briefly identify intermediate results and each comparison.
 - In fixtures, separate setup, execution, and assertions.
 - Explain purpose or a non-obvious choice; avoid narrating every statement.
+
+## Frontend organization
+
+- Group components by feature under `web/src/components/`.
+- Keep page entry points focused on shared state, queries, and coordination.
+- Name components after the data type or value they render, and name state and
+  handlers after what they control. Avoid vague names.
+- Keep component implementations in named files. Use directory index files
+  to expose feature entry points; keep internal imports direct.
+- Use Prettier for JS/JSX formatting and preserve unrelated user edits.
+- Place details where they have enough space and remain reachable alongside
+  existing scrolling and floating panels. Check the complete interaction on
+  desktop and narrow screens.
 
 ## Validation reporting
 
@@ -51,4 +67,5 @@
 - Keep every commit-message line within 80 characters.
 - Fold follow-up changes into the appropriate implementation commit group when
   requested.
+- Keep formatting-only changes in separate commits from behavior and refactors.
 - Do not push unless explicitly instructed.

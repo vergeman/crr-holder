@@ -137,12 +137,7 @@ only source lists require pagination initially.
 
 ## Sprint 4 - Add the Map
 
-### 4.1 - Offset Pagination Benchmark
-
-* TODO: once the explorer flow is wired, measure first-page and later-page
-  source endpoint latency under market, holder, point, and combined filters.
-* Assess aggregation cost and increasing offsets before deciding whether
-  keyset (cursor) pagination would improve performance.
+Detailed plan: [0009 - Map Integration](0009-map-integration.md).
 
 ### Map Integration
 
@@ -151,6 +146,13 @@ only source lists require pagination initially.
 * Reconcile geographic summaries with tabular totals.
 
 Output: geographic exploration integrated with the existing explorer.
+
+### 4.1 - Offset Pagination Benchmark
+
+* TODO: once the explorer flow is wired, measure first-page and later-page
+  source endpoint latency under market, holder, point, and combined filters.
+* Assess aggregation cost and increasing offsets before deciding whether
+  keyset (cursor) pagination would improve performance.
 
 ## Sprint 5 - Compare SQLite Access Modes
 
