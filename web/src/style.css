@@ -225,6 +225,8 @@ dd { margin: 0; font-weight: 600; }
 }
 
 /* Expanded sinks and request states remain beside their source. */
+.source-row { cursor: pointer; }
+.source-row:hover td { background: #f3f7fa; }
 .source-expand { margin-right: 6px; }
 .holdings-scroll .sink-row th, .holdings-scroll .sink-state th { padding-left: 32px; }
 .holdings-scroll .sink-state th { white-space: normal; font-weight: normal; }

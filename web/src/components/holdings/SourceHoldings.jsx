@@ -129,7 +129,12 @@ export default function SourceHoldings({
                     .flatMap((part) => part.sources)
                     .map((row) => (
                       <Fragment key={row.source}>
-                        <tr>
+                        <tr
+                          className="source-row"
+                          onClick={() => {
+                            if (!expanded.has(row.source)) toggle(row.source);
+                          }}
+                        >
                           <th scope="row">
                             <button
                               type="button"
@@ -141,7 +146,10 @@ export default function SourceHoldings({
                               title={`${
                                 expanded.has(row.source) ? "Collapse" : "Expand"
                               } ${row.source}`}
-                              onClick={() => toggle(row.source)}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                toggle(row.source);
+                              }}
                             >
                               <svg
                                 className="control-caret"
