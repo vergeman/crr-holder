@@ -44,8 +44,9 @@ Branch: [type]/[id]-[short-title]
 * Treat acceptance criteria as a closed list; useful improvements are not
   automatically part of the task.
 * Before adding unplanned stored data, files, dependencies, or substantial
-  verification steps, explain the addition and discuss scope with the user.
-  Existing authorization covers additions already specified in the plan.
+  verification steps, explain why, explicitly prompt the user for a scope
+  decision, and wait for their reply before implementing the addition.
+  Existing authorization covers work already requested or specified in the plan.
 * Resolve routine implementation choices within the agreed scope without
   requesting confirmation.
 
