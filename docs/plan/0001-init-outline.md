@@ -21,13 +21,107 @@ Output: a working local development stack.
 
 ## Sprint 3 - Build the Explorer
 
-* Implement metadata, summaries, and holdings drill-down endpoints.
-* Build report and portfolio filters, summary metrics, rankings, the holdings matrix, and contract details.
-* Route TanStack Query hooks through a shared data-access interface, initially backed by Orval-generated HTTP calls.
-* Verify filtering, pagination, and aggregate reconciliation; keep OPT and OBL separate.
-* Leave a map placeholder until the tabular data flow works.
+Build the following groups in order, each ending with a working UI flow.
+Leave a map placeholder until Sprint 4.
 
-Output: a usable explorer backed by the API. See [API design](../api.md) and [frontend design](../web.md).
+### 3.1 - Filters and Portfolio Summary
+
+Detailed plan: [0004 - Filters and Portfolio Summary](0004-filters-portfolio-summary.md).
+
+* Implement `/api/metadata` and the metrics and OPT/OBL mix in `/api/summary`.
+* Build report, account-holder, and settlement-point selectors, clear filters,
+  and portfolio summary metrics.
+* Narrow settlement-point dropdown choices to the report and selected holder's
+  sources or sinks (inclusive union, unique points). On holder change, clear the
+  point immediately and refresh dropdown metadata and summary in parallel.
+* Default to the latest report by publication date; never combine report snapshots.
+* Apply settlement-point filtering as source OR sink across summaries and holdings.
+  Include each matching holding once, including when both endpoints match.
+* Use contractual MWh for summaries and matrix cells. Keep OPT and OBL separate
+  and do not net opposing directed paths.
+* Establish TanStack Query and Orval generation. Write generated HTTP client
+  code and types only under `web/src/generated/`; treat that directory as
+  replaceable output, with no handwritten wrapper or hook code inside it.
+* Automatically regenerate the client from the API's OpenAPI schema during
+  development startup and when the API schema changes.
+* Keep the handwritten data-access wrapper outside `web/src/generated/`. Import
+  generated HTTP calls into that wrapper and route TanStack Query hooks through
+  it, so regeneration cannot overwrite the wrapper or hooks.
+* Add a brief comment at the wrapper's provider selection identifying it as the
+  place to swap HTTP for browser SQLite or VFS providers in Sprint 5.
+* Verify that an API schema change updates generated output automatically while
+  leaving the handwritten wrapper and hooks unchanged.
+* Verify market, account-holder, settlement-point, and combined filters against
+  dataset totals, including a holding whose source and sink both match.
+
+Output: selecting a portfolio updates trustworthy totals; clearing filters
+returns to the market view for the selected report.
+
+### 3.2 - Rankings and Discovery
+
+* Add top account-holder and settlement-point rankings to `/api/summary`.
+* Build the discovery lists and connect ranking clicks to the shared filters.
+* Display account-holder names from the existing directory.
+* Verify that ranking clicks produce the corresponding filtered summary.
+
+Output: users can discover holders and settlement points through rankings.
+
+### 3.3 - Source Holdings Matrix
+
+* Implement `/api/holdings/sources` and the source-by-delivery-month matrix.
+* Display separate OPT and OBL columns with horizontal month scrolling.
+* Initially show a fixed number of complete source rows; provide "show more
+  sources." Define the initial count in the detailed implementation plan.
+* Page sources only; each returned source includes all its delivery-month cells.
+* Sort sources by total contractual MWh across delivery months and both hedge
+  types, descending; use the source identifier to break ties.
+* Verify source pagination without duplicates or omissions and reconcile all
+  source cells with the filtered summary, separately for OPT and OBL.
+
+Output: users can explore a portfolio's sources across delivery months.
+
+### 3.4 - Sink Expansion
+
+* Implement `/api/holdings/sources/{source}/sinks` and load sinks on expansion.
+* Return all matching sinks for an expanded source without pagination or cutoff;
+  include all delivery-month cells and retain the shared filters.
+* Sort sinks by total contractual MWh across delivery months and both hedge
+  types, descending; use the sink identifier to break ties.
+* Verify expansion under the shared filters and reconcile sink cells with their
+  parent source cells, separately for OPT and OBL.
+
+Output: expanding a source explains its totals through directed source-sink paths.
+
+### 3.5 - Contract Details and Completed Workspace
+
+* Implement `/api/holdings/contracts` and open details from a sink/month/hedge-type
+  cell, retaining the report and portfolio filters.
+* Return all contracts matching that cell without pagination initially.
+* Show original contract fields, including MW and TOU, alongside each contract's
+  MWh contribution to the selected delivery month.
+* Group contracts by account holder and TOU. Sort account-holder groups by total
+  MWh descending and contract rows within each TOU group by selected-month MWh
+  descending; break ties with account-holder identifier or CRR ID and segment ID.
+* Show the full cell total and account-holder/TOU subtotals regardless of whether
+  their groups are expanded. Expansion changes visibility, not totals.
+* Finish the holdings panel's hide and resize behavior.
+* Reconcile contract contributions and group subtotals with the clicked cell;
+  verify that collapsing groups leaves totals unchanged.
+* Check a market-wide cell with many contracts to assess whether an unpaginated
+  detail response is practical before considering any pagination change.
+
+Output: users can move from market totals to individual contracts and reconcile
+numbers throughout the drill-down.
+
+Measure representative query execution times as queries are implemented.
+Use the prepared dataset without adding stored fields or changing its schema.
+Full access-mode benchmarking belongs to Sprint 5. Map endpoint MWh counts source
+and sink participation separately; adding those endpoint totals counts each path
+at both ends and is not the portfolio's contractual MWh total.
+
+Output: a usable explorer backed by the API. See [API design](../api.md) and
+[frontend design](../web.md). These groups refine the earlier design sketches;
+only source lists require pagination initially.
 
 ## Sprint 4 - Add the Map
 
