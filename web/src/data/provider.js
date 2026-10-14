@@ -1,0 +1,31 @@
+// Imports
+import { getMetadata, getSummary } from '../generated/client';
+
+// Transformation: HTTP details stay outside the query hooks and UI.
+function unwrap(response) {
+  if (response.status !== 200) {
+    throw new Error(`Request failed: ${response.status}`);
+  }
+  return response.data;
+}
+
+const httpProvider = {
+  async getMetadata({ reportId, accountHolder }, signal) {
+    const response = await getMetadata({
+      ...(reportId != null && { report_id: reportId }),
+      ...(accountHolder && { account_holder: accountHolder }),
+    }, { signal });
+    return unwrap(response);
+  },
+  async getSummary({ reportId, accountHolder, settlementPoint }, signal) {
+    const response = await getSummary({
+      report_id: reportId,
+      ...(accountHolder && { account_holder: accountHolder }),
+      ...(settlementPoint && { settlement_point: settlementPoint }),
+    }, { signal });
+    return unwrap(response);
+  },
+};
+
+// Output: swap the HTTP provider here for browser SQLite or VFS in Sprint 5.
+export const dataProvider = httpProvider;

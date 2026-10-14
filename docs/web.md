@@ -1,7 +1,7 @@
 # Frontend Design
 
 Goal: to have something beyond filtering Excel or pandas - move naturally
-between the market, individual portfolios, geographic positions, directed paths,
+between the market, individual portfolios, geographic positions, ordered source-sink pairs,
 and actual contracts. Real exploration
 
 Top down we get birds eye overview to detailed inventory
@@ -55,7 +55,7 @@ Top down we get birds eye overview to detailed inventory
 │ Total Contractual MWh       2.1B      │ │                                                     │ │
 │ Account Holders              376      │ │                                                     │ │
 │ Settlement Points          2,100      │ │                                                     │ │
-│ Directed Paths            18,400      │ │                                 [ + ] [ − ]         │ │
+│ Source-Sink Pairs         18,400      │ │                                 [ + ] [ − ]         │ │
 │                                       │ └─────────────────────────────────────────────────────┘ │
 │ Options       ████████████  68%       │                                                         │
 │ Obligations   ██████        32%       │ ● Source-dominant   ● Balanced   ● Sink-dominant         │

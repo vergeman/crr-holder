@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host 0.0.0.0 --port 5173"
+    "dev": "node scripts/dev.js"
   },
   "dependencies": {
     "react": "19.3.0",
