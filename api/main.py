@@ -31,6 +31,17 @@ class HedgeTypeMwh(BaseModel):
     OBL: float
 
 
+class RankedAccountHolder(BaseModel):
+    accountHolder: str
+    legalName: str | None
+    totalMwh: float
+
+
+class RankedSettlementPoint(BaseModel):
+    settlementPoint: str
+    totalMwh: float
+
+
 class Summary(BaseModel):
     reportId: int
     totalMwh: float
@@ -38,6 +49,8 @@ class Summary(BaseModel):
     settlementPointCount: int
     directedPathCount: int
     hedgeTypeMwh: HedgeTypeMwh
+    topAccountHolders: list[RankedAccountHolder]
+    topSettlementPoints: list[RankedSettlementPoint]
 
 
 app = FastAPI()

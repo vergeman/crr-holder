@@ -1,6 +1,9 @@
 # Imports
 import sqlite3
 
+from filters import holdings_filter
+from rankings import get_top_account_holders, get_top_settlement_points
+
 
 def resolve_report(db: sqlite3.Connection, report_id: int | None) -> int:
     if report_id is not None:
@@ -67,12 +70,7 @@ def get_summary(db: sqlite3.Connection, report_id=None, account_holder=None,
     # Preparation
     report_id = resolve_report(db, report_id)
 
-    filters = ["report_id = :report_id"]
-    if account_holder:
-        filters.append("account_holder = :account_holder")
-    if settlement_point:
-        filters.append("(source = :settlement_point OR sink = :settlement_point)")
-    where = " AND ".join(filters)
+    where, parameters = holdings_filter(report_id, account_holder, settlement_point)
 
     # Transformation: direct predicates allow use of existing filter indexes.
     row = db.execute(
@@ -96,8 +94,7 @@ def get_summary(db: sqlite3.Connection, report_id=None, account_holder=None,
                COALESCE(SUM(CASE WHEN hedge_type = 'OBL' THEN mwh ELSE 0 END), 0)
         FROM holdings
         """,
-        {"report_id": report_id, "account_holder": account_holder or None,
-         "settlement_point": settlement_point or None},
+        parameters,
     ).fetchone()
 
     # Output
@@ -108,4 +105,8 @@ def get_summary(db: sqlite3.Connection, report_id=None, account_holder=None,
         "settlementPointCount": row[2],
         "directedPathCount": row[3],
         "hedgeTypeMwh": {"OPT": row[4], "OBL": row[5]},
+        "topAccountHolders": get_top_account_holders(
+            db, report_id, account_holder, settlement_point),
+        "topSettlementPoints": get_top_settlement_points(
+            db, report_id, account_holder, settlement_point),
     }

@@ -26,12 +26,14 @@ class SummaryTests(unittest.TestCase):
                 summary = get_summary(self.db, **filters)
 
                 # Assertions: expected values are independent fixture totals.
-                self.assertEqual(summary, {
+                expected_metrics = {
                     "reportId": 2, "totalMwh": expected[0],
                     "accountHolderCount": expected[1], "settlementPointCount": expected[2],
                     "directedPathCount": expected[3],
                     "hedgeTypeMwh": {"OPT": expected[4], "OBL": expected[5]},
-                })
+                }
+                self.assertEqual(
+                    {key: summary[key] for key in expected_metrics}, expected_metrics)
 
     def test_report_isolation_and_default(self):
         # Execution
@@ -40,11 +42,13 @@ class SummaryTests(unittest.TestCase):
 
         # Assertions
         self.assertEqual(latest, 2)
-        self.assertEqual(previous, {
+        expected_metrics = {
             "reportId": 1, "totalMwh": 30, "accountHolderCount": 2,
             "settlementPointCount": 3, "directedPathCount": 2,
             "hedgeTypeMwh": {"OPT": 10, "OBL": 20},
-        })
+        }
+        self.assertEqual(
+            {key: previous[key] for key in expected_metrics}, expected_metrics)
 
     def test_metadata_dropdowns(self):
         cases = [(None, None, ["A", "B", "C", "D"]),
