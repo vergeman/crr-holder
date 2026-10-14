@@ -38,7 +38,7 @@ Detailed plan: [0004 - Filters and Portfolio Summary](0004-filters-portfolio-sum
 * Apply settlement-point filtering as source OR sink across summaries and holdings.
   Include each matching holding once, including when both endpoints match.
 * Use contractual MWh for summaries and matrix cells. Keep OPT and OBL separate
-  and do not net opposing directed paths.
+  and do not net opposing ordered source-sink pairs.
 * Establish TanStack Query and Orval generation. Write generated HTTP client
   code and types only under `web/src/generated/`; treat that directory as
   replaceable output, with no handwritten wrapper or hook code inside it.

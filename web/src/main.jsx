@@ -14,7 +14,7 @@ function PortfolioSummary({ summary }) {
     ['Total Contractual MWh', number.format(summary.totalMwh)],
     ['Account Holders', summary.accountHolderCount],
     ['Settlement Points', summary.settlementPointCount],
-    ['Directed Paths', summary.directedPathCount],
+    ['Source-Sink Pairs', summary.directedPathCount],
   ];
 
   // Output: inventory values and percentages use the same unrounded API totals.

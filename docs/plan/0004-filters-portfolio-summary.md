@@ -81,7 +81,7 @@ Branch: feat/0004-filters-portfolio-summary
 | `totalMwh` | Total Contractual MWh | Sum `peak_wd_mwh + peak_we_mwh + off_peak_mwh` across all matching rows. |
 | `accountHolderCount` | Account Holders | Count distinct account-holder identifiers. |
 | `settlementPointCount` | Settlement Points | Count the distinct union of source and sink identifiers. |
-| `directedPathCount` | Directed Paths | Count distinct ordered `(source, sink)` pairs. |
+| `directedPathCount` | Source-Sink Pairs | Count distinct ordered `(source, sink)` pairs. |
 | `hedgeTypeMwh.OPT` | Options | Sum contractual MWh for OPT rows. |
 | `hedgeTypeMwh.OBL` | Obligations | Sum contractual MWh for OBL rows. |
 
@@ -242,8 +242,8 @@ Keep this data inline in `api/tests/test_summary.py`:
 | 2 | Y | C | A | 2026-10-01 | OPT | 20 | 20 | 20 |
 
 For report 2, market totals are 210 MWh (130 OPT, 80 OBL), two holders,
-four points, and five directed paths. Holder X has 100 MWh (70 OPT, 30 OBL),
-one holder, two points, and three directed paths. Point A matches 160 MWh;
+four points, and five ordered source-sink pairs. Holder X has 100 MWh (70 OPT, 30 OBL),
+one holder, two points, and three ordered source-sink pairs. Point A matches 160 MWh;
 the A-to-A row contributes its 40 MWh once. Holder X with point A has 100 MWh;
 holder X with point C has zero. Report 1 totals 30 MWh and must stay separate.
 Report 2's point dropdown contains A/B/C/D, X's contains A/B, and Y's contains
