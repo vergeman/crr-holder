@@ -30,7 +30,7 @@ function CRRExplorer() {
   const portfolioResizeStart = useRef(null);
   const [crrHoldingsPanelVisible, setCRRHoldingsPanelVisible] = useState(false);
   const [crrHoldingsPanelHeight, setCRRHoldingsPanelHeight] = useState(() =>
-    boundCRRHoldingsPanelHeight(window.innerHeight * 0.35)
+    boundCRRHoldingsPanelHeight(window.innerHeight * 0.45)
   );
   const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
   const reportMetadata = useMetadata(reportId);

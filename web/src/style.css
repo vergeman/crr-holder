@@ -189,9 +189,9 @@ dd { margin: 0; font-weight: 600; }
 .holdings-scroll::-webkit-scrollbar { width: 14px; height: 14px; }
 .holdings-scroll::-webkit-scrollbar-track { background: #edf1f4; }
 .holdings-scroll::-webkit-scrollbar-thumb { background: #8b9fac; border: 3px solid #edf1f4; border-radius: 7px; }
-.holdings-scroll table { border-collapse: separate; border-spacing: 0; }
+.holdings-scroll table { border-collapse: separate; border-spacing: 0; font-size: 12px; }
 .holdings-scroll th, .holdings-scroll td {
-  padding: 8px 12px; border-bottom: 1px solid #dce2e7;
+  padding: 4px 8px; border-bottom: 1px solid #dce2e7;
   border-right: 1px solid #dce2e7; white-space: nowrap; text-align: right;
   min-width: 80px;
 }
@@ -253,8 +253,8 @@ dd { margin: 0; font-weight: 600; }
 /* Expanded sinks and request states remain beside their source. */
 .source-row { cursor: pointer; }
 .source-row:hover td { background: #f3f7fa; }
-.source-expand { margin-right: 6px; }
-.holdings-scroll .sink-row th, .holdings-scroll .sink-state th { padding-left: 32px; }
+.source-expand { width: 24px; height: 24px; margin-right: 4px; }
+.holdings-scroll .sink-row th, .holdings-scroll .sink-state th { padding-left: 24px; }
 .holdings-scroll .sink-state th { white-space: normal; font-weight: normal; }
 
 /* Native contract dialogs appear above the map and holdings. */
