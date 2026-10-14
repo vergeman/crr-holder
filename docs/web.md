@@ -157,6 +157,9 @@ Top down we get birds eye overview to detailed inventory
 
 ## Detail Sidebar / Drawer
 
+Detailed behavior, cell selection, grouping, and holdings panel controls:
+[Sprint 3.5 plan](plan/0008-contract-details-workspace.md).
+
 * Example shows everything at source x sink x instrument x time period
 * For an individual account holder, this will have been selected prior to click
   on the "Account Holder" Panel

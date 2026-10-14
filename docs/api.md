@@ -61,6 +61,11 @@
   Retain the shared filters plus the source restriction. See
   [Sprint 3.4 contract](plan/0007-sink-expansion.md).
 
+* Contract details select an exact ordered pair, first-of-month ISO `month`, and
+  `OPT` or `OBL` under the shared filters. Return all original contract segments
+  grouped by holder and TOU, with selected-month contributions and full subtotals.
+  See [Sprint 3.5 contract](plan/0008-contract-details-workspace.md).
+
 * endpoints vs map:
   * if we show an aggregate MWh,it wil just be dominated by the hubs and loading zones, kind of obvious.
   * more interesting is to see the source-sink pairs, particularly by account holder. Sinks are also sources so not necessarily "losing" anything, this is just a way to look at it

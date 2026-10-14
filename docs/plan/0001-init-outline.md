@@ -104,6 +104,8 @@ Output: expanding a source explains its totals through Source-Sink Pairs.
 
 ### 3.5 - Contract Details and Completed Workspace
 
+Detailed plan: [0008 - Contract Details and Completed Workspace](0008-contract-details-workspace.md).
+
 * Implement `/api/holdings/contracts` and open details from a sink/month/hedge-type
   cell, retaining the report and portfolio filters.
 * Return all contracts matching that cell without pagination initially.
