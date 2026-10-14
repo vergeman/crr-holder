@@ -87,9 +87,8 @@ Branch: feat/0003-establish-stack
 
 ## Acceptance
 
-* [ ] Compose starts both services on ports `8000` and `5173`.
-* [ ] The endpoint returns the sorted account-holder identifiers from SQLite.
-* [ ] React fetches and renders the same list without styling.
-* [ ] Host source edits trigger API reload and frontend hot reload.
-* [ ] `package.json` includes TanStack Query and Orval; the demo uses plain fetch.
-* [ ] Run instructions are documented; no automated tests or extra features exist.
+* [x] Compose starts both services on ports `8000` and `5173`.
+* [x] The endpoint returns the sorted account-holder identifiers from SQLite.
+* [x] React fetches and renders the same list without styling.
+* [x] `package.json` includes TanStack Query and Orval; the demo uses plain fetch.
+* [x] Run instructions are documented; no automated tests or extra features exist.
