@@ -1,12 +1,14 @@
 # Imports
 import sqlite3
 from contextlib import closing
+from datetime import date
+from typing import Annotated, Literal
 
 from fastapi import FastAPI, Query
-from pydantic import BaseModel
+from pydantic import AfterValidator, BaseModel
 
 from queries import get_metadata, get_summary
-from holdings import get_source_holdings, get_sink_holdings
+from holdings import get_source_holdings, get_sink_holdings, get_contract_holdings
 
 
 # Preparation: response models also define the generated HTTP contract.
@@ -93,6 +95,49 @@ class SinkHoldings(BaseModel):
     sinks: list[SinkHolding]
 
 
+# Preparation: original contract fields are stored once in the response hierarchy.
+class Contract(BaseModel):
+    crrId: int
+    segmentId: int
+    crrType: str
+    startDate: str
+    endDate: str
+    mw: float
+    monthMwh: float
+
+
+class TimeOfUseGroup(BaseModel):
+    timeOfUse: str
+    hours: int
+    totalMwh: float
+    contracts: list[Contract]
+
+
+class ContractAccountHolder(BaseModel):
+    accountHolder: str
+    legalName: str | None
+    totalMwh: float
+    timeOfUseGroups: list[TimeOfUseGroup]
+
+
+class ContractHoldings(BaseModel):
+    reportId: int
+    source: str
+    sink: str
+    deliveryMonth: str
+    hedgeType: Literal['OPT', 'OBL']
+    totalMwh: float
+    accountHolders: list[ContractAccountHolder]
+
+
+def validate_delivery_month(value):
+    # Validation: accept only real first-of-month ISO dates.
+    parsed = date.fromisoformat(value)
+    if parsed.day != 1 or parsed.isoformat() != value:
+        raise ValueError('Use a first-of-month ISO date (YYYY-MM-01).')
+    return value
+
+
 app = FastAPI()
 
 
@@ -131,3 +176,18 @@ def sink_holdings(source: str, report_id: int | None = None,
                   settlement_point: str | None = None):
     with closing(sqlite3.connect("file:/data/crr.sqlite?mode=ro", uri=True)) as db:
         return get_sink_holdings(db, source, report_id, account_holder, settlement_point)
+
+
+# Output: cell details retain one report and the same portfolio selection.
+@app.get("/api/holdings/contracts", response_model=ContractHoldings,
+         operation_id="getContractHoldings")
+def contract_holdings(source: str, sink: str,
+                      month: Annotated[str, Query(pattern=r'^\d{4}-\d{2}-01$'),
+                                       AfterValidator(validate_delivery_month)],
+                      hedge_type: Literal['OPT', 'OBL'],
+                      report_id: int | None = None,
+                      account_holder: str | None = None,
+                      settlement_point: str | None = None):
+    with closing(sqlite3.connect("file:/data/crr.sqlite?mode=ro", uri=True)) as db:
+        return get_contract_holdings(db, source, sink, month, hedge_type,
+                                     report_id, account_holder, settlement_point)
