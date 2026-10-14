@@ -47,7 +47,8 @@ function PortfolioSummary({ summary }) {
   );
 }
 
-function RankingList({ id, title, rows, identifierKey, onSelect, pointTotals = false }) {
+function RankingList({ id, title, rows, identifierKey, onSelect, onClear,
+                       filtered, pointTotals = false }) {
   const explanation = 'Ranked by contractual MWh for the current filters.' +
     (pointTotals ? ' Each holding counts toward its source and sink; identical endpoints ' +
       'count once. Do not add settlement-point totals to calculate portfolio MWh.' : '');
@@ -56,14 +57,13 @@ function RankingList({ id, title, rows, identifierKey, onSelect, pointTotals = f
   return (
     <div className="ranking-list" aria-labelledby={`${id}-heading`}>
       <div className="ranking-heading">
-        <h3 id={`${id}-heading`}>{title}</h3>
-        <span className="ranking-info">
-          <button type="button" aria-label={`About ${title}`}
-            aria-describedby={`${id}-tooltip`}>i</button>
-          <span className="ranking-tooltip" id={`${id}-tooltip`} role="tooltip">
-            {explanation}
-          </span>
+        <h3 id={`${id}-heading`} tabIndex={0}
+          aria-describedby={`${id}-tooltip`}>{title}</h3>
+        <span className="ranking-tooltip" id={`${id}-tooltip`} role="tooltip">
+          {explanation}
         </span>
+        <button type="button" className="ranking-clear" disabled={!filtered}
+          aria-label={`Clear ${title} filter`} onClick={onClear}>Clear</button>
       </div>
       {rows.length === 0 ? <p>No holdings match these filters.</p> : (
         <ol>
@@ -86,7 +86,8 @@ function RankingList({ id, title, rows, identifierKey, onSelect, pointTotals = f
   );
 }
 
-function Discovery({ summary, onHolderSelect, onPointSelect }) {
+function Discovery({ summary, accountHolder, settlementPoint,
+                     onHolderSelect, onPointSelect, onHolderClear }) {
   // Output: both lists belong to the same currently selected portfolio.
   return (
     <section aria-labelledby="discover-heading">
@@ -94,10 +95,11 @@ function Discovery({ summary, onHolderSelect, onPointSelect }) {
       <div className="discovery-lists">
         <RankingList id="top-accounts" title="Top Accounts"
           rows={summary.topAccountHolders} identifierKey="accountHolder"
-          onSelect={onHolderSelect} />
+          onSelect={onHolderSelect} onClear={onHolderClear} filtered={!!accountHolder} />
         <RankingList id="top-points" title="Top Settlement Points"
           rows={summary.topSettlementPoints} identifierKey="settlementPoint"
-          onSelect={onPointSelect} pointTotals />
+          onSelect={onPointSelect} onClear={() => onPointSelect('')}
+          filtered={!!settlementPoint} pointTotals />
       </div>
     </section>
   );
@@ -190,8 +192,9 @@ function CRRExplorer() {
             !summary.data ? <p role="status">Loading portfolio summary...</p> :
               <>
                 <PortfolioSummary summary={summary.data} />
-                <Discovery summary={summary.data} onHolderSelect={changeHolder}
-                  onPointSelect={setSettlementPoint} />
+                <Discovery summary={summary.data} accountHolder={accountHolder}
+                  settlementPoint={settlementPoint} onHolderSelect={changeHolder}
+                  onPointSelect={setSettlementPoint} onHolderClear={() => setAccountHolder('')} />
               </>}
         </aside>
         <section className="map-placeholder" aria-labelledby="map-heading">
