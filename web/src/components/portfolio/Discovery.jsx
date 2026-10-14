@@ -44,7 +44,7 @@ function RankingTable({
           title={`Clear ${title} filter`}
           onClick={onClear}
         >
-          <span aria-hidden="true">×</span>
+          <span aria-hidden="true">←</span>
         </button>
       </div>
       {rows.length === 0 ? (
