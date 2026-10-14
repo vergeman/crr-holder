@@ -134,14 +134,33 @@ export default function SourceHoldings({
                           <th scope="row">
                             <button
                               type="button"
-                              className="source-expand"
+                              className="source-expand control-icon"
                               aria-expanded={expanded.has(row.source)}
                               aria-label={`${
                                 expanded.has(row.source) ? "Collapse" : "Expand"
                               } ${row.source}`}
+                              title={`${
+                                expanded.has(row.source) ? "Collapse" : "Expand"
+                              } ${row.source}`}
                               onClick={() => toggle(row.source)}
                             >
-                              {expanded.has(row.source) ? "▾" : "▸"}
+                              <svg
+                                className="control-caret"
+                                viewBox="0 0 16 16"
+                                aria-hidden="true"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="1.6"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                style={{
+                                  transform: expanded.has(row.source)
+                                    ? "rotate(0deg)"
+                                    : "rotate(-90deg)",
+                                }}
+                              >
+                                <path d="m4 6 4 4 4-4" />
+                              </svg>
                             </button>
                             {row.source}
                           </th>

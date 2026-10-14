@@ -32,12 +32,13 @@ function RankingList({
         </span>
         <button
           type="button"
-          className="ranking-clear"
+          className="ranking-clear control-icon"
           disabled={!filtered}
           aria-label={`Clear ${title} filter`}
+          title={`Clear ${title} filter`}
           onClick={onClear}
         >
-          Clear
+          <span aria-hidden="true">×</span>
         </button>
       </div>
       {rows.length === 0 ? (

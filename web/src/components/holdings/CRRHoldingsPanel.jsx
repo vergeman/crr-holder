@@ -54,11 +54,27 @@ export default function CRRHoldingsPanel({
         <h2 id="holdings-heading">CRR Holdings</h2>
         <button
           type="button"
+          className="control-icon holdings-toggle"
+          aria-label={
+            crrHoldingsPanelVisible ? "Hide holdings" : "Show holdings"
+          }
+          title={crrHoldingsPanelVisible ? "Hide holdings" : "Show holdings"}
           onClick={onToggle}
           aria-expanded={crrHoldingsPanelVisible}
           aria-controls="holdings-content"
         >
-          {crrHoldingsPanelVisible ? "Hide" : "Show"} holdings
+          <svg
+            className="control-caret"
+            viewBox="0 0 16 16"
+            aria-hidden="true"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="m4 6 4 4 4-4" />
+          </svg>
         </button>
       </div>
       <div className="holdings-panel-body" hidden={!crrHoldingsPanelVisible}>

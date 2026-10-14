@@ -67,8 +67,15 @@ export default function ContractDetailsModal({
     >
       <div className="contract-header">
         <h2 id="contract-heading">CRR Contract Details</h2>
-        <button type="button" autoFocus onClick={closeModal}>
-          Close
+        <button
+          type="button"
+          className="control-icon"
+          aria-label="Close contract details"
+          title="Close contract details"
+          autoFocus
+          onClick={closeModal}
+        >
+          <span aria-hidden="true">×</span>
         </button>
       </div>
       <dl className="contract-selection">
