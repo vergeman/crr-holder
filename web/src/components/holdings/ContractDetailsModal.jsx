@@ -127,8 +127,10 @@ export default function ContractDetailsModal({
                   <summary>
                     <span className="contract-holder-heading">
                       <span>
-                        {holder.accountHolder}
-                        {holder.legalName && <small>{holder.legalName}</small>}
+                        {holder.legalName || holder.accountHolder}
+                        {holder.legalName && (
+                          <small>{holder.accountHolder}</small>
+                        )}
                       </span>
                       <strong>{mwhNumber.format(holder.totalMwh)} MWh</strong>
                     </span>
