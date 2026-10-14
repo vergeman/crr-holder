@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
@@ -66,6 +67,7 @@ export default function Map({
         center: texasLatLng,
         zoom: 5,
         renderWorldCopies: false,
+        attributionControl: false,
       });
       instance.addControl(
         new maplibregl.NavigationControl({ showCompass: false }),
@@ -186,6 +188,14 @@ export default function Map({
             mwhNumber={mwhNumber}
           />
         ))}
+      {map &&
+        createPortal(
+          <MapControls
+            canReset={Boolean(isoPoints)}
+            onReset={() => fitReport(map, isoPoints)}
+          />,
+          map.getContainer().querySelector(".maplibregl-ctrl-top-right")
+        )}
       {detail && detailPosition && (
         <MapPointDetails
           detail={detail}
@@ -194,12 +204,6 @@ export default function Map({
         />
       )}
       <div className="map-information">
-        <MapControls
-          canReset={Boolean(map && isoPoints)}
-          canClear={Boolean(selectedPoint)}
-          onReset={() => fitReport(map, isoPoints)}
-          onClear={() => onPointSelect("")}
-        />
         <MapStatus
           mapError={mapError}
           dataFailed={dataFailed}
