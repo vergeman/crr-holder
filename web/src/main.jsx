@@ -112,10 +112,19 @@ function CRRExplorer() {
   return (
     <main>
       <header>
-        <div>
+        <div className="explorer-heading">
           <h1>ERCOT CRR Holdings Explorer</h1>
-          <p>Outstanding contractual holdings</p>
         </div>
+        <PortfolioFilters
+          reportMetadata={reportMetadata}
+          metadata={metadata}
+          accountHolder={accountHolder}
+          settlementPoint={settlementPoint}
+          onHolderSelect={changeAccountHolder}
+          onPointSelect={changeSettlementPoint}
+          onClear={clearFilters}
+          loading={portfolioLoading}
+        />
         <label>
           Report
           <select
@@ -154,36 +163,31 @@ function CRRExplorer() {
             hidden={!summary.data && !summary.isError}
             aria-busy={portfolioLoading}
           >
-            <PortfolioFilters
-              reportMetadata={reportMetadata}
-              metadata={metadata}
-              accountHolder={accountHolder}
-              settlementPoint={settlementPoint}
-              onHolderSelect={changeAccountHolder}
-              onPointSelect={changeSettlementPoint}
-              onClear={clearFilters}
-              loading={portfolioLoading}
-            />
-            {summary.isError ? (
-              <p role="alert">Unable to load portfolio summary.</p>
-            ) : !summary.data ? (
-              <p role="status">Loading portfolio summary...</p>
-            ) : (
-              <PortfolioSummary summary={summary.data} mwhNumber={mwhNumber} />
-            )}
+            <div className="portfolio-scroll">
+              {summary.isError ? (
+                <p role="alert">Unable to load portfolio summary.</p>
+              ) : !summary.data ? (
+                <p role="status">Loading portfolio summary...</p>
+              ) : (
+                <PortfolioSummary
+                  summary={summary.data}
+                  mwhNumber={mwhNumber}
+                />
+              )}
+              {summary.data && (
+                <Discovery
+                  summary={summary.data}
+                  mwhNumber={mwhNumber}
+                  accountHolder={accountHolder}
+                  settlementPoint={settlementPoint}
+                  onHolderSelect={changeAccountHolder}
+                  onPointSelect={changeSettlementPoint}
+                  onHolderClear={clearAccountHolder}
+                  loading={portfolioLoading}
+                />
+              )}
+            </div>
           </div>
-          {summary.data && (
-            <Discovery
-              summary={summary.data}
-              mwhNumber={mwhNumber}
-              accountHolder={accountHolder}
-              settlementPoint={settlementPoint}
-              onHolderSelect={changeAccountHolder}
-              onPointSelect={changeSettlementPoint}
-              onHolderClear={clearAccountHolder}
-              loading={portfolioLoading}
-            />
-          )}
         </aside>
         <Map
           key={reportId}

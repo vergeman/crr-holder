@@ -12,39 +12,28 @@ export default function PortfolioSummary({ summary, mwhNumber }) {
         <summary>
           <h2 id="summary-heading">Portfolio Summary</h2>
         </summary>
-        <p>Contractual inventory across the report’s delivery horizon.</p>
         <div className="portfolio-summary-columns">
-          <div>
-            <dl className="portfolio-total">
-              <div>
-                <dt>Total Contractual MWh</dt>
-                <dd>{mwhNumber.format(summary.totalMwh)}</dd>
-              </div>
-            </dl>
+          <dl className="portfolio-inventory">
+            <div className="portfolio-total">
+              <dt>Total Contractual MWh</dt>
+              <dd>{mwhNumber.format(summary.totalMwh)}</dd>
+            </div>
             {["OPT", "OBL"].map((type) => {
               const mwh = summary.hedgeTypeMwh[type];
               const percent =
                 summary.totalMwh === 0 ? 0 : (100 * mwh) / summary.totalMwh;
               return (
-                <div className="hedge" key={type}>
-                  <div className="hedge-label">
-                    <span>
-                      {type === "OPT" ? "Options" : "Obligations"} ({type})
-                    </span>
-                    <span>
-                      {mwhNumber.format(mwh)} MWh · {percent.toFixed(1)}%
-                    </span>
-                  </div>
-                  <div className="bar" aria-hidden="true">
-                    <div
-                      className={type.toLowerCase()}
-                      style={{ width: `${percent}%` }}
-                    />
-                  </div>
+                <div className="portfolio-hedge" key={type}>
+                  <dt>
+                    {type === "OPT" ? "Options" : "Obligations"} ({type})
+                  </dt>
+                  <dd>
+                    {mwhNumber.format(mwh)} · {percent.toFixed(1)}%
+                  </dd>
                 </div>
               );
             })}
-          </div>
+          </dl>
           <dl>
             {metrics.map(([label, value]) => (
               <div key={label}>

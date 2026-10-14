@@ -1,3 +1,8 @@
+// The directory suffix is useful in source data but adds noise to rankings.
+function accountDisplayName(name) {
+  return name?.replace(/\s*\(CRRAH\)$/, "") || "";
+}
+
 function RankingTable({
   id,
   title,
@@ -45,46 +50,47 @@ function RankingTable({
       {rows.length === 0 ? (
         <p>No holdings match these filters.</p>
       ) : (
-        <table className="ranking-table" aria-busy={loading}>
-          <thead>
-            <tr>
-              <th scope="col">
-                {pointTotals ? "Settlement Point" : "Account Holder"}
-              </th>
-              <th scope="col">Total MWh</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
-              <tr
-                key={row[identifierKey]}
-                onClick={() => {
-                  if (!loading) onSelect(row[identifierKey]);
-                }}
-                className={
-                  selected === row[identifierKey]
-                    ? "ranking-selected"
-                    : undefined
-                }
-              >
-                <td>
-                  <button
-                    type="button"
-                    className="ranking-identity"
-                    aria-pressed={selected === row[identifierKey]}
-                    disabled={loading}
-                  >
-                    <strong>{row.legalName || row[identifierKey]}</strong>
-                    {row.legalName && <span>{row[identifierKey]}</span>}
-                  </button>
-                </td>
-                <td className="ranking-mwh">
-                  {mwhNumber.format(row.totalMwh)}
-                </td>
+        <div className="ranking-scroll">
+          <table className="ranking-table" aria-busy={loading}>
+            <thead>
+              <tr>
+                <th scope="col">{pointTotals ? "Settlement Point" : "Code"}</th>
+                {!pointTotals && <th scope="col">Account Holder</th>}
+                <th scope="col">Total MWh</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr
+                  key={row[identifierKey]}
+                  onClick={() => {
+                    if (!loading) onSelect(row[identifierKey]);
+                  }}
+                  className={
+                    selected === row[identifierKey]
+                      ? "ranking-selected"
+                      : undefined
+                  }
+                >
+                  <td>
+                    <button
+                      type="button"
+                      className="ranking-identity"
+                      disabled={loading}
+                      aria-pressed={selected === row[identifierKey]}
+                    >
+                      {row[identifierKey]}
+                    </button>
+                  </td>
+                  {!pointTotals && <td>{accountDisplayName(row.legalName)}</td>}
+                  <td className="ranking-mwh">
+                    {mwhNumber.format(row.totalMwh)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
