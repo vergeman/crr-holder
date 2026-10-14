@@ -109,3 +109,59 @@ def get_sink_holdings(db, source, report_id=None, account_holder=None,
     # Output: empty sources retain the selected report's timeline.
     return {"reportId": report_id, "source": source,
             "deliveryMonths": months, "sinks": sinks}
+
+
+def get_contract_holdings(db, source, sink, month, hedge_type, report_id=None,
+                         account_holder=None, settlement_point=None):
+    # Preparation: select original segments with the shared portfolio predicates.
+    report_id = resolve_report(db, report_id)
+    where, parameters = holdings_filter(report_id, account_holder, settlement_point)
+    parameters.update(source=source, sink=sink, month=month, hedge_type=hedge_type)
+
+    # Transformation: match the prepared monthly calculation without proration.
+    rows = db.execute(f"""
+        -- Filter originals before enriching holders to keep predicates unambiguous.
+        WITH contracts AS (
+            SELECT * FROM crr_holdings WHERE {where}
+              AND source = :source AND sink = :sink AND hedge_type = :hedge_type
+        )
+        SELECT h.account_holder, a.legal_name, h.time_of_use,
+               h.crr_id, h.segment_id, h.crr_type, h.start_date, h.end_date,
+               h.mw, h.mw * t.hours AS month_mwh
+        FROM contracts h
+        JOIN tou_hours t ON t.time_of_use = h.time_of_use
+                         AND t.delivery_month = :month
+                         -- Use the same inclusive month bounds as preparation.
+                         AND t.delivery_month BETWEEN h.start_date AND h.end_date
+        JOIN account_holders a ON a.account_holder = h.account_holder
+        ORDER BY month_mwh DESC, h.crr_id ASC, h.segment_id ASC
+    """, parameters)
+
+    holders = {}
+    for holder, name, tou, crr_id, segment_id, crr_type, start, end, mw, mwh in rows:
+        group = holders.setdefault(holder, {
+            "accountHolder": holder, "legalName": name, "totalMwh": 0,
+            "timeOfUseGroups": {},
+        })
+        tou_group = group['timeOfUseGroups'].setdefault(tou, {
+            "timeOfUse": tou, "totalMwh": 0, "contracts": [],
+        })
+        tou_group['contracts'].append({
+            "crrId": crr_id, "segmentId": segment_id, "crrType": crr_type,
+            "startDate": start, "endDate": end, "mw": mw, "monthMwh": mwh,
+        })
+        tou_group['totalMwh'] += mwh
+        group['totalMwh'] += mwh
+
+    for group in holders.values():
+        groups = group['timeOfUseGroups']
+        group['timeOfUseGroups'] = [groups[tou] for tou in
+                                    ('PeakWD', 'PeakWE', 'Off-peak') if tou in groups]
+    ordered = sorted(holders.values(), key=lambda group:
+                     (-group['totalMwh'], group['accountHolder']))
+
+    # Output: totals reflect every returned segment, independent of UI expansion.
+    return {"reportId": report_id, "source": source, "sink": sink,
+            "deliveryMonth": month, "hedgeType": hedge_type,
+            "totalMwh": sum(group['totalMwh'] for group in ordered),
+            "accountHolders": ordered}
