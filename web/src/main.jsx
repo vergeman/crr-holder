@@ -46,7 +46,9 @@ function CRRExplorer() {
     // Retain the chosen size while reapplying viewport bounds.
     function resizeViewport() {
       setViewportHeight(window.innerHeight);
-      setCRRHoldingsPanelHeight((height) => boundCRRHoldingsPanelHeight(height));
+      setCRRHoldingsPanelHeight((height) =>
+        boundCRRHoldingsPanelHeight(height)
+      );
     }
     window.addEventListener("resize", resizeViewport);
     return () => window.removeEventListener("resize", resizeViewport);
@@ -129,7 +131,9 @@ function CRRExplorer() {
       <div
         className="workspace"
         style={{
-          "--holdings-space": crrHoldingsPanelVisible ? `${crrHoldingsPanelHeight + 200}px` : "140px",
+          "--holdings-space": crrHoldingsPanelVisible
+            ? `${crrHoldingsPanelHeight + 200}px`
+            : "140px",
         }}
       >
         <aside>
