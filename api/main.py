@@ -6,7 +6,7 @@ from fastapi import FastAPI, Query
 from pydantic import BaseModel
 
 from queries import get_metadata, get_summary
-from holdings import get_source_holdings
+from holdings import get_source_holdings, get_sink_holdings
 
 
 # Preparation: response models also define the generated HTTP contract.
@@ -79,6 +79,20 @@ class SourceHoldings(BaseModel):
     nextOffset: int | None
 
 
+class SinkHolding(BaseModel):
+    sink: str
+    totalOptMwh: float
+    totalOblMwh: float
+    months: list[HoldingsMonth]
+
+
+class SinkHoldings(BaseModel):
+    reportId: int
+    source: str
+    deliveryMonths: list[str]
+    sinks: list[SinkHolding]
+
+
 app = FastAPI()
 
 
@@ -107,3 +121,13 @@ def source_holdings(report_id: int | None = None,
     with closing(sqlite3.connect("file:/data/crr.sqlite?mode=ro", uri=True)) as db:
         return get_source_holdings(db, report_id, account_holder,
                                    settlement_point, limit, offset)
+
+
+# Output: expanded sources use the same read-only report and portfolio filters.
+@app.get("/api/holdings/sources/{source}/sinks", response_model=SinkHoldings,
+         operation_id="getSinkHoldings")
+def sink_holdings(source: str, report_id: int | None = None,
+                  account_holder: str | None = None,
+                  settlement_point: str | None = None):
+    with closing(sqlite3.connect("file:/data/crr.sqlite?mode=ro", uri=True)) as db:
+        return get_sink_holdings(db, source, report_id, account_holder, settlement_point)

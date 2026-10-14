@@ -3,11 +3,9 @@ from filters import holdings_filter
 from queries import resolve_report
 
 
-def get_source_holdings(db, report_id=None, account_holder=None,
-                        settlement_point=None, limit=20, offset=0):
-    # Preparation: the report timeline remains independent of portfolio filters.
-    report_id = resolve_report(db, report_id)
-    months = [row[0] for row in db.execute("""
+def delivery_months(db, report_id):
+    # Preparation: share the continuous report timeline across both drill-downs.
+    return [row[0] for row in db.execute("""
         -- WITH RECURSIVE expands the report span one month at a time.
         -- Example: October and January holdings yield Oct, Nov, Dec, Jan.
         WITH RECURSIVE months(month, last) AS (
@@ -18,6 +16,13 @@ def get_source_holdings(db, report_id=None, account_holder=None,
         )
         SELECT month FROM months WHERE month IS NOT NULL ORDER BY month
     """, (report_id,))]
+
+
+def get_source_holdings(db, report_id=None, account_holder=None,
+                        settlement_point=None, limit=20, offset=0):
+    # Preparation: the report timeline remains independent of portfolio filters.
+    report_id = resolve_report(db, report_id)
+    months = delivery_months(db, report_id)
     where, parameters = holdings_filter(report_id, account_holder, settlement_point)
     bounds = db.execute(f"""
         SELECT MIN(delivery_month), MAX(delivery_month)
@@ -63,3 +68,44 @@ def get_source_holdings(db, report_id=None, account_holder=None,
                              if bounds[0] else None,
             "sources": sources,
             "nextOffset": offset + limit if len(ranked) > limit else None}
+
+
+def get_sink_holdings(db, source, report_id=None, account_holder=None,
+                      settlement_point=None):
+    # Preparation: source restriction complements the inclusive portfolio filter.
+    report_id = resolve_report(db, report_id)
+    months = delivery_months(db, report_id)
+    where, parameters = holdings_filter(report_id, account_holder, settlement_point)
+    where += " AND source = :source"
+    parameters['source'] = source
+
+    # Transformation: aggregate every matching sink, without pagination.
+    ranked = db.execute(f"""
+        -- Rank full-horizon sinks by combined MWh, then identifier for ties.
+        SELECT sink,
+               SUM(CASE WHEN hedge_type = 'OPT'
+                   THEN peak_wd_mwh + peak_we_mwh + off_peak_mwh ELSE 0 END) AS total_opt_mwh,
+               SUM(CASE WHEN hedge_type = 'OBL'
+                   THEN peak_wd_mwh + peak_we_mwh + off_peak_mwh ELSE 0 END) AS total_obl_mwh
+        FROM crr_monthly_holdings WHERE {where}
+        GROUP BY sink
+        ORDER BY total_opt_mwh + total_obl_mwh DESC, sink ASC
+    """, parameters).fetchall()
+    sinks = [{"sink": sink, "totalOptMwh": opt, "totalOblMwh": obl,
+              "months": [{"deliveryMonth": month, "OPT": 0, "OBL": 0}
+                         for month in months]} for sink, opt, obl in ranked]
+    cells = {(row['sink'], cell['deliveryMonth']): cell
+             for row in sinks for cell in row['months']}
+    rows = db.execute(f"""
+        -- Keep the same predicates for monthly cells and full-horizon totals.
+        SELECT sink, delivery_month, hedge_type,
+               SUM(peak_wd_mwh + peak_we_mwh + off_peak_mwh)
+        FROM crr_monthly_holdings WHERE {where}
+        GROUP BY sink, delivery_month, hedge_type
+    """, parameters)
+    for sink, month, hedge_type, mwh in rows:
+        cells[sink, month][hedge_type] = mwh
+
+    # Output: empty sources retain the selected report's timeline.
+    return {"reportId": report_id, "source": source,
+            "deliveryMonths": months, "sinks": sinks}
