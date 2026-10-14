@@ -1,5 +1,6 @@
 // Imports
 import { getMetadata, getSummary } from '../generated/client';
+import { wasmProvider } from './wasm-provider';
 
 // Transformation: HTTP details stay outside the query hooks and UI.
 function unwrap(response) {
@@ -27,5 +28,6 @@ const httpProvider = {
   },
 };
 
-// Output: swap the HTTP provider here for browser SQLite or VFS in Sprint 5.
-export const dataProvider = httpProvider;
+// Output: select browser SQLite at startup; HTTP remains the default baseline.
+export const dataProvider = import.meta.env.VITE_DATA_PROVIDER === 'wasm'
+  ? wasmProvider : httpProvider;
