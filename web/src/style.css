@@ -17,7 +17,7 @@ h2 { font-size: 15px; }
 p { color: #52616b; }
 .workspace { position: relative; flex: 1; min-height: 0; overflow: hidden; }
 .workspace > aside { position: absolute; top: 16px; left: 16px; z-index: 3;
-  width: 380px; max-width: calc(100% - 92px); max-height: max(120px, calc(100% - var(--holdings-space)));
+  width: 560px; max-width: calc(100% - 92px); max-height: max(120px, calc(100% - var(--holdings-space)));
   overflow-y: auto; scrollbar-width: thin; pointer-events: none; }
 .workspace > aside > * { pointer-events: auto; }
 .workspace > aside section { box-shadow: 0 3px 16px #20303c24; }
@@ -27,6 +27,24 @@ p { color: #52616b; }
 .workspace > aside details[open] > summary { margin-bottom: 16px; }
 section { background: white; padding: 20px; border: 1px solid #dce2e7; border-radius: 6px; }
 aside section + section { margin-top: 12px; }
+/* Filters and inventory share a compact portfolio card. */
+.portfolio-overview { background: white; border-radius: 6px; box-shadow: 0 3px 16px #20303c24; }
+.workspace > aside .portfolio-overview section { box-shadow: none; }
+.portfolio-overview .portfolio-filters { border-bottom: 0; border-radius: 6px 6px 0 0; }
+.portfolio-overview .portfolio-summary { margin-top: 0; border-radius: 0 0 6px 6px; }
+.portfolio-overview + section { margin-top: 12px; }
+.portfolio-filter-controls { display: flex; align-items: end; flex-wrap: wrap; gap: 10px; }
+.portfolio-filter-controls label { flex: 1 1 180px; min-width: 0; margin: 0; }
+.portfolio-filter-controls button { flex-shrink: 0; height: 30px; }
+.portfolio-summary-columns { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 24px; }
+.portfolio-summary-columns dl { margin: 0; }
+.portfolio-summary-columns dt { color: #52616b; }
+.portfolio-total > div { flex-direction: column; gap: 4px; }
+.portfolio-total dd { font-size: 20px; }
+.portfolio-summary .hedge { margin-top: 10px; }
+.portfolio-summary .hedge-label { font-size: 12px; gap: 4px; }
+.portfolio-summary .bar { height: 6px; }
+.portfolio-summary > details > p { font-size: 12px; }
 label { display: block; margin-bottom: 16px; font-size: 12px; font-weight: 600; }
 select { display: block; width: 100%; margin-top: 4px; height: 30px; font-size: 13px; }
 header select { min-width: 170px; }
@@ -133,6 +151,7 @@ dd { margin: 0; font-weight: 600; }
   .map-controls { display: inline-flex; margin-right: 10px; }
   .map-legend { display: inline-block; }
   .discovery-lists { grid-template-columns: 1fr; }
+  .portfolio-summary-columns { gap: 12px; }
 }
 
 /* Complete months scroll while source identifiers remain visible. */

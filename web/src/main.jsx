@@ -137,32 +137,34 @@ function CRRExplorer() {
         }}
       >
         <aside>
-          <PortfolioFilters
-            reportMetadata={reportMetadata}
-            metadata={metadata}
-            accountHolder={accountHolder}
-            settlementPoint={settlementPoint}
-            onHolderSelect={changeAccountHolder}
-            onPointSelect={changeSettlementPoint}
-            onClear={clearFilters}
-          />
-          {summary.isError ? (
-            <p role="alert">Unable to load portfolio summary.</p>
-          ) : !summary.data ? (
-            <p role="status">Loading portfolio summary...</p>
-          ) : (
-            <>
+          <div className="portfolio-overview">
+            <PortfolioFilters
+              reportMetadata={reportMetadata}
+              metadata={metadata}
+              accountHolder={accountHolder}
+              settlementPoint={settlementPoint}
+              onHolderSelect={changeAccountHolder}
+              onPointSelect={changeSettlementPoint}
+              onClear={clearFilters}
+            />
+            {summary.isError ? (
+              <p role="alert">Unable to load portfolio summary.</p>
+            ) : !summary.data ? (
+              <p role="status">Loading portfolio summary...</p>
+            ) : (
               <PortfolioSummary summary={summary.data} mwhNumber={mwhNumber} />
-              <Discovery
-                summary={summary.data}
-                mwhNumber={mwhNumber}
-                accountHolder={accountHolder}
-                settlementPoint={settlementPoint}
-                onHolderSelect={changeAccountHolder}
-                onPointSelect={changeSettlementPoint}
-                onHolderClear={clearAccountHolder}
-              />
-            </>
+            )}
+          </div>
+          {summary.data && (
+            <Discovery
+              summary={summary.data}
+              mwhNumber={mwhNumber}
+              accountHolder={accountHolder}
+              settlementPoint={settlementPoint}
+              onHolderSelect={changeAccountHolder}
+              onPointSelect={changeSettlementPoint}
+              onHolderClear={clearAccountHolder}
+            />
           )}
         </aside>
         <Map
