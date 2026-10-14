@@ -61,7 +61,8 @@ class HoldingsMonth(HedgeTypeMwh):
 
 class SourceHolding(BaseModel):
     source: str
-    totalMwh: float
+    totalOptMwh: float
+    totalOblMwh: float
     months: list[HoldingsMonth]
 
 

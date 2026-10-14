@@ -28,13 +28,20 @@ def get_source_holdings(db, report_id=None, account_holder=None,
     # Transformation: rank complete sources before loading their monthly cells.
     parameters.update(limit=limit + 1, offset=offset)
     ranked = db.execute(f"""
-        SELECT source, SUM(peak_wd_mwh + peak_we_mwh + off_peak_mwh) AS total
+        SELECT source,
+               SUM(CASE WHEN hedge_type = 'OPT'
+                   THEN peak_wd_mwh + peak_we_mwh + off_peak_mwh ELSE 0 END) AS total_opt_mwh,
+               SUM(CASE WHEN hedge_type = 'OBL'
+                   THEN peak_wd_mwh + peak_we_mwh + off_peak_mwh ELSE 0 END) AS total_obl_mwh
         FROM crr_monthly_holdings WHERE {where}
-        GROUP BY source ORDER BY total DESC, source ASC LIMIT :limit OFFSET :offset
+        GROUP BY source
+        ORDER BY total_opt_mwh + total_obl_mwh DESC, source ASC
+        LIMIT :limit OFFSET :offset
     """, parameters).fetchall()
-    sources = [{"source": source, "totalMwh": total,
+    sources = [{"source": source,
+                "totalOptMwh": opt, "totalOblMwh": obl,
                 "months": [{"deliveryMonth": month, "OPT": 0, "OBL": 0}
-                           for month in months]} for source, total in ranked[:limit]]
+                           for month in months]} for source, opt, obl in ranked[:limit]]
     cells = {(source['source'], cell['deliveryMonth']): cell
              for source in sources for cell in source['months']}
     if sources:

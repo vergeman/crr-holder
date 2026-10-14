@@ -15,8 +15,8 @@ export default function SourceHoldings({ reportId, accountHolder, settlementPoin
 
   function jump() {
     if (scroll.current && firstMonth.current) {
-      const stickyWidth = scroll.current.querySelector('th').offsetWidth;
-      scroll.current.scrollLeft = firstMonth.current.offsetLeft - stickyWidth;
+      const timelineStart = scroll.current.querySelector('[data-delivery-month]').offsetLeft;
+      scroll.current.scrollLeft = firstMonth.current.offsetLeft - timelineStart;
     }
   }
 
@@ -45,15 +45,20 @@ export default function SourceHoldings({ reportId, accountHolder, settlementPoin
             <table>
               <thead>
                 <tr><th rowSpan={2} scope="col">Source</th>
+                  <th colSpan={2} scope="colgroup">Total MWh</th>
                   {page.deliveryMonths.map((month) => <th key={month} colSpan={2}
-                    scope="colgroup" ref={month === page.holdingsRange?.firstMonth ? firstMonth : null}>
+                    scope="colgroup" data-delivery-month={month}
+                    ref={month === page.holdingsRange?.firstMonth ? firstMonth : null}>
                     {monthLabel(month)}</th>)}
                 </tr>
-                <tr>{page.deliveryMonths.flatMap((month) => ['OPT', 'OBL'].map((type) =>
+                <tr><th scope="col">OPT</th><th scope="col">OBL</th>
+                  {page.deliveryMonths.flatMap((month) => ['OPT', 'OBL'].map((type) =>
                   <th key={`${month}/${type}`} scope="col">{type}</th>))}</tr>
               </thead>
               <tbody>{query.data.pages.flatMap((part) => part.sources).map((row) =>
                 <tr key={row.source}><th scope="row">{row.source}</th>
+                  <td>{number.format(row.totalOptMwh)}</td>
+                  <td>{number.format(row.totalOblMwh)}</td>
                   {row.months.flatMap((month) => ['OPT', 'OBL'].map((type) =>
                     <td key={`${month.deliveryMonth}/${type}`}>{number.format(month[type])}</td>))}
                 </tr>)}</tbody>

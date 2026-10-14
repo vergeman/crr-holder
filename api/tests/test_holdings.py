@@ -33,8 +33,12 @@ class HoldingsTests(unittest.TestCase):
                         for source in page['sources']:
                             self.assertEqual([cell['deliveryMonth'] for cell in source['months']],
                                              page['deliveryMonths'])
-                            self.assertEqual(source['totalMwh'], sum(
+                            self.assertEqual(source['totalOptMwh'] + source['totalOblMwh'], sum(
                                 cell['OPT'] + cell['OBL'] for cell in source['months']))
+
+                            for hedge, field in (('OPT', 'totalOptMwh'), ('OBL', 'totalOblMwh')):
+                                self.assertEqual(source[field],
+                                                 sum(cell[hedge] for cell in source['months']))
 
                         if page['nextOffset'] is None:
                             break
@@ -42,9 +46,11 @@ class HoldingsTests(unittest.TestCase):
 
                     # Reconciliation: all pages match summary totals without duplicates.
                     self.assertEqual(len(sources), len({row['source'] for row in sources}))
-                    self.assertEqual(sum(row['totalMwh'] for row in sources), summary['totalMwh'])
+                    self.assertEqual(sum(row['totalOptMwh'] + row['totalOblMwh'] for row in sources), summary['totalMwh'])
 
-                    for hedge in ('OPT', 'OBL'):
+                    for hedge, field in (('OPT', 'totalOptMwh'), ('OBL', 'totalOblMwh')):
+                        self.assertEqual(sum(row[field] for row in sources),
+                                         summary['hedgeTypeMwh'][hedge])
                         self.assertEqual(sum(cell[hedge] for row in sources for cell in row['months']),
                                          summary['hedgeTypeMwh'][hedge])
 
@@ -89,7 +95,7 @@ class HoldingsTests(unittest.TestCase):
         # Assertions
         self.assertIsNone(page['holdingsRange'])
         self.assertEqual([row['source'] for row in page['sources']], ['A', 'B'])
-        self.assertTrue(all(row['totalMwh'] == 0 for row in page['sources']))
+        self.assertTrue(all(row['totalOptMwh'] + row['totalOblMwh'] == 0 for row in page['sources']))
 
     def test_ties_and_complete_source_pages(self):
         # Setup: local pagination rows exceed the default page size.
