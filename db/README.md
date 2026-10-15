@@ -149,3 +149,28 @@ These are single runs, excluding serialization and network time.
 The unfiltered overview still
 aggregates every summary row; consider sharing geography/ranking aggregation
 or precomputing that overview if its measured latency remains too high.
+
+## 7. Scan the summary table for report-only requests
+
+Added `NOT INDEXED` only when neither account nor settlement point is selected.
+The local plan now shows `SCAN crr_summary_holdings`; point filters still use
+the source and sink indexes. A single local comparison of complete summary
+calls fell from **5,106 ms to 2,287 ms** for the overview. All five comparison
+responses matched within tolerance, and filtered timings stayed similar.
+The Docker run reduced measured overview stages from **3,470 to 1,510 ms**:
+
+| Stage, ms | Index access | Table scan |
+| --- | ---: | ---: |
+| Totals | 1,197 | 611 |
+| Geography | 951 | 436 |
+| Account rankings | 69 | 133 |
+| Point rankings | 1,253 | 331 |
+
+Account rankings regressed individually, but the combined time improved.
+Filtered stage totals remained small: 67 ms for HB_NORTH, 42 ms for LZ_NORTH,
+and 2 ms for XLUREP. These are single-run stage sums, excluding serialization
+and network time. Next, test sharing geography and point-ranking aggregation.
+
+This forced scan is an
+experiment and may be less suitable when a report selects a small part of a
+database containing many reports.
