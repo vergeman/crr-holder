@@ -4,9 +4,8 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { generate } from 'orval';
 import config from '../orval.config.js';
 
-// Preparation: schema polling and Vite share the development process lifecycle.
+// Generate the client at startup before launching Vite.
 const shutdown = new AbortController();
-let lastSchema;
 let vite;
 
 function stop() {
@@ -17,7 +16,7 @@ function stop() {
 process.on('SIGINT', stop);
 process.on('SIGTERM', stop);
 
-// Import and transformation: serialize regeneration, keeping the schema in memory.
+// Retry until the API is ready and client generation succeeds.
 while (!shutdown.signal.aborted) {
   try {
     const response = await fetch(config.explorer.input, {
@@ -26,11 +25,8 @@ while (!shutdown.signal.aborted) {
     if (!response.ok) throw new Error(`OpenAPI request failed: ${response.status}`);
     const schema = await response.text();
 
-    if (schema !== lastSchema) {
-      await generate({ ...config.explorer, input: { target: JSON.parse(schema) } });
-      lastSchema = schema;
-      console.log('HTTP client updated from the API schema.');
-    }
+    await generate({ ...config.explorer, input: { target: JSON.parse(schema) } });
+    console.log('HTTP client updated from the API schema.');
 
     // Output: serve the UI only after its generated imports exist.
     if (!vite && !shutdown.signal.aborted) {
@@ -49,6 +45,8 @@ while (!shutdown.signal.aborted) {
         }
       });
     }
+
+    break;
   } catch (error) {
     if (!shutdown.signal.aborted) console.error(`Client generation: ${error.message}`);
   }
@@ -56,6 +54,6 @@ while (!shutdown.signal.aborted) {
   try {
     await delay(2000, undefined, { signal: shutdown.signal });
   } catch {
-    // Shutdown interrupts the polling interval.
+    // Shutdown interrupts the retry delay.
   }
 }
