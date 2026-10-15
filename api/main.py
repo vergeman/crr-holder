@@ -7,7 +7,7 @@ from fastapi import FastAPI, Query
 from pydantic import AfterValidator, BaseModel
 
 from services.metadata import get_metadata
-from queries import get_summary
+from services.summary import get_summary
 from holdings import get_source_holdings, get_sink_holdings, get_contract_holdings
 
 

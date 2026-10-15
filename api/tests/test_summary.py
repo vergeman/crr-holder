@@ -3,7 +3,7 @@ import unittest
 
 from fixtures import create_fixture_db
 from services.metadata import get_metadata
-from queries import get_summary
+from services.summary import get_summary
 from services.helpers import resolve_report
 
 

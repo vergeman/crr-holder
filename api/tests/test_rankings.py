@@ -2,7 +2,7 @@
 import unittest
 
 from fixtures import create_fixture_db
-from queries import get_summary
+from services.summary import get_summary
 
 
 class RankingTests(unittest.TestCase):

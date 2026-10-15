@@ -1,8 +1,8 @@
 import sqlite3
 
 from services.helpers import holdings_filter, resolve_report
-from geography import get_geographic_footprint
-from rankings import get_top_account_holders, get_top_settlement_points
+from services.geography import get_geographic_footprint
+from services.rankings import get_top_account_holders, get_top_settlement_points
 
 
 def get_summary(db: sqlite3.Connection, report_id=None, account_holder=None,
