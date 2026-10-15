@@ -42,6 +42,11 @@ def build_dataset(data_dir, output):
             if errors:
                 raise ValueError(f"Dataset comparisons failed: {errors}")
 
+            # Publish optimizer statistics with the completed tables and indexes.
+            print("Analyzing database...", flush=True)
+            db.execute("ANALYZE")
+            db.commit()
+
         # Publish the completed database after all comparisons pass.
         os.replace(temporary, output)
         return results

@@ -276,3 +276,23 @@ Reference: `1b5b70f`.
   task 5 statistics recheck.
 * Captures: `/tmp/0013-query-performance/task-4/` on host and API container.
   Diff check: passed.
+
+### Task 5 — published optimizer statistics
+
+* Dataset test, Docker rebuild, validation, and 20 API tests: passed.
+* All 22 responses match preceding captures; baseline MWh differences are
+  within tolerance (maximum `1.1920928955078125e-7`).
+* Medians in ms; source entries show offset 0 / offset 20.
+
+| Service | Unfiltered | Account | Settlement Point | Combined |
+| --- | ---: | ---: | ---: | ---: |
+| metadata | 710.64 | 308.78 | — | — |
+| summary | 1658.49 | 0.36 | 46.75 | 23.71 |
+| sources | 1312.00 / 1408.19 | 179.64 / 280.92 | 435.86 / 323.79 | 187.77 / 175.30 |
+| sinks | 175.38 | 153.02 | 192.73 | 138.01 |
+| contracts | 11.89 | 4.51 | 9.95 | 5.81 |
+
+* Recheck: timing increases did not persist; all 16 responses match.
+  Combined summary: 20.80 ms; statistics did not resolve its access-choice issue.
+* Captures: `/tmp/0013-query-performance/task-5/` and `task-5-recheck/` on host
+  and API container. Diff check: passed.

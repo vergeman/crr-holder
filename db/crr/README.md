@@ -29,3 +29,4 @@ hedge type, month, and TOU, with tolerance `1e-6 + 1e-10 * abs(expected)`.
 Summary path totals are compared with their monthly input using the same tolerance.
 On success, it replaces `db/crr/crr.sqlite` and prints counts, including missing
 account enrichment and coordinates.
+Before publishing, it runs `ANALYZE` to persist optimizer statistics in the database.
