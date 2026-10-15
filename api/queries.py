@@ -1,17 +1,8 @@
 import sqlite3
 
-from filters import holdings_filter
+from services.helpers import holdings_filter, resolve_report
 from geography import get_geographic_footprint
 from rankings import get_top_account_holders, get_top_settlement_points
-
-
-def resolve_report(db: sqlite3.Connection, report_id: int | None) -> int:
-    if report_id is not None:
-        return report_id
-
-    return db.execute(
-        "SELECT report_id FROM reports ORDER BY publication_date DESC, report_id DESC LIMIT 1"
-    ).fetchone()[0]
 
 
 def get_metadata(db: sqlite3.Connection, report_id=None, account_holder=None) -> dict:

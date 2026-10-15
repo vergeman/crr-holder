@@ -1,4 +1,4 @@
-from filters import holdings_filter
+from services.helpers import holdings_filter
 
 
 def get_geographic_footprint(db, report_id, account_holder=None, settlement_point=None):

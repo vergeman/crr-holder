@@ -1,6 +1,5 @@
 # Imports
-from filters import holdings_filter
-from queries import resolve_report
+from services.helpers import holdings_filter, resolve_report
 
 
 def delivery_months(db, report_id):
