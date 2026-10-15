@@ -130,7 +130,7 @@ class ContractHoldingsTests(unittest.TestCase):
 
         # Assertions: invalid dates and unsupported instruments never reach SQLite.
         valid = dict(source='A', sink='B', month='2026-10-01', hedge_type='OPT')
-        with patch('main.sqlite3.connect') as connect:
+        with patch('database.sqlite3.connect') as connect:
             for field, value in [('month', '2026-10'), ('month', '2026-10-02'),
                                  ('month', '2026-13-01'), ('month', '2026-1-01'),
                                  ('hedge_type', 'BOTH')]:

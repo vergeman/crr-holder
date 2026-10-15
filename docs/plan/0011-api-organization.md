@@ -86,3 +86,11 @@ and test changes; keep the API runnable between commits. Tests stay in
 * Before and after the refactor, run
   `docker compose exec -T api python -c 'import json; from main import app; print(json.dumps(app.openapi(), sort_keys=True))'`
   into temporary files under `/tmp`, then compare with `diff -u`.
+
+## Validation results
+
+* API tests: 18 passed after each of the five commit groups.
+
+* OpenAPI comparison: identical; generated client types unchanged.
+
+* API container: recreated with the Compose `DB_FILE` setting applied.
