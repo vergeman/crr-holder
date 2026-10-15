@@ -267,3 +267,53 @@ These are single runs excluding serialization and network time. Small filtered
 differences do not establish a regression. The overview's remaining major
 stages are shared point aggregation (529 ms) and totals/distinct paths (408 ms).
 Next, assess further shared work or a precomputed unfiltered overview.
+
+## 12. Profile source and sink holdings
+
+Added query plans, SQL/fetch timings, returned row counts, and Python cell setup
+and fill timings to both matrix requests. Monthly cell queries now fetch all
+rows before filling cells so SQL work is measured separately. Query predicates
+and response contents are unchanged; the original-contract endpoint is unchanged.
+
+Single local SQL timings (milliseconds), using the first source on each page
+for the corresponding sink expansion:
+
+| Query | Unfiltered | HB_NORTH | XEDIS2 |
+| --- | ---: | ---: | ---: |
+| Source timeline | 201 | 208 | 205 |
+| Source bounds | 411 | 33 | 50 |
+| Source rankings | 902 | 46 | 26 |
+| Source monthly cells | 118 | 40 | 12 |
+| Sink timeline | 213 | 205 | 200 |
+| Sink rankings | 9 | 8 | 1 |
+| Sink monthly cells | 11 | 10 | 2 |
+
+Python cell setup/fill took under 5 ms combined per request in these runs.
+Seven source/sink tests and whitespace checks passed. These are local single
+runs; next, inspect Docker timings. Source ranking and the shared report
+timeline are the initial candidates for investigation, without changing them yet.
+
+Docker sink expansions showed the timeline dominating: 127–131 ms versus
+5–8 ms for rankings and 7–9 ms for monthly cells across HB_NORTH, HB_HOUSTON,
+and HB_WEST. Python setup/fill remained around 3–5 ms combined.
+
+## 14. Profile individual contracts
+
+Added query plans and separate SQL/fetch and Python grouping/sorting timings
+to the contract endpoint, reusing the holdings profiling helper. It now fetches
+rows before grouping so SQL work is excluded from the Python timer.
+
+Local queries for August 2026 OBL contracts took 5.11 ms SQL + 0.95 ms Python
+for HB_NORTH → LZ_NORTH (440 rows), and 4.32 ms SQL + 1.15 ms Python for
+HB_HOUSTON → LZ_HOUSTON (404 rows). Both responses exactly matched the prior
+implementation. The plan uses `holdings_path_dates` through report, source,
+sink, and the start-date range. Whitespace checks passed. Contract fixture
+tests still require the unavailable local FastAPI dependency. Next, capture
+the same requests in Docker; no query optimization was made in this step.
+
+Docker contract timings confirmed small costs: August OBL HB_NORTH → LZ_NORTH
+returned 440 rows in 7.44 ms SQL + 1.61 ms Python; September Houston → Houston
+returned 54 OPT rows in 1.30 + 0.25 ms and 410 OBL rows in 5.37 + 0.56 ms.
+Sink expansions remained around 25–30 ms across measured stages. These are
+individual runs excluding serialization and network time. Leave these queries
+unchanged and profile top-level source pagination next.
