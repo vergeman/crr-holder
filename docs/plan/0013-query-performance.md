@@ -1,0 +1,208 @@
+# 0013 - Query Performance
+
+Type: perf
+Branch: perf/0013-query-performance
+
+Depends on: [0012 - Service Timing](0012-service-timing.md)
+
+## Goal
+
+* Apply the successful `experiment/db-performance:db/README.md` findings, tracking
+  response equivalence and service timings after each optimization.
+
+* Establish the optimized baseline for
+  [0014 - Service Query Boundaries](0014-service-query-boundaries.md).
+
+## Tasks and commit groups
+
+Implement the nine tasks in order on `perf/0013-query-performance`, with at least
+nine commits: the baseline first, then one commit per discrete improvement.
+Include each task's verification results in its commit. Keep formatting-only
+changes separate and immediately after the related implementation. Do not push.
+
+After each task, finish verification, commit the result, and stop. Report the
+commit, brief results, and any material differences; prompt the user to review
+and wait for their reply before beginning the next task. Do not start 0014
+automatically after task 9.
+
+Use the referenced experiment commits as implementation guides, adapting their
+changes to current modules. Do not cherry-pick profiling or unrelated changes.
+
+### 1. Capture responses and timings before changes
+
+Commit: `test: capture service response and timing baselines`
+
+* Capture all five services' responses from existing fixture scenarios as JSON
+  under `api/tests/fixtures/service_responses/`. Add
+  `api/tests/test_service_responses.py` to compare complete outputs; keep inputs
+  and fixture setup in code. Reuse existing coverage for filters, pagination,
+  timeline gaps, empty portfolios, self paths, and nonempty contract details.
+  Never regenerate expected responses automatically during tests.
+
+* Add a small `api/tests/measure_services.py` runner using existing `@timed`
+  service entry points against the real read-only database. Enable timing before
+  imports and configure the existing logger; leave `api/timing.py` unchanged.
+  Load fixed report and request inputs from
+  `api/tests/fixtures/measurement_inputs.json` for all five services, covering unfiltered,
+  account, point, combined filters, and source pagination where applicable.
+
+* Capture complete real-data responses and timing logs under `/tmp`. Use the same
+  database inputs, one warm-up, and three measured calls per workload. Record
+  baseline medians here; after each optimization rerun only affected workloads
+  and record their medians against the baseline and preceding step. Include the
+  request inputs once so comparisons can be reproduced. Timings cover service
+  execution, excluding HTTP and connection setup; add no timing assertions.
+
+### 2. Build the summary aggregate
+
+Commit: `perf(db): build summary holdings aggregate`
+Reference: `5928a37` (dataset and fixture changes).
+
+* Add `crr_summary_holdings` at report/account/source/sink/hedge-type grain with
+  summed `mwh`, its composite primary key, and source/sink indexes. Populate it
+  after monthly holdings via `db/crr/sql/summary_holdings.sql`; validate totals
+  against monthly data and refresh it in fixtures after monthly mutations.
+
+### 3. Use aggregate holdings for summary queries
+
+Commit: `perf(api): query summary holdings with selective filters`
+References: `48bb950` (split point filters), `5928a37` (aggregate selection).
+
+* Add `summary_holdings_query()` in `api/services/helpers.py`. Select the new
+  aggregate with bound report/account filters; split point matches into disjoint
+  source and sink branches with `UNION ALL`, preserving self-path semantics.
+  Use it for summary totals, geography, and holder/point rankings.
+
+### 4. Reuse filtered holdings within queries
+
+Commit: `perf(api): materialize reused filtered holdings`
+Reference: `48bb950` (materialized totals and geography CTEs).
+
+* Mark totals and geography holdings CTEs `AS MATERIALIZED` to reuse their
+  filtered inputs.
+
+### 5. Publish optimizer statistics
+
+Commit: `perf(db): publish optimizer statistics`
+References: `4c02819`, `6d7b7f3`.
+
+* Run `ANALYZE` after dataset validation and before publication. Let SQLite choose
+  access paths; do not carry over the experiment's superseded `NOT INDEXED` hint.
+
+### 6. Share point aggregation
+
+Commit: `perf(api): share point aggregation and count`
+References: `fd438e1`, `ef1aeef`.
+
+* Introduce `get_point_summary()` for geography and point rankings. Preserve
+  separate source/sink exposure, count self paths once in rankings, and retain
+  zero-exposure points and missing coordinates. Derive settlement-point count
+  from the complete geography list and remove its separate totals calculation.
+
+### 7. Seek report timeline endpoints
+
+Commit: `perf(db): index report timeline endpoint lookups`
+Reference: `5f97a08`.
+
+* Add `monthly_report_month(report_id, delivery_month)`. Seed `delivery_months()`
+  with separate scalar MIN/MAX lookups, keeping continuous month expansion.
+  Include the index in build-time statistics.
+
+### 8. Rank sources from summary holdings
+
+Commit: `perf(api): rank sources from summary holdings`
+Reference: `3fe259a`.
+
+* Use `summary_holdings_query()` for source ranking. Keep pagination, monthly
+  cells, and nonzero date bounds on their existing semantics and data sources.
+
+### 9. Seek nonzero portfolio bounds
+
+Commit: `perf(api): seek nonzero portfolio date bounds`
+Reference: `1b5b70f`.
+
+* Use ordered earliest/latest nonzero-month lookups with `LIMIT 1` for report-only
+  and account-filtered requests, including account-plus-point filters. Retain
+  combined MIN/MAX for point-only requests, as established by the experiment.
+
+* Finish this task by comparing final outputs with the original baselines before
+  explicitly updating committed fixtures to the optimized responses. Record any
+  permitted numeric differences; require exact fixture comparisons afterward. Complete 0013 before
+  starting the structural refactor.
+
+## Scope control
+
+* Limit changes to the existing dataset build/SQL/tests and affected API
+  services/tests, plus the files named above. Keep endpoint contracts, matrix
+  cells, contract queries, and OFFSET pagination. Port successful changes into
+  current modules; do not merge experimental profiling or unrelated changes.
+
+* Allow only the specified aggregate, indexes, fixtures, and measurement runner.
+  Add no dependencies, query framework, browser provider, or SQL extraction.
+
+* Treat tasks and verification as closed lists. Explain and ask before adding
+  unplanned files, stored data, dependencies, or substantial verification.
+  Resolve routine implementation choices within scope without confirmation.
+
+## Verification
+
+* Compare fixture and real-data responses after each optimization. Require exact
+  structure, identifiers, counts, ordering, pagination, and nulls. Allow only
+  MWh differences within `1e-6 + 1e-10 * abs(expected)` during optimization;
+  investigate ranking changes rather than sorting them away.
+
+* Inspect Compose configuration and `docker compose ps`; reuse running services.
+  Run after baseline capture and each optimization:
+  `docker compose exec -T -e ENABLED_TIMED=1 api python -m unittest discover -s tests -v`.
+
+* Measure affected workloads with
+  `docker compose exec -T -e ENABLED_TIMED=1 api python tests/measure_services.py`;
+  let the runner accept service names to select workloads.
+  Use `--label task-N` for later captures to preserve the original baseline. Keep raw captures in
+  `/tmp/0013-query-performance/` and concise results in this plan. Investigate measured regressions
+  before proceeding; experiment timings are reference observations, not targets.
+
+* For build changes, run
+  `python3 -m unittest discover -s db/crr/tests -v` with the dataset dependencies
+  installed and build using the documented `db/crr/README.md` Docker commands.
+  Rebuild only when required by a build change, before dependent measurements.
+
+* Run `git diff --check` after each task. Do not run `EXPLAIN` or add query-plan
+  logging; that investigation is already documented in the experiment branch.
+  Add no broader performance suite.
+
+## Acceptance
+
+* [x] Original response fixtures and real-data response/timing baselines captured.
+
+* [ ] All eight successful optimization groups implemented with response checks
+  and affected service timings recorded after each group.
+
+* [ ] At least nine task commits exist, beginning with the baseline, with a user
+  review stop after each task.
+
+* [ ] Dataset validation, API tests, and diff checks pass.
+
+* [ ] Final optimized fixtures pass exact comparisons and are ready for 0014.
+
+## Results
+
+### Task 1 — baseline
+
+* API suite: 20 tests passed. Complete-response fixtures cover all five services.
+* Diff check: passed. Application services and timing library unchanged.
+* Captures: `/tmp/0013-query-performance/baseline/` on the host and API
+  container holds responses and timing logs. Fixed request inputs are committed
+  in `api/tests/fixtures/measurement_inputs.json`.
+* Inputs: report `1`, account `XNRGLD`, point/source `HB_NORTH`, sink `LZ_NORTH`,
+  month `2027-06-01`, hedge `OBL`. Source pages use limit 20, offsets 0 and 20.
+* Medians below are milliseconds, after one warm-up and three measured calls.
+  Source entries show offset 0 / offset 20. Later runs use `--label task-N`.
+
+| Service | Unfiltered | Account | Settlement Point | Combined |
+| --- | ---: | ---: | ---: | ---: |
+| metadata | 873.60 | 348.54 | — | — |
+| summary | 9792.94 | 0.79 | 6072.56 | 0.54 |
+| sources | 2158.83 / 2193.36 | 138.01 / 124.61 | 1967.38 / 1728.54 | 133.13 / 163.13 |
+| sinks | 2423.01 | 158.61 | 2438.49 | 132.86 |
+| contracts | 9.99 | 4.44 | 9.50 | 3.93 |
