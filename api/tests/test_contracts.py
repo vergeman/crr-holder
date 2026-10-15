@@ -6,7 +6,7 @@ from urllib.parse import urlencode
 from unittest.mock import patch
 
 from fixtures import create_fixture_db
-from holdings import get_contract_holdings, get_sink_holdings
+from services.holdings import get_contract_holdings, get_sink_holdings
 from main import app
 
 
