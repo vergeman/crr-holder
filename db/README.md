@@ -186,3 +186,29 @@ table scans; totals retained some base-index reads in subqueries locally.
 
 The code still contains `NOT INDEXED`. Next, remove it and repeat the Docker
 profiling to compare planner-selected access with the forced scan.
+
+## 9. Remove the forced scan after ANALYZE
+
+Removed `NOT INDEXED` from the summary query builder. With persisted statistics,
+the basic report-only selection chooses a table scan; point and account filters
+still choose their corresponding indexes.
+
+A single local complete-summary run took 2,208 ms unfiltered, 72 ms for HB_NORTH,
+41 ms for LZ_NORTH, 48 ms for XEDIS2, and 44 ms for XEDIS2 + HB_NORTH.
+The overview is similar to the earlier forced-scan local run (2,287 ms);
+statistics and cache states differ, so this is not an isolated timing comparison.
+All five responses matched the forced-scan results within tolerance, and the
+11 geography, ranking, source, and sink tests passed. Whitespace checks passed.
+Docker plans confirmed table scans for the overview and index lookups for
+point/account filters. Measured stage sums remained comparable:
+
+| Filters, ms | Forced scan | ANALYZE without override |
+| --- | ---: | ---: |
+| Report only | 1,510 | 1,546 |
+| HB_NORTH | 67 | 67 |
+| LZ_NORTH | 43 | 39 |
+| XLUREP | 2 | 2 |
+
+These are single runs, excluding serialization and network time. Keep the
+override removed and retain build-time statistics. Next, test sharing geography
+and point-ranking aggregation to reduce repeated full-report work.

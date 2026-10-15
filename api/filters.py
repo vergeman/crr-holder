@@ -16,12 +16,10 @@ def holdings_filter(report_id, account_holder=None, settlement_point=None):
 def summary_holdings_query(report_id, account_holder=None, settlement_point=None):
     where, parameters = holdings_filter(report_id, account_holder)
     parameters["settlement_point"] = settlement_point
-    # Test a direct table scan when no portfolio filter narrows the report.
-    access = "NOT INDEXED" if not account_holder and not settlement_point else ""
     sql = f"""
         SELECT account_holder, source, sink, hedge_type,
                mwh
-        FROM crr_summary_holdings {access} WHERE {where}
+        FROM crr_summary_holdings WHERE {where}
     """
     if settlement_point:
         # Use each endpoint index; self paths enter only through the source branch.
