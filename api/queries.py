@@ -73,20 +73,16 @@ def get_summary(db: sqlite3.Connection, report_id=None, account_holder=None,
         report_id, account_holder, settlement_point)
 
     # Filter holdings for the Portfolio Summary panel's totals,
-    # holder/point/source-sink counts, and OPT/OBL mix.
+    # holder/source-sink counts, and OPT/OBL mix.
     sql = f"""
         WITH holdings AS MATERIALIZED (
             {holdings_sql}
-        ), points AS (
-            -- Unique endpoints across months and instruments.
-            SELECT source AS point FROM holdings
-            UNION SELECT sink FROM holdings
         ), source_sink AS (
             -- Count A-to-B and B-to-A as distinct ordered source-sink pairs.
             SELECT DISTINCT source, sink FROM holdings
         )
         SELECT COALESCE(SUM(mwh), 0), COUNT(DISTINCT account_holder),
-               (SELECT COUNT(*) FROM points), (SELECT COUNT(*) FROM source_sink),
+               (SELECT COUNT(*) FROM source_sink),
                COALESCE(SUM(CASE WHEN hedge_type = 'OPT' THEN mwh ELSE 0 END), 0),
                COALESCE(SUM(CASE WHEN hedge_type = 'OBL' THEN mwh ELSE 0 END), 0)
         FROM holdings
@@ -119,9 +115,9 @@ def get_summary(db: sqlite3.Connection, report_id=None, account_holder=None,
         "totalMwh": row[0],
         "geographicFootprint": geographic_footprint,
         "accountHolderCount": row[1],
-        "settlementPointCount": row[2],
-        "directedPathCount": row[3],
-        "hedgeTypeMwh": {"OPT": row[4], "OBL": row[5]},
+        "settlementPointCount": len(geographic_footprint),
+        "directedPathCount": row[2],
+        "hedgeTypeMwh": {"OPT": row[3], "OBL": row[4]},
         "topAccountHolders": top_account_holders,
         "topSettlementPoints": top_settlement_points,
     }

@@ -240,3 +240,30 @@ the combined helper logs `point summary SQL` and Python result-building times.
 Docker stage sums fell from 1,546 to 1,193 ms for the overview, 67 to 46 ms for
 HB_NORTH, and 39 to 27 ms for LZ_NORTH. XLUREP stayed around 2 ms. Geography
 and point rankings together fell from 801 to 497 ms in these individual runs.
+
+## 11. Reuse the participating-point count
+
+Removed the totals query's points CTE and count subquery. Geography already
+returns every participating point, including zero-exposure points and those
+without coordinates, so `settlementPointCount` now uses its result length.
+
+A single local complete-summary comparison fell from 1,384 to 1,264 ms for the
+overview, 47 to 39 ms for HB_NORTH, and 28 to 23 ms for LZ_NORTH. All five
+comparison responses matched within tolerance. The 11 geography, ranking,
+source, and sink tests and whitespace checks passed. Next, repeat in Docker
+and compare the totals query time; cache states differ between these local runs.
+
+Docker totals-query time fell from 621 to 408 ms; the point-union subquery is
+absent from the plan. Measured summary stage sums:
+
+| Filters, ms | Before count reuse | After count reuse |
+| --- | ---: | ---: |
+| Report only | 1,193 | 1,008 |
+| HB_NORTH | 46 | 47 |
+| LZ_NORTH | 27 | 31 |
+| XLUREP | 2 | 2 |
+
+These are single runs excluding serialization and network time. Small filtered
+differences do not establish a regression. The overview's remaining major
+stages are shared point aggregation (529 ms) and totals/distinct paths (408 ms).
+Next, assess further shared work or a precomputed unfiltered overview.
