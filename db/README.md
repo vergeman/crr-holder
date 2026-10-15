@@ -385,3 +385,30 @@ whitespace checks passed. These are sequential single runs, not medians, and
 exclude HTTP/serialization. Unfiltered bounds now dominate at about 242–247 ms.
 Next, investigate endpoint lookups for nonzero monthly exposure bounds using
 the existing report/month index before adding more stored aggregates.
+
+## 17. Seek nonzero portfolio date bounds
+
+Committed source ranking separately as `3fe259a`, then tested earliest/latest
+nonzero monthly rows using ordered scalar subqueries with LIMIT 1. Report-only
+lookups use `monthly_report_month`; account lookups use `monthly_account`.
+The nonzero predicate and empty-portfolio behavior are unchanged.
+
+In a Docker comparison, original bounds took 299–301 ms for unfiltered pages,
+55 ms for XEDIS2, and 33 ms for XEDIS2 + HB_NORTH. Endpoint lookups took
+0.07–0.17 ms. All six tested bounds matched, including an absent account.
+
+Point-only filters regressed from 46 to 82 ms: each endpoint subquery used
+source/sink matches and a temporary sort. Retained the original MIN/MAX query
+for point-only filters, avoiding that duplicated work. Final single-run timings:
+
+| Case | Bounds, ms | Complete source function, ms |
+| --- | ---: | ---: |
+| First page | 0.07 | 255 |
+| Second page | 0.08 | 205 |
+| HB_NORTH | 34 | 92 |
+| XEDIS2 | 0.16 | 17 |
+
+Seven source/sink tests and whitespace checks passed. Timings are sequential
+single runs in the existing API container, excluding HTTP and serialization;
+cache states differ. No new index or stored aggregate was needed. Next,
+checkpoint the query changes and use repeatable workloads for provider profiling.
