@@ -5,6 +5,7 @@ services:
     build: ./api
     environment:
       DB_FILE: /data/crr.sqlite
+      ENABLED_TIMED: "${ENABLED_TIMED:-0}"
     ports:
       - "8000:8000"
     volumes:
