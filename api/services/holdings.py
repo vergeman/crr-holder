@@ -26,11 +26,30 @@ def get_source_holdings(db, report_id=None, account_holder=None,
     report_id = resolve_report(db, report_id)
     months = delivery_months(db, report_id)
     where, parameters = holdings_filter(report_id, account_holder, settlement_point)
-    bounds = db.execute(f"""
-        SELECT MIN(delivery_month), MAX(delivery_month)
-        FROM crr_monthly_holdings WHERE {where}
-          AND peak_wd_mwh + peak_we_mwh + off_peak_mwh != 0
-    """, parameters).fetchone()
+
+    # Return the portfolio's first and last months with nonzero MWh.
+    # Use date-ordered indexes to search from opposite ends, stopping at the
+    # first match in each direction instead of scanning every matching row.
+    bounds_sql = f"""
+        -- Stop at the first nonzero exposure from each end of the timeline.
+        SELECT (
+            SELECT delivery_month FROM crr_monthly_holdings WHERE {where}
+              AND peak_wd_mwh + peak_we_mwh + off_peak_mwh != 0
+            ORDER BY delivery_month ASC LIMIT 1
+        ), (
+            SELECT delivery_month FROM crr_monthly_holdings WHERE {where}
+              AND peak_wd_mwh + peak_we_mwh + off_peak_mwh != 0
+            ORDER BY delivery_month DESC LIMIT 1
+        )
+    """
+    if settlement_point and not account_holder:
+        # Point lookups do not order months; aggregate their matches once.
+        bounds_sql = f"""
+            SELECT MIN(delivery_month), MAX(delivery_month)
+            FROM crr_monthly_holdings WHERE {where}
+              AND peak_wd_mwh + peak_we_mwh + off_peak_mwh != 0
+        """
+    bounds = db.execute(bounds_sql, parameters).fetchone()
 
     # Transformation: rank complete sources before loading their monthly cells.
     ranking_sql, _ = summary_holdings_query(

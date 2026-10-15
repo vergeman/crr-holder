@@ -16,7 +16,7 @@ from services.summary import get_summary
 import test_contracts
 
 
-# Expected complete responses, captured before query optimizations.
+# Expected optimized responses, verified against the original baseline in plan 0013.
 RESPONSES = Path(__file__).parent / 'fixtures/service_responses'
 
 
@@ -97,9 +97,9 @@ class ServiceResponseTests(unittest.TestCase):
         # Execute all service scenarios against fresh fixture databases.
         actual = fixture_responses()  # Service -> scenario -> current response.
 
-        # Compare each service with its saved baseline, including list ordering.
+        # Compare each service with its committed response, including list ordering.
         for service, response in actual.items():
             with self.subTest(service=service):
-                # Baseline scenarios for this service; never regenerated here.
+                # Expected scenarios for this service; never regenerated here.
                 expected = json.loads((RESPONSES / f'{service}.json').read_text())
                 self.assertEqual(response, expected)

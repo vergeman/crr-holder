@@ -176,17 +176,32 @@ Reference: `1b5b70f`.
 
 * [x] Original response fixtures and real-data response/timing baselines captured.
 
-* [ ] All eight successful optimization groups implemented with response checks
+* [x] All eight successful optimization groups implemented with response checks
   and affected service timings recorded after each group.
 
-* [ ] At least nine task commits exist, beginning with the baseline, with a user
+* [x] At least nine task commits exist, beginning with the baseline, with a user
   review stop after each task.
 
-* [ ] Dataset validation, API tests, and diff checks pass.
+* [x] Dataset validation, API tests, and diff checks pass.
 
-* [ ] Final optimized fixtures pass exact comparisons and are ready for 0014.
+* [x] Final optimized fixtures pass exact comparisons and are ready for 0014.
 
 ## Results
+
+Response comparisons check for material floating-point MWh differences.
+
+### Overall — baseline to task 9
+
+* All 22 final responses match baseline within tolerance.
+* Unfiltered service medians in ms; source entries show offset 0 / offset 20.
+
+| Service | Baseline | Task 9 | Speedup |
+| --- | ---: | ---: | ---: |
+| metadata | 873.60 | 725.41 | 1.2× |
+| summary | 9792.94 | 933.36 | 10.5× |
+| sources | 2158.83 / 2193.36 | 232.71 / 187.92 | 9.3× / 11.7× |
+| sinks | 2423.01 | 18.25 | 132.8× |
+| contracts | 9.99 | 9.44 | 1.1× |
 
 ### Task 1 — baseline
 
@@ -239,7 +254,6 @@ Reference: `1b5b70f`.
 * API suite: 20 tests passed, including exact committed response fixtures.
 * Four affected real-data responses match baseline and task 2 within MWh
   tolerance; structure, identifiers, counts, ordering, and nulls are unchanged.
-  Maximum absolute MWh difference: `1.1920928955078125e-7`.
 * Fixtures accept final scenario data before building the aggregate once;
   no refresh calls or expected-response changes were needed.
 * Medians (ms), with original baseline and preceding task for comparison:
@@ -261,8 +275,7 @@ Reference: `1b5b70f`.
 
 * Totals and geography reuse filtered holdings through `AS MATERIALIZED` CTEs.
 * API suite: 20 tests passed, including exact committed response fixtures.
-* Four real-data responses match task 3 exactly and baseline within MWh
-  tolerance; maximum absolute baseline difference: `1.1920928955078125e-7`.
+* Four real-data responses match task 3 exactly and baseline within tolerance.
 * Medians (ms), with original baseline and preceding task for comparison:
 
 | Summary filter | Baseline | Task 3 | Task 4 |
@@ -280,8 +293,7 @@ Reference: `1b5b70f`.
 ### Task 5 — published optimizer statistics
 
 * Dataset test, Docker rebuild, validation, and 20 API tests: passed.
-* All 22 responses match preceding captures; baseline MWh differences are
-  within tolerance (maximum `1.1920928955078125e-7`).
+* All 22 responses match preceding captures and baseline within tolerance.
 * Medians in ms; source entries show offset 0 / offset 20.
 
 | Service | Unfiltered | Account | Settlement Point | Combined |
@@ -300,8 +312,7 @@ Reference: `1b5b70f`.
 ### Task 6 — shared point aggregation
 
 * API suite: 20 tests passed. Diff check: passed.
-* Four responses match task 5; baseline MWh differences remain within tolerance
-  (maximum `1.1920928955078125e-7`).
+* Four responses match task 5 and baseline within tolerance.
 * Medians in ms:
 
 | Summary filter | Baseline | Task 5 | Task 6 |
@@ -337,8 +348,8 @@ Reference: `1b5b70f`.
 ### Task 8 — aggregate source rankings
 
 * API suite: 20 tests passed. Diff check: passed.
-* Eight responses match baseline and task 7 within MWh tolerance
-  (maximum difference `1.4901161193847656e-8`); ordering and pagination unchanged.
+* Eight responses match baseline and task 7 within tolerance;
+  ordering and pagination unchanged.
 * Medians in ms; entries show offset 0 / offset 20.
 
 | Source filter | Baseline | Task 7 | Task 8 |
@@ -351,3 +362,29 @@ Reference: `1b5b70f`.
 * Combined-filter recheck: 24.71 / 25.59 ms.
 * Captures: `/tmp/0013-query-performance/task-8/` and `task-8-recheck/` on host
   and API container.
+
+### Task 9 — nonzero date endpoints and final verification
+
+* API suite: 20 tests passed. Diff check: passed.
+* All 22 final responses match preceding captures and baseline within tolerance.
+* Optimized fixtures pass exact comparisons. Only summary zero MWh values
+  changed JSON representation from `0` to `0.0`; other fixture files are unchanged.
+* Source medians in ms; entries show offset 0 / offset 20.
+
+| Source filter | Baseline | Task 8 | Task 9 |
+| --- | ---: | ---: | ---: |
+| Unfiltered | 2158.83 / 2193.36 | 488.19 / 485.96 | 232.71 / 187.92 |
+| Account | 138.01 / 124.61 | 0.53 / 0.27 | 0.60 / 0.15 |
+| Settlement Point | 1967.38 / 1728.54 | 88.60 / 86.10 | 89.51 / 76.44 |
+| Combined | 133.13 / 163.13 | 28.01 / 30.08 | 4.57 / 3.92 |
+
+* Other final service medians in ms:
+
+| Service | Unfiltered | Account | Settlement Point | Combined |
+| --- | ---: | ---: | ---: | ---: |
+| metadata | 725.41 | 324.04 | — | — |
+| summary | 933.36 | 0.18 | 28.03 | 13.77 |
+| sinks | 18.25 | 0.24 | 17.25 | 0.27 |
+| contracts | 9.44 | 5.45 | 9.81 | 4.18 |
+
+* Captures: `/tmp/0013-query-performance/task-9/` on host and API container.

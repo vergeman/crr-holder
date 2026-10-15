@@ -22,13 +22,13 @@
         "longitude": -98.0,
         "latitude": null,
         "sourceMwh": 110.0,
-        "sinkMwh": 0
+        "sinkMwh": 0.0
       },
       {
         "settlementPoint": "D",
         "longitude": null,
         "latitude": null,
-        "sourceMwh": 0,
+        "sourceMwh": 0.0,
         "sinkMwh": 50.0
       }
     ],
@@ -85,7 +85,7 @@
         "settlementPoint": "B",
         "longitude": -99.0,
         "latitude": 31.0,
-        "sourceMwh": 0,
+        "sourceMwh": 0.0,
         "sinkMwh": 10.0
       },
       {
@@ -93,7 +93,7 @@
         "longitude": null,
         "latitude": null,
         "sourceMwh": 20.0,
-        "sinkMwh": 0
+        "sinkMwh": 0.0
       }
     ],
     "accountHolderCount": 2,
@@ -197,7 +197,7 @@
         "longitude": -98.0,
         "latitude": null,
         "sourceMwh": 60.0,
-        "sinkMwh": 0
+        "sinkMwh": 0.0
       }
     ],
     "accountHolderCount": 2,
