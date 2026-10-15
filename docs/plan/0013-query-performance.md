@@ -333,3 +333,21 @@ Reference: `1b5b70f`.
 
 * Captures: `/tmp/0013-query-performance/task-7/` on host and API container.
   Diff check: passed.
+
+### Task 8 — aggregate source rankings
+
+* API suite: 20 tests passed. Diff check: passed.
+* Eight responses match baseline and task 7 within MWh tolerance
+  (maximum difference `1.4901161193847656e-8`); ordering and pagination unchanged.
+* Medians in ms; entries show offset 0 / offset 20.
+
+| Source filter | Baseline | Task 7 | Task 8 |
+| --- | ---: | ---: | ---: |
+| Unfiltered | 2158.83 / 2193.36 | 1032.45 / 995.16 | 488.19 / 485.96 |
+| Account | 138.01 / 124.61 | 0.56 / 0.25 | 0.53 / 0.27 |
+| Settlement Point | 1967.38 / 1728.54 | 110.76 / 107.35 | 88.60 / 86.10 |
+| Combined | 133.13 / 163.13 | 22.75 / 21.80 | 28.01 / 30.08 |
+
+* Combined-filter recheck: 24.71 / 25.59 ms.
+* Captures: `/tmp/0013-query-performance/task-8/` and `task-8-recheck/` on host
+  and API container.
