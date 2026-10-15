@@ -10,7 +10,7 @@ def get_geographic_footprint(db, report_id, account_holder=None, settlement_poin
     # A self path participates once in each independent role.
     rows = db.execute(f"""
         -- One publication and the shared portfolio predicates.
-        WITH holdings AS (
+        WITH holdings AS MATERIALIZED (
             {holdings_sql}
         ), roles AS (
             SELECT source AS point, mwh AS source_mwh, 0 AS sink_mwh FROM holdings

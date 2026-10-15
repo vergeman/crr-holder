@@ -256,3 +256,23 @@ Reference: `1b5b70f`.
   the account primary key (same one returned row). This indicates an access-path
   issue before build statistics; recheck in task 5. No index hint was added.
 * Captures: `/tmp/0013-query-performance/task-3/`. Diff check: passed.
+
+### Task 4 — materialized filtered holdings
+
+* Totals and geography reuse filtered holdings through `AS MATERIALIZED` CTEs.
+* API suite: 20 tests passed, including exact committed response fixtures.
+* Four real-data responses match task 3 exactly and baseline within MWh
+  tolerance; maximum absolute baseline difference: `1.1920928955078125e-7`.
+* Medians (ms), with original baseline and preceding task for comparison:
+
+| Summary filter | Baseline | Task 3 | Task 4 |
+| --- | ---: | ---: | ---: |
+| Unfiltered | 9792.94 | 3746.41 | 3550.76 |
+| Account | 0.79 | 0.19 | 0.19 |
+| Settlement Point | 6072.56 | 131.73 | 37.44 |
+| Combined | 0.54 | 22.88 | 20.61 |
+
+* No new measured regressions; the combined-filter regression remains for the
+  task 5 statistics recheck.
+* Captures: `/tmp/0013-query-performance/task-4/` on host and API container.
+  Diff check: passed.

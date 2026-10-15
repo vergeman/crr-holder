@@ -19,7 +19,7 @@ def get_summary(db: sqlite3.Connection, report_id=None, account_holder=None,
     # holder/point/source-sink counts, and OPT/OBL mix.
     row = db.execute(
         f"""
-        WITH holdings AS (
+        WITH holdings AS MATERIALIZED (
             {holdings_sql}
         ), points AS (
             -- Unique endpoints across months and instruments.
