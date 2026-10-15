@@ -1,5 +1,5 @@
 # Imports
-from services.helpers import holdings_filter, resolve_report
+from services.helpers import holdings_filter, resolve_report, summary_holdings_query
 from timing import timed
 
 
@@ -9,13 +9,14 @@ def delivery_months(db, report_id):
         -- WITH RECURSIVE expands the report span one month at a time.
         -- Example: October and January holdings yield Oct, Nov, Dec, Jan.
         WITH RECURSIVE months(month, last) AS (
-            SELECT MIN(delivery_month), MAX(delivery_month)
-            FROM crr_monthly_holdings WHERE report_id = ?
+            -- Separate lookups seek each endpoint of the report's month index.
+            SELECT (SELECT MIN(delivery_month) FROM crr_monthly_holdings WHERE report_id = ?),
+                   (SELECT MAX(delivery_month) FROM crr_monthly_holdings WHERE report_id = ?)
             UNION ALL
             SELECT date(month, '+1 month'), last FROM months WHERE month < last
         )
         SELECT month FROM months WHERE month IS NOT NULL ORDER BY month
-    """, (report_id,))]
+    """, (report_id, report_id))]
 
 
 @timed
@@ -25,21 +26,43 @@ def get_source_holdings(db, report_id=None, account_holder=None,
     report_id = resolve_report(db, report_id)
     months = delivery_months(db, report_id)
     where, parameters = holdings_filter(report_id, account_holder, settlement_point)
-    bounds = db.execute(f"""
-        SELECT MIN(delivery_month), MAX(delivery_month)
-        FROM crr_monthly_holdings WHERE {where}
-          AND peak_wd_mwh + peak_we_mwh + off_peak_mwh != 0
-    """, parameters).fetchone()
+
+    # Return the portfolio's first and last months with nonzero MWh.
+    # Use date-ordered indexes to search from opposite ends, stopping at the
+    # first match in each direction instead of scanning every matching row.
+    bounds_sql = f"""
+        -- Stop at the first nonzero exposure from each end of the timeline.
+        SELECT (
+            SELECT delivery_month FROM crr_monthly_holdings WHERE {where}
+              AND peak_wd_mwh + peak_we_mwh + off_peak_mwh != 0
+            ORDER BY delivery_month ASC LIMIT 1
+        ), (
+            SELECT delivery_month FROM crr_monthly_holdings WHERE {where}
+              AND peak_wd_mwh + peak_we_mwh + off_peak_mwh != 0
+            ORDER BY delivery_month DESC LIMIT 1
+        )
+    """
+    if settlement_point and not account_holder:
+        # Point lookups do not order months; aggregate their matches once.
+        bounds_sql = f"""
+            SELECT MIN(delivery_month), MAX(delivery_month)
+            FROM crr_monthly_holdings WHERE {where}
+              AND peak_wd_mwh + peak_we_mwh + off_peak_mwh != 0
+        """
+    bounds = db.execute(bounds_sql, parameters).fetchone()
 
     # Transformation: rank complete sources before loading their monthly cells.
+    ranking_sql, _ = summary_holdings_query(
+        report_id, account_holder, settlement_point
+    )
     parameters.update(limit=limit + 1, offset=offset)
     ranked = db.execute(f"""
+        -- Full-horizon totals are already summed across months.
+        WITH holdings AS ({ranking_sql})
         SELECT source,
-               SUM(CASE WHEN hedge_type = 'OPT'
-                   THEN peak_wd_mwh + peak_we_mwh + off_peak_mwh ELSE 0 END) AS total_opt_mwh,
-               SUM(CASE WHEN hedge_type = 'OBL'
-                   THEN peak_wd_mwh + peak_we_mwh + off_peak_mwh ELSE 0 END) AS total_obl_mwh
-        FROM crr_monthly_holdings WHERE {where}
+               SUM(CASE WHEN hedge_type = 'OPT' THEN mwh ELSE 0 END) AS total_opt_mwh,
+               SUM(CASE WHEN hedge_type = 'OBL' THEN mwh ELSE 0 END) AS total_obl_mwh
+        FROM holdings
         GROUP BY source
         ORDER BY total_opt_mwh + total_obl_mwh DESC, source ASC
         LIMIT :limit OFFSET :offset

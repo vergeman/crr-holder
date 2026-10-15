@@ -1,0 +1,208 @@
+{
+  "market": {
+    "reportId": 2,
+    "source": "A",
+    "deliveryMonths": [
+      "2026-10-01",
+      "2026-11-01"
+    ],
+    "sinks": [
+      {
+        "sink": "A",
+        "totalOptMwh": 40.0,
+        "totalOblMwh": 0,
+        "months": [
+          {
+            "deliveryMonth": "2026-10-01",
+            "OPT": 40.0,
+            "OBL": 0
+          },
+          {
+            "deliveryMonth": "2026-11-01",
+            "OPT": 0,
+            "OBL": 0
+          }
+        ]
+      },
+      {
+        "sink": "B",
+        "totalOptMwh": 30.0,
+        "totalOblMwh": 0,
+        "months": [
+          {
+            "deliveryMonth": "2026-10-01",
+            "OPT": 10.0,
+            "OBL": 0
+          },
+          {
+            "deliveryMonth": "2026-11-01",
+            "OPT": 20.0,
+            "OBL": 0
+          }
+        ]
+      }
+    ]
+  },
+  "previous_report": {
+    "reportId": 1,
+    "source": "A",
+    "deliveryMonths": [
+      "2026-10-01"
+    ],
+    "sinks": [
+      {
+        "sink": "B",
+        "totalOptMwh": 10.0,
+        "totalOblMwh": 0,
+        "months": [
+          {
+            "deliveryMonth": "2026-10-01",
+            "OPT": 10.0,
+            "OBL": 0
+          }
+        ]
+      }
+    ]
+  },
+  "account": {
+    "reportId": 2,
+    "source": "A",
+    "deliveryMonths": [
+      "2026-10-01",
+      "2026-11-01"
+    ],
+    "sinks": [
+      {
+        "sink": "A",
+        "totalOptMwh": 40.0,
+        "totalOblMwh": 0,
+        "months": [
+          {
+            "deliveryMonth": "2026-10-01",
+            "OPT": 40.0,
+            "OBL": 0
+          },
+          {
+            "deliveryMonth": "2026-11-01",
+            "OPT": 0,
+            "OBL": 0
+          }
+        ]
+      },
+      {
+        "sink": "B",
+        "totalOptMwh": 30.0,
+        "totalOblMwh": 0,
+        "months": [
+          {
+            "deliveryMonth": "2026-10-01",
+            "OPT": 10.0,
+            "OBL": 0
+          },
+          {
+            "deliveryMonth": "2026-11-01",
+            "OPT": 20.0,
+            "OBL": 0
+          }
+        ]
+      }
+    ]
+  },
+  "point": {
+    "reportId": 2,
+    "source": "A",
+    "deliveryMonths": [
+      "2026-10-01",
+      "2026-11-01"
+    ],
+    "sinks": [
+      {
+        "sink": "A",
+        "totalOptMwh": 40.0,
+        "totalOblMwh": 0,
+        "months": [
+          {
+            "deliveryMonth": "2026-10-01",
+            "OPT": 40.0,
+            "OBL": 0
+          },
+          {
+            "deliveryMonth": "2026-11-01",
+            "OPT": 0,
+            "OBL": 0
+          }
+        ]
+      },
+      {
+        "sink": "B",
+        "totalOptMwh": 30.0,
+        "totalOblMwh": 0,
+        "months": [
+          {
+            "deliveryMonth": "2026-10-01",
+            "OPT": 10.0,
+            "OBL": 0
+          },
+          {
+            "deliveryMonth": "2026-11-01",
+            "OPT": 20.0,
+            "OBL": 0
+          }
+        ]
+      }
+    ]
+  },
+  "combined": {
+    "reportId": 2,
+    "source": "A",
+    "deliveryMonths": [
+      "2026-10-01",
+      "2026-11-01"
+    ],
+    "sinks": [
+      {
+        "sink": "A",
+        "totalOptMwh": 40.0,
+        "totalOblMwh": 0,
+        "months": [
+          {
+            "deliveryMonth": "2026-10-01",
+            "OPT": 40.0,
+            "OBL": 0
+          },
+          {
+            "deliveryMonth": "2026-11-01",
+            "OPT": 0,
+            "OBL": 0
+          }
+        ]
+      },
+      {
+        "sink": "B",
+        "totalOptMwh": 30.0,
+        "totalOblMwh": 0,
+        "months": [
+          {
+            "deliveryMonth": "2026-10-01",
+            "OPT": 10.0,
+            "OBL": 0
+          },
+          {
+            "deliveryMonth": "2026-11-01",
+            "OPT": 20.0,
+            "OBL": 0
+          }
+        ]
+      }
+    ]
+  },
+  "empty": {
+    "reportId": 2,
+    "source": "A",
+    "deliveryMonths": [
+      "2026-10-01",
+      "2026-11-01"
+    ],
+    "sinks": []
+  }
+}

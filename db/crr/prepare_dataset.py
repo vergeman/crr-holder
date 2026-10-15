@@ -31,6 +31,8 @@ def build_dataset(data_dir, output):
             # Expand contracts into months, then create lookup indexes.
             print("Materializing monthly holdings...", flush=True)
             db.executescript(read_sql("monthly_holdings.sql"))
+            print("Materializing summary holdings...", flush=True)
+            db.executescript(read_sql("summary_holdings.sql"))
             db.executescript(read_sql("indexes.sql"))
 
             # Validate the temporary database before publishing it.
@@ -39,6 +41,11 @@ def build_dataset(data_dir, output):
             errors = {key: value for key, value in results.items() if key.endswith("_errors") and value}
             if errors:
                 raise ValueError(f"Dataset comparisons failed: {errors}")
+
+            # Publish optimizer statistics with the completed tables and indexes.
+            print("Analyzing database...", flush=True)
+            db.execute("ANALYZE")
+            db.commit()
 
         # Publish the completed database after all comparisons pass.
         os.replace(temporary, output)

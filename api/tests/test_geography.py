@@ -1,11 +1,11 @@
 import unittest
 
-from fixtures import create_fixture_db
+from fixtures import HOLDINGS, POINTS, create_fixture_db
 from services.summary import get_summary
 
 
 class GeographyTests(unittest.TestCase):
-    def setUp(self):
+    def test_roles_filters_and_reports(self):
         # Coordinates are local to geographic tests; C is partially mapped.
         self.db = create_fixture_db()
         self.addCleanup(self.db.close)
@@ -13,7 +13,6 @@ class GeographyTests(unittest.TestCase):
             'UPDATE settlement_points SET longitude=?, latitude=? WHERE settlement_point=?',
             [(-100, 32, 'A'), (-99, 31, 'B'), (-98, None, 'C')])
 
-    def test_roles_filters_and_reports(self):
         # Each case is (selected_filters, aggregate_results), where results are
         # [(settlement_point, sourceMWh, sinkMWh), ...] for the filtered holdings.
         # Example: {'settlement_point': 'A'} selects holdings starting or ending
@@ -48,13 +47,14 @@ class GeographyTests(unittest.TestCase):
         # Add 8 points to the fixture's 4. The last added point has zero
         # MWh and must appear in geography.
         # range(1, 9) produces 1 through 8; the upper bound is excluded.
-        for i in range(1, 9):
-            point = f'Z{i:02}'
-            mwh = i if i < 8 else 0
-            self.db.execute('INSERT INTO settlement_points (settlement_point) VALUES (?)', (point,))
-            self.db.execute('INSERT INTO crr_monthly_holdings VALUES '
-                            '(2, "X", ?, "A", "2026-10-01", "OPT", 0, 0, 0, ?, 0, 0)',
-                            (point, mwh))
+        added_points = [(f'Z{i:02}',) for i in range(1, 9)]
+        added_holdings = [
+            (2, 'X', point, 'A', '2026-10-01', 'OPT', i if i < 8 else 0, 0, 0)
+            for i, (point,) in enumerate(added_points, 1)
+        ]
+        self.db = create_fixture_db(points=POINTS + added_points,
+                                    holdings=HOLDINGS + added_holdings)
+        self.addCleanup(self.db.close)
 
         summary = get_summary(self.db)
         # geographicFootprint returns all participating points, not a ranking.

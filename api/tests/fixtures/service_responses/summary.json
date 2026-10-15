@@ -1,0 +1,339 @@
+{
+  "market": {
+    "reportId": 2,
+    "totalMwh": 210.0,
+    "geographicFootprint": [
+      {
+        "settlementPoint": "A",
+        "longitude": -100.0,
+        "latitude": 32.0,
+        "sourceMwh": 70.0,
+        "sinkMwh": 130.0
+      },
+      {
+        "settlementPoint": "B",
+        "longitude": -99.0,
+        "latitude": 31.0,
+        "sourceMwh": 30.0,
+        "sinkMwh": 30.0
+      },
+      {
+        "settlementPoint": "C",
+        "longitude": -98.0,
+        "latitude": null,
+        "sourceMwh": 110.0,
+        "sinkMwh": 0.0
+      },
+      {
+        "settlementPoint": "D",
+        "longitude": null,
+        "latitude": null,
+        "sourceMwh": 0.0,
+        "sinkMwh": 50.0
+      }
+    ],
+    "accountHolderCount": 2,
+    "settlementPointCount": 4,
+    "directedPathCount": 5,
+    "hedgeTypeMwh": {
+      "OPT": 130.0,
+      "OBL": 80.0
+    },
+    "topAccountHolders": [
+      {
+        "accountHolder": "Y",
+        "legalName": null,
+        "totalMwh": 110.0
+      },
+      {
+        "accountHolder": "X",
+        "legalName": "Holder X",
+        "totalMwh": 100.0
+      }
+    ],
+    "topSettlementPoints": [
+      {
+        "settlementPoint": "A",
+        "totalMwh": 160.0
+      },
+      {
+        "settlementPoint": "C",
+        "totalMwh": 110.0
+      },
+      {
+        "settlementPoint": "B",
+        "totalMwh": 60.0
+      },
+      {
+        "settlementPoint": "D",
+        "totalMwh": 50.0
+      }
+    ]
+  },
+  "previous_report": {
+    "reportId": 1,
+    "totalMwh": 30.0,
+    "geographicFootprint": [
+      {
+        "settlementPoint": "A",
+        "longitude": -100.0,
+        "latitude": 32.0,
+        "sourceMwh": 10.0,
+        "sinkMwh": 20.0
+      },
+      {
+        "settlementPoint": "B",
+        "longitude": -99.0,
+        "latitude": 31.0,
+        "sourceMwh": 0.0,
+        "sinkMwh": 10.0
+      },
+      {
+        "settlementPoint": "D",
+        "longitude": null,
+        "latitude": null,
+        "sourceMwh": 20.0,
+        "sinkMwh": 0.0
+      }
+    ],
+    "accountHolderCount": 2,
+    "settlementPointCount": 3,
+    "directedPathCount": 2,
+    "hedgeTypeMwh": {
+      "OPT": 10.0,
+      "OBL": 20.0
+    },
+    "topAccountHolders": [
+      {
+        "accountHolder": "Z",
+        "legalName": "Holder Z",
+        "totalMwh": 20.0
+      },
+      {
+        "accountHolder": "X",
+        "legalName": "Holder X",
+        "totalMwh": 10.0
+      }
+    ],
+    "topSettlementPoints": [
+      {
+        "settlementPoint": "A",
+        "totalMwh": 30.0
+      },
+      {
+        "settlementPoint": "D",
+        "totalMwh": 20.0
+      },
+      {
+        "settlementPoint": "B",
+        "totalMwh": 10.0
+      }
+    ]
+  },
+  "account": {
+    "reportId": 2,
+    "totalMwh": 100.0,
+    "geographicFootprint": [
+      {
+        "settlementPoint": "A",
+        "longitude": -100.0,
+        "latitude": 32.0,
+        "sourceMwh": 70.0,
+        "sinkMwh": 70.0
+      },
+      {
+        "settlementPoint": "B",
+        "longitude": -99.0,
+        "latitude": 31.0,
+        "sourceMwh": 30.0,
+        "sinkMwh": 30.0
+      }
+    ],
+    "accountHolderCount": 1,
+    "settlementPointCount": 2,
+    "directedPathCount": 3,
+    "hedgeTypeMwh": {
+      "OPT": 70.0,
+      "OBL": 30.0
+    },
+    "topAccountHolders": [
+      {
+        "accountHolder": "X",
+        "legalName": "Holder X",
+        "totalMwh": 100.0
+      }
+    ],
+    "topSettlementPoints": [
+      {
+        "settlementPoint": "A",
+        "totalMwh": 100.0
+      },
+      {
+        "settlementPoint": "B",
+        "totalMwh": 60.0
+      }
+    ]
+  },
+  "point": {
+    "reportId": 2,
+    "totalMwh": 160.0,
+    "geographicFootprint": [
+      {
+        "settlementPoint": "A",
+        "longitude": -100.0,
+        "latitude": 32.0,
+        "sourceMwh": 70.0,
+        "sinkMwh": 130.0
+      },
+      {
+        "settlementPoint": "B",
+        "longitude": -99.0,
+        "latitude": 31.0,
+        "sourceMwh": 30.0,
+        "sinkMwh": 30.0
+      },
+      {
+        "settlementPoint": "C",
+        "longitude": -98.0,
+        "latitude": null,
+        "sourceMwh": 60.0,
+        "sinkMwh": 0.0
+      }
+    ],
+    "accountHolderCount": 2,
+    "settlementPointCount": 3,
+    "directedPathCount": 4,
+    "hedgeTypeMwh": {
+      "OPT": 130.0,
+      "OBL": 30.0
+    },
+    "topAccountHolders": [
+      {
+        "accountHolder": "X",
+        "legalName": "Holder X",
+        "totalMwh": 100.0
+      },
+      {
+        "accountHolder": "Y",
+        "legalName": null,
+        "totalMwh": 60.0
+      }
+    ],
+    "topSettlementPoints": [
+      {
+        "settlementPoint": "A",
+        "totalMwh": 160.0
+      },
+      {
+        "settlementPoint": "B",
+        "totalMwh": 60.0
+      },
+      {
+        "settlementPoint": "C",
+        "totalMwh": 60.0
+      }
+    ]
+  },
+  "combined": {
+    "reportId": 2,
+    "totalMwh": 100.0,
+    "geographicFootprint": [
+      {
+        "settlementPoint": "A",
+        "longitude": -100.0,
+        "latitude": 32.0,
+        "sourceMwh": 70.0,
+        "sinkMwh": 70.0
+      },
+      {
+        "settlementPoint": "B",
+        "longitude": -99.0,
+        "latitude": 31.0,
+        "sourceMwh": 30.0,
+        "sinkMwh": 30.0
+      }
+    ],
+    "accountHolderCount": 1,
+    "settlementPointCount": 2,
+    "directedPathCount": 3,
+    "hedgeTypeMwh": {
+      "OPT": 70.0,
+      "OBL": 30.0
+    },
+    "topAccountHolders": [
+      {
+        "accountHolder": "X",
+        "legalName": "Holder X",
+        "totalMwh": 100.0
+      }
+    ],
+    "topSettlementPoints": [
+      {
+        "settlementPoint": "A",
+        "totalMwh": 100.0
+      },
+      {
+        "settlementPoint": "B",
+        "totalMwh": 60.0
+      }
+    ]
+  },
+  "empty": {
+    "reportId": 2,
+    "totalMwh": 0,
+    "geographicFootprint": [],
+    "accountHolderCount": 0,
+    "settlementPointCount": 0,
+    "directedPathCount": 0,
+    "hedgeTypeMwh": {
+      "OPT": 0,
+      "OBL": 0
+    },
+    "topAccountHolders": [],
+    "topSettlementPoints": []
+  },
+  "zero_exposure": {
+    "reportId": 2,
+    "totalMwh": 0.0,
+    "geographicFootprint": [
+      {
+        "settlementPoint": "A",
+        "longitude": -100.0,
+        "latitude": 32.0,
+        "sourceMwh": 0.0,
+        "sinkMwh": 0.0
+      },
+      {
+        "settlementPoint": "B",
+        "longitude": -99.0,
+        "latitude": 31.0,
+        "sourceMwh": 0.0,
+        "sinkMwh": 0.0
+      }
+    ],
+    "accountHolderCount": 1,
+    "settlementPointCount": 2,
+    "directedPathCount": 3,
+    "hedgeTypeMwh": {
+      "OPT": 0.0,
+      "OBL": 0.0
+    },
+    "topAccountHolders": [
+      {
+        "accountHolder": "X",
+        "legalName": "Holder X",
+        "totalMwh": 0.0
+      }
+    ],
+    "topSettlementPoints": [
+      {
+        "settlementPoint": "A",
+        "totalMwh": 0.0
+      },
+      {
+        "settlementPoint": "B",
+        "totalMwh": 0.0
+      }
+    ]
+  }
+}

@@ -58,3 +58,13 @@ CREATE TABLE crr_monthly_holdings (
     off_peak_mwh REAL NOT NULL,
     PRIMARY KEY (report_id, account_holder, source, sink, delivery_month, hedge_type)
 );
+
+CREATE TABLE crr_summary_holdings (
+    report_id INTEGER NOT NULL REFERENCES reports,
+    account_holder TEXT NOT NULL REFERENCES account_holders,
+    source TEXT NOT NULL REFERENCES settlement_points,
+    sink TEXT NOT NULL REFERENCES settlement_points,
+    hedge_type TEXT NOT NULL,
+    mwh REAL NOT NULL,
+    PRIMARY KEY (report_id, account_holder, source, sink, hedge_type)
+);

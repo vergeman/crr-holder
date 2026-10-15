@@ -1,18 +1,17 @@
 # Imports
 import unittest
 
-from fixtures import create_fixture_db
+from fixtures import HOLDINGS, POINTS, create_fixture_db
 from services.holdings import get_source_holdings
 from services.summary import get_summary
 
 
 class HoldingsTests(unittest.TestCase):
-    def setUp(self):
+    def test_reports_filters_and_reconciliation(self):
         # Setup
         self.db = create_fixture_db()
         self.addCleanup(self.db.close)
 
-    def test_reports_filters_and_reconciliation(self):
         # Execution: compare summary and source pages under identical filters.
         for report in (None, 1, 2):
             for holder, point in ((None, None), ('X', None), (None, 'A'),
@@ -62,8 +61,10 @@ class HoldingsTests(unittest.TestCase):
     def test_month_cells_and_portfolio_bounds(self):
         # Setup: add a January CRR for source D, leaving December empty.
         # D ranks below the first source page; its month must still set the bounds.
-        self.db.execute("""INSERT INTO crr_monthly_holdings
-            VALUES (2, 'Y', 'D', 'A', '2027-01-01', 'OBL', 0, 0, 0, 1, 0, 0)""")
+        self.db = create_fixture_db(holdings=HOLDINGS + [
+            (2, 'Y', 'D', 'A', '2027-01-01', 'OBL', 1, 0, 0)
+        ])
+        self.addCleanup(self.db.close)
 
         # Execution
         page = get_source_holdings(self.db, account_holder='X')
@@ -86,8 +87,10 @@ class HoldingsTests(unittest.TestCase):
 
     def test_zero_contributions_have_no_holdings_range(self):
         # Setup
-        self.db.execute("UPDATE crr_monthly_holdings SET peak_wd_mwh=0, "
-                        "peak_we_mwh=0, off_peak_mwh=0 WHERE account_holder='X'")
+        zero_holdings = [row[:6] + (0, 0, 0) if row[1] == 'X' else row
+                         for row in HOLDINGS]
+        self.db = create_fixture_db(holdings=zero_holdings)
+        self.addCleanup(self.db.close)
 
         # Execution
         page = get_source_holdings(self.db, account_holder='X')
@@ -99,11 +102,14 @@ class HoldingsTests(unittest.TestCase):
 
     def test_ties_and_complete_source_pages(self):
         # Setup: local pagination rows exceed the default page size.
-        self.db.executemany("INSERT INTO settlement_points (settlement_point) VALUES (?)",
-                            [(f'S{i:02}',) for i in range(23)])
-        self.db.executemany("""INSERT INTO crr_monthly_holdings
-            VALUES (2, 'Y', ?, 'A', '2026-10-01', 'OPT', 0, 0, 0, 2, 0, 0)""",
-            [(f'S{i:02}',) for i in range(23)])
+        added_points = [(f'S{i:02}',) for i in range(23)]
+        added_holdings = [
+            (2, 'Y', point, 'A', '2026-10-01', 'OPT', 2, 0, 0)
+            for (point,) in added_points
+        ]
+        self.db = create_fixture_db(points=POINTS + added_points,
+                                    holdings=HOLDINGS + added_holdings)
+        self.addCleanup(self.db.close)
 
         # Execution
         first = get_source_holdings(self.db)

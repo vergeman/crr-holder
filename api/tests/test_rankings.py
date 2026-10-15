@@ -1,17 +1,16 @@
 # Imports
 import unittest
 
-from fixtures import create_fixture_db
+from fixtures import ACCOUNT_HOLDERS, HOLDINGS, POINTS, REPORTS, create_fixture_db
 from services.summary import get_summary
 
 
 class RankingTests(unittest.TestCase):
-    def setUp(self):
+    def test_rankings_follow_summary_filters(self):
         # Setup
         self.db = create_fixture_db()
         self.addCleanup(self.db.close)
 
-    def test_rankings_follow_summary_filters(self):
         cases = [
             ({}, [("Y", None, 110), ("X", "Holder X", 100)],
              [("A", 160), ("C", 110), ("B", 60), ("D", 50)]),
@@ -43,21 +42,18 @@ class RankingTests(unittest.TestCase):
 
     def test_ties_and_limit_after_grouping(self):
         # Setup: local ties beyond the result limit do not change the shared fixture.
-        self.db.execute("INSERT INTO reports VALUES (3, '2026-11-01')")
         identifiers = [f"T{index:03}" for index in range(102)]
-        self.db.executemany(
-            "INSERT INTO account_holders (account_holder) VALUES (?)",
-            [(identifier,) for identifier in reversed(identifiers)],
+        added_holdings = [
+            (3, identifier, identifier, identifier, '2026-11-01', 'OPT', 1, 0, 0)
+            for identifier in reversed(identifiers)
+        ]
+        self.db = create_fixture_db(
+            reports=REPORTS + [(3, '2026-11-01')],
+            account_holders=ACCOUNT_HOLDERS + [(identifier, None) for identifier in reversed(identifiers)],
+            points=POINTS + [(identifier,) for identifier in reversed(identifiers)],
+            holdings=HOLDINGS + added_holdings,
         )
-        self.db.executemany(
-            "INSERT INTO settlement_points (settlement_point) VALUES (?)",
-            [(identifier,) for identifier in reversed(identifiers)],
-        )
-        self.db.executemany(
-            "INSERT INTO crr_monthly_holdings VALUES "
-            "(3, ?, ?, ?, '2026-11-01', 'OPT', 0, 0, 0, 1, 0, 0)",
-            [(identifier, identifier, identifier) for identifier in reversed(identifiers)],
-        )
+        self.addCleanup(self.db.close)
 
         # Execution
         summary = get_summary(self.db)

@@ -37,7 +37,6 @@ class ContractHoldingsTests(unittest.TestCase):
         if not sql.exists():
             sql = Path('/data/sql/monthly_holdings.sql')
         self.db.executescript(sql.read_text())
-
     def details(self, **filters):
         return get_contract_holdings(self.db, 'A', 'B', '2026-10-01', 'OPT', **filters)
 

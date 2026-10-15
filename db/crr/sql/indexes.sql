@@ -4,3 +4,6 @@ CREATE INDEX holdings_sink ON crr_holdings(report_id, sink);
 CREATE INDEX monthly_account ON crr_monthly_holdings(report_id, account_holder, delivery_month);
 CREATE INDEX monthly_source ON crr_monthly_holdings(report_id, source, delivery_month);
 CREATE INDEX monthly_sink ON crr_monthly_holdings(report_id, sink, delivery_month);
+CREATE INDEX monthly_report_month ON crr_monthly_holdings(report_id, delivery_month);
+CREATE INDEX summary_source ON crr_summary_holdings(report_id, source);
+CREATE INDEX summary_sink ON crr_summary_holdings(report_id, sink);

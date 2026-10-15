@@ -1,0 +1,525 @@
+{
+  "market": {
+    "reportId": 2,
+    "source": "A",
+    "sink": "B",
+    "deliveryMonth": "2026-10-01",
+    "hedgeType": "OPT",
+    "totalMwh": 120.0,
+    "accountHolders": [
+      {
+        "accountHolder": "X",
+        "legalName": "Holder X",
+        "totalMwh": 55.0,
+        "timeOfUseGroups": [
+          {
+            "timeOfUse": "PeakWD",
+            "hours": 10,
+            "totalMwh": 45.0,
+            "contracts": [
+              {
+                "crrId": 99,
+                "segmentId": 1,
+                "crrType": "STANDARD",
+                "startDate": "2026-10-01",
+                "endDate": "2026-10-31",
+                "mw": 2.0,
+                "monthMwh": 20.0
+              },
+              {
+                "crrId": 100,
+                "segmentId": 1,
+                "crrType": "STANDARD",
+                "startDate": "2026-10-01",
+                "endDate": "2026-10-31",
+                "mw": 1.25,
+                "monthMwh": 12.5
+              },
+              {
+                "crrId": 100,
+                "segmentId": 2,
+                "crrType": "STANDARD",
+                "startDate": "2026-10-01",
+                "endDate": "2026-11-30",
+                "mw": 1.25,
+                "monthMwh": 12.5
+              }
+            ]
+          },
+          {
+            "timeOfUse": "PeakWE",
+            "hours": 5,
+            "totalMwh": 10.0,
+            "contracts": [
+              {
+                "crrId": 101,
+                "segmentId": 1,
+                "crrType": "REFUND",
+                "startDate": "2026-10-01",
+                "endDate": "2026-10-31",
+                "mw": 2.0,
+                "monthMwh": 10.0
+              }
+            ]
+          },
+          {
+            "timeOfUse": "Off-peak",
+            "hours": 20,
+            "totalMwh": 0.0,
+            "contracts": [
+              {
+                "crrId": 102,
+                "segmentId": 1,
+                "crrType": "STANDARD",
+                "startDate": "2026-10-01",
+                "endDate": "2026-10-31",
+                "mw": 0.0,
+                "monthMwh": 0.0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "accountHolder": "Y",
+        "legalName": null,
+        "totalMwh": 55.0,
+        "timeOfUseGroups": [
+          {
+            "timeOfUse": "PeakWD",
+            "hours": 10,
+            "totalMwh": 55.0,
+            "contracts": [
+              {
+                "crrId": 103,
+                "segmentId": 1,
+                "crrType": "STANDARD",
+                "startDate": "2026-10-01",
+                "endDate": "2026-10-31",
+                "mw": 5.5,
+                "monthMwh": 55.0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "accountHolder": "Z",
+        "legalName": "Holder Z",
+        "totalMwh": 10.0,
+        "timeOfUseGroups": [
+          {
+            "timeOfUse": "PeakWD",
+            "hours": 10,
+            "totalMwh": 10.0,
+            "contracts": [
+              {
+                "crrId": 104,
+                "segmentId": 1,
+                "crrType": "STANDARD",
+                "startDate": "2026-10-01",
+                "endDate": "2026-10-31",
+                "mw": 1.0,
+                "monthMwh": 10.0
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "previous_report": {
+    "reportId": 1,
+    "source": "A",
+    "sink": "B",
+    "deliveryMonth": "2026-10-01",
+    "hedgeType": "OPT",
+    "totalMwh": 90.0,
+    "accountHolders": [
+      {
+        "accountHolder": "X",
+        "legalName": "Holder X",
+        "totalMwh": 90.0,
+        "timeOfUseGroups": [
+          {
+            "timeOfUse": "PeakWD",
+            "hours": 10,
+            "totalMwh": 90.0,
+            "contracts": [
+              {
+                "crrId": 100,
+                "segmentId": 1,
+                "crrType": "STANDARD",
+                "startDate": "2026-10-01",
+                "endDate": "2026-10-31",
+                "mw": 9.0,
+                "monthMwh": 90.0
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "account": {
+    "reportId": 2,
+    "source": "A",
+    "sink": "B",
+    "deliveryMonth": "2026-10-01",
+    "hedgeType": "OPT",
+    "totalMwh": 55.0,
+    "accountHolders": [
+      {
+        "accountHolder": "X",
+        "legalName": "Holder X",
+        "totalMwh": 55.0,
+        "timeOfUseGroups": [
+          {
+            "timeOfUse": "PeakWD",
+            "hours": 10,
+            "totalMwh": 45.0,
+            "contracts": [
+              {
+                "crrId": 99,
+                "segmentId": 1,
+                "crrType": "STANDARD",
+                "startDate": "2026-10-01",
+                "endDate": "2026-10-31",
+                "mw": 2.0,
+                "monthMwh": 20.0
+              },
+              {
+                "crrId": 100,
+                "segmentId": 1,
+                "crrType": "STANDARD",
+                "startDate": "2026-10-01",
+                "endDate": "2026-10-31",
+                "mw": 1.25,
+                "monthMwh": 12.5
+              },
+              {
+                "crrId": 100,
+                "segmentId": 2,
+                "crrType": "STANDARD",
+                "startDate": "2026-10-01",
+                "endDate": "2026-11-30",
+                "mw": 1.25,
+                "monthMwh": 12.5
+              }
+            ]
+          },
+          {
+            "timeOfUse": "PeakWE",
+            "hours": 5,
+            "totalMwh": 10.0,
+            "contracts": [
+              {
+                "crrId": 101,
+                "segmentId": 1,
+                "crrType": "REFUND",
+                "startDate": "2026-10-01",
+                "endDate": "2026-10-31",
+                "mw": 2.0,
+                "monthMwh": 10.0
+              }
+            ]
+          },
+          {
+            "timeOfUse": "Off-peak",
+            "hours": 20,
+            "totalMwh": 0.0,
+            "contracts": [
+              {
+                "crrId": 102,
+                "segmentId": 1,
+                "crrType": "STANDARD",
+                "startDate": "2026-10-01",
+                "endDate": "2026-10-31",
+                "mw": 0.0,
+                "monthMwh": 0.0
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "point": {
+    "reportId": 2,
+    "source": "A",
+    "sink": "B",
+    "deliveryMonth": "2026-10-01",
+    "hedgeType": "OPT",
+    "totalMwh": 120.0,
+    "accountHolders": [
+      {
+        "accountHolder": "X",
+        "legalName": "Holder X",
+        "totalMwh": 55.0,
+        "timeOfUseGroups": [
+          {
+            "timeOfUse": "PeakWD",
+            "hours": 10,
+            "totalMwh": 45.0,
+            "contracts": [
+              {
+                "crrId": 99,
+                "segmentId": 1,
+                "crrType": "STANDARD",
+                "startDate": "2026-10-01",
+                "endDate": "2026-10-31",
+                "mw": 2.0,
+                "monthMwh": 20.0
+              },
+              {
+                "crrId": 100,
+                "segmentId": 1,
+                "crrType": "STANDARD",
+                "startDate": "2026-10-01",
+                "endDate": "2026-10-31",
+                "mw": 1.25,
+                "monthMwh": 12.5
+              },
+              {
+                "crrId": 100,
+                "segmentId": 2,
+                "crrType": "STANDARD",
+                "startDate": "2026-10-01",
+                "endDate": "2026-11-30",
+                "mw": 1.25,
+                "monthMwh": 12.5
+              }
+            ]
+          },
+          {
+            "timeOfUse": "PeakWE",
+            "hours": 5,
+            "totalMwh": 10.0,
+            "contracts": [
+              {
+                "crrId": 101,
+                "segmentId": 1,
+                "crrType": "REFUND",
+                "startDate": "2026-10-01",
+                "endDate": "2026-10-31",
+                "mw": 2.0,
+                "monthMwh": 10.0
+              }
+            ]
+          },
+          {
+            "timeOfUse": "Off-peak",
+            "hours": 20,
+            "totalMwh": 0.0,
+            "contracts": [
+              {
+                "crrId": 102,
+                "segmentId": 1,
+                "crrType": "STANDARD",
+                "startDate": "2026-10-01",
+                "endDate": "2026-10-31",
+                "mw": 0.0,
+                "monthMwh": 0.0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "accountHolder": "Y",
+        "legalName": null,
+        "totalMwh": 55.0,
+        "timeOfUseGroups": [
+          {
+            "timeOfUse": "PeakWD",
+            "hours": 10,
+            "totalMwh": 55.0,
+            "contracts": [
+              {
+                "crrId": 103,
+                "segmentId": 1,
+                "crrType": "STANDARD",
+                "startDate": "2026-10-01",
+                "endDate": "2026-10-31",
+                "mw": 5.5,
+                "monthMwh": 55.0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "accountHolder": "Z",
+        "legalName": "Holder Z",
+        "totalMwh": 10.0,
+        "timeOfUseGroups": [
+          {
+            "timeOfUse": "PeakWD",
+            "hours": 10,
+            "totalMwh": 10.0,
+            "contracts": [
+              {
+                "crrId": 104,
+                "segmentId": 1,
+                "crrType": "STANDARD",
+                "startDate": "2026-10-01",
+                "endDate": "2026-10-31",
+                "mw": 1.0,
+                "monthMwh": 10.0
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "combined": {
+    "reportId": 2,
+    "source": "A",
+    "sink": "B",
+    "deliveryMonth": "2026-10-01",
+    "hedgeType": "OPT",
+    "totalMwh": 55.0,
+    "accountHolders": [
+      {
+        "accountHolder": "X",
+        "legalName": "Holder X",
+        "totalMwh": 55.0,
+        "timeOfUseGroups": [
+          {
+            "timeOfUse": "PeakWD",
+            "hours": 10,
+            "totalMwh": 45.0,
+            "contracts": [
+              {
+                "crrId": 99,
+                "segmentId": 1,
+                "crrType": "STANDARD",
+                "startDate": "2026-10-01",
+                "endDate": "2026-10-31",
+                "mw": 2.0,
+                "monthMwh": 20.0
+              },
+              {
+                "crrId": 100,
+                "segmentId": 1,
+                "crrType": "STANDARD",
+                "startDate": "2026-10-01",
+                "endDate": "2026-10-31",
+                "mw": 1.25,
+                "monthMwh": 12.5
+              },
+              {
+                "crrId": 100,
+                "segmentId": 2,
+                "crrType": "STANDARD",
+                "startDate": "2026-10-01",
+                "endDate": "2026-11-30",
+                "mw": 1.25,
+                "monthMwh": 12.5
+              }
+            ]
+          },
+          {
+            "timeOfUse": "PeakWE",
+            "hours": 5,
+            "totalMwh": 10.0,
+            "contracts": [
+              {
+                "crrId": 101,
+                "segmentId": 1,
+                "crrType": "REFUND",
+                "startDate": "2026-10-01",
+                "endDate": "2026-10-31",
+                "mw": 2.0,
+                "monthMwh": 10.0
+              }
+            ]
+          },
+          {
+            "timeOfUse": "Off-peak",
+            "hours": 20,
+            "totalMwh": 0.0,
+            "contracts": [
+              {
+                "crrId": 102,
+                "segmentId": 1,
+                "crrType": "STANDARD",
+                "startDate": "2026-10-01",
+                "endDate": "2026-10-31",
+                "mw": 0.0,
+                "monthMwh": 0.0
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "empty": {
+    "reportId": 2,
+    "source": "A",
+    "sink": "B",
+    "deliveryMonth": "2026-10-01",
+    "hedgeType": "OPT",
+    "totalMwh": 10.0,
+    "accountHolders": [
+      {
+        "accountHolder": "Z",
+        "legalName": "Holder Z",
+        "totalMwh": 10.0,
+        "timeOfUseGroups": [
+          {
+            "timeOfUse": "PeakWD",
+            "hours": 10,
+            "totalMwh": 10.0,
+            "contracts": [
+              {
+                "crrId": 104,
+                "segmentId": 1,
+                "crrType": "STANDARD",
+                "startDate": "2026-10-01",
+                "endDate": "2026-10-31",
+                "mw": 1.0,
+                "monthMwh": 10.0
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "self_path": {
+    "reportId": 2,
+    "source": "A",
+    "sink": "A",
+    "deliveryMonth": "2026-10-01",
+    "hedgeType": "OPT",
+    "totalMwh": 60.0,
+    "accountHolders": [
+      {
+        "accountHolder": "X",
+        "legalName": "Holder X",
+        "totalMwh": 60.0,
+        "timeOfUseGroups": [
+          {
+            "timeOfUse": "PeakWD",
+            "hours": 10,
+            "totalMwh": 60.0,
+            "contracts": [
+              {
+                "crrId": 107,
+                "segmentId": 1,
+                "crrType": "STANDARD",
+                "startDate": "2026-10-01",
+                "endDate": "2026-10-31",
+                "mw": 6.0,
+                "monthMwh": 60.0
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
