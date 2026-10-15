@@ -2,7 +2,7 @@
 import sqlite3
 
 
-from filters import holdings_filter
+from services.helpers import holdings_filter
 
 
 def get_top_account_holders(db: sqlite3.Connection, report_id, account_holder=None,

@@ -2,7 +2,9 @@
 import unittest
 
 from fixtures import create_fixture_db
-from queries import get_metadata, get_summary, resolve_report
+from services.metadata import get_metadata
+from services.summary import get_summary
+from services.helpers import resolve_report
 
 
 class SummaryTests(unittest.TestCase):

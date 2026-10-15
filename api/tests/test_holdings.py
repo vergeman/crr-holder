@@ -2,8 +2,8 @@
 import unittest
 
 from fixtures import create_fixture_db
-from holdings import get_source_holdings
-from queries import get_summary
+from services.holdings import get_source_holdings
+from services.summary import get_summary
 
 
 class HoldingsTests(unittest.TestCase):

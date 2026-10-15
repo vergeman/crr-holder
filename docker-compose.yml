@@ -3,6 +3,8 @@ version: "3.8"
 services:
   api:
     build: ./api
+    environment:
+      DB_FILE: /data/crr.sqlite
     ports:
       - "8000:8000"
     volumes:
