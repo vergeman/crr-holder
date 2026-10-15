@@ -312,3 +312,24 @@ Reference: `1b5b70f`.
 | Combined | 0.54 | 23.71 | 11.21 |
 
 * Captures: `/tmp/0013-query-performance/task-6/` on host and API container.
+
+### Task 7 — indexed timeline endpoints
+
+* Dataset test, Docker rebuild, validation, and 20 API tests: passed.
+* All 12 affected responses match baseline and task 5 exactly.
+* Timings improved across all measured source and sink workloads.
+* Medians in ms; source entries show offset 0 / offset 20.
+
+| Service / filter | Baseline | Task 5 | Task 7 |
+| --- | ---: | ---: | ---: |
+| sources / Unfiltered | 2158.83 / 2193.36 | 1312.00 / 1408.19 | 1032.45 / 995.16 |
+| sources / Account | 138.01 / 124.61 | 179.64 / 280.92 | 0.56 / 0.25 |
+| sources / Settlement Point | 1967.38 / 1728.54 | 435.86 / 323.79 | 110.76 / 107.35 |
+| sources / Combined | 133.13 / 163.13 | 187.77 / 175.30 | 22.75 / 21.80 |
+| sinks / Unfiltered | 2423.01 | 175.38 | 17.03 |
+| sinks / Account | 158.61 | 153.02 | 0.26 |
+| sinks / Settlement Point | 2438.49 | 192.73 | 17.53 |
+| sinks / Combined | 132.86 | 138.01 | 0.25 |
+
+* Captures: `/tmp/0013-query-performance/task-7/` on host and API container.
+  Diff check: passed.

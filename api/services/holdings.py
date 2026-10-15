@@ -9,13 +9,14 @@ def delivery_months(db, report_id):
         -- WITH RECURSIVE expands the report span one month at a time.
         -- Example: October and January holdings yield Oct, Nov, Dec, Jan.
         WITH RECURSIVE months(month, last) AS (
-            SELECT MIN(delivery_month), MAX(delivery_month)
-            FROM crr_monthly_holdings WHERE report_id = ?
+            -- Separate lookups seek each endpoint of the report's month index.
+            SELECT (SELECT MIN(delivery_month) FROM crr_monthly_holdings WHERE report_id = ?),
+                   (SELECT MAX(delivery_month) FROM crr_monthly_holdings WHERE report_id = ?)
             UNION ALL
             SELECT date(month, '+1 month'), last FROM months WHERE month < last
         )
         SELECT month FROM months WHERE month IS NOT NULL ORDER BY month
-    """, (report_id,))]
+    """, (report_id, report_id))]
 
 
 @timed
