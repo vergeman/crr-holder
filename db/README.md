@@ -297,6 +297,23 @@ Docker sink expansions showed the timeline dominating: 127–131 ms versus
 5–8 ms for rankings and 7–9 ms for monthly cells across HB_NORTH, HB_HOUSTON,
 and HB_WEST. Python setup/fill remained around 3–5 ms combined.
 
+## 13. Index report delivery months
+
+Added `monthly_report_month` on `(report_id, delivery_month)` to the build and
+existing database. Split the timeline seed into separate MIN and MAX scalar
+subqueries so each can find an endpoint without scanning all report entries.
+Analyzed the new index in the existing database; normal builds analyze all
+indexes at completion.
+
+The local plan uses the new covering index for both bounds. Timeline SQL took
+0.51 ms for the same 42 months, versus around 200 ms in the original local
+profile. An absent report still returns no months. Seven source/sink tests
+and whitespace checks passed. Next, repeat the sink expansions in Docker.
+
+Docker timeline time fell from about 130 ms to 0.37–0.40 ms. Measured sink
+expansion stages fell from 149 to 33 ms for HB_NORTH and 147 to 26 ms for
+HB_HOUSTON in individual runs, excluding serialization and network time.
+
 ## 14. Profile individual contracts
 
 Added query plans and separate SQL/fetch and Python grouping/sorting timings
