@@ -3,13 +3,13 @@ import sqlite3
 from time import perf_counter
 
 
-from filters import monthly_holdings_query
+from filters import summary_holdings_query
 
 
 def get_top_account_holders(db: sqlite3.Connection, report_id, account_holder=None,
                             settlement_point=None) -> list[dict]:
     # Preparation
-    holdings_sql, parameters = monthly_holdings_query(
+    holdings_sql, parameters = summary_holdings_query(
         report_id, account_holder, settlement_point)
 
     # Transformation: aggregate inventory before joining directory names.
@@ -38,7 +38,7 @@ def get_top_account_holders(db: sqlite3.Connection, report_id, account_holder=No
 def get_top_settlement_points(db: sqlite3.Connection, report_id, account_holder=None,
                               settlement_point=None) -> list[dict]:
     # Preparation
-    holdings_sql, parameters = monthly_holdings_query(
+    holdings_sql, parameters = summary_holdings_query(
         report_id, account_holder, settlement_point)
 
     # Transformation: preserve each monthly contribution without doubling self paths.

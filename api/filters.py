@@ -13,13 +13,13 @@ def holdings_filter(report_id, account_holder=None, settlement_point=None):
     }
 
 
-def monthly_holdings_query(report_id, account_holder=None, settlement_point=None):
+def summary_holdings_query(report_id, account_holder=None, settlement_point=None):
     where, parameters = holdings_filter(report_id, account_holder)
     parameters["settlement_point"] = settlement_point
     sql = f"""
         SELECT account_holder, source, sink, hedge_type,
-               peak_wd_mwh + peak_we_mwh + off_peak_mwh AS mwh
-        FROM crr_monthly_holdings WHERE {where}
+               mwh
+        FROM crr_summary_holdings WHERE {where}
     """
     if settlement_point:
         # Use each endpoint index; self paths enter only through the source branch.
@@ -27,8 +27,8 @@ def monthly_holdings_query(report_id, account_holder=None, settlement_point=None
             {sql} AND source = :settlement_point
             UNION ALL
             SELECT account_holder, source, sink, hedge_type,
-                   peak_wd_mwh + peak_we_mwh + off_peak_mwh AS mwh
-            FROM crr_monthly_holdings
+                   mwh
+            FROM crr_summary_holdings
             WHERE {where} AND sink = :settlement_point AND source != :settlement_point
         """
     return sql, parameters

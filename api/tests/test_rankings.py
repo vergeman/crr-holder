@@ -1,7 +1,7 @@
 # Imports
 import unittest
 
-from fixtures import create_fixture_db
+from fixtures import create_fixture_db, refresh_summary_holdings
 from queries import get_summary
 
 
@@ -58,6 +58,8 @@ class RankingTests(unittest.TestCase):
             "(3, ?, ?, ?, '2026-11-01', 'OPT', 0, 0, 0, 1, 0, 0)",
             [(identifier, identifier, identifier) for identifier in reversed(identifiers)],
         )
+
+        refresh_summary_holdings(self.db)
 
         # Execution
         summary = get_summary(self.db)

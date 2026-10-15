@@ -1,7 +1,7 @@
 import sqlite3
 from time import perf_counter
 
-from filters import monthly_holdings_query
+from filters import summary_holdings_query
 from geography import get_geographic_footprint
 from rankings import get_top_account_holders, get_top_settlement_points
 
@@ -69,7 +69,7 @@ def get_summary(db: sqlite3.Connection, report_id=None, account_holder=None,
                 settlement_point=None) -> dict:
     report_id = resolve_report(db, report_id)
 
-    holdings_sql, parameters = monthly_holdings_query(
+    holdings_sql, parameters = summary_holdings_query(
         report_id, account_holder, settlement_point)
 
     # Filter holdings for the Portfolio Summary panel's totals,

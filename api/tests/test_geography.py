@@ -1,6 +1,6 @@
 import unittest
 
-from fixtures import create_fixture_db
+from fixtures import create_fixture_db, refresh_summary_holdings
 from queries import get_summary
 
 
@@ -56,6 +56,7 @@ class GeographyTests(unittest.TestCase):
                             '(2, "X", ?, "A", "2026-10-01", "OPT", 0, 0, 0, ?, 0, 0)',
                             (point, mwh))
 
+        refresh_summary_holdings(self.db)
         summary = get_summary(self.db)
         # geographicFootprint returns all participating points, not a ranking.
         points = summary['geographicFootprint']

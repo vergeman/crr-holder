@@ -108,4 +108,44 @@ original holdings. A future summary month filter would require monthly data.
 
 First compare row counts at the two grains, then compare timings and equivalent
 results for the overview, point filters, and large-account filters. The size
-reduction and speedup remain unmeasured; no new aggregate table has been built.
+reduction and speedup are recorded below.
+
+## 6. Build and query the month-free aggregate
+
+Built `crr_summary_holdings` at the proposed grain, storing one summed `mwh`
+measure. Summary totals, geography, and rankings now use it through
+`summary_holdings_query`; monthly matrices and contract details are unchanged.
+The dataset builder populates it and validates path totals against monthly data.
+Source and sink indexes preserve the split point lookups; the primary-key index
+supports account filtering.
+
+The existing database was extended in place for this experiment:
+
+- Monthly input: **799,368 rows**.
+- Summary aggregate: **246,197 rows**, about 69% fewer.
+- Aggregate and index build: **3.87 seconds** locally.
+
+Single-run local comparisons of complete `get_summary` calls (milliseconds):
+
+| Filters | Monthly input | Summary input |
+| --- | ---: | ---: |
+| Report only | 13,883 | 5,373 |
+| HB_NORTH | 849 | 240 |
+| LZ_NORTH | 659 | 212 |
+| XEDIS2 (largest monthly row count) | 503 | 55 |
+| XEDIS2 + HB_NORTH | 183 | 41 |
+
+These local runs use a different runtime from the earlier Docker logs and
+different cache states; compare within this table, not against earlier timings.
+All five responses matched the previous results, allowing the existing
+floating-point tolerance. The build fixture and 11 geography, ranking, source,
+and sink tests passed. Full API test discovery was blocked locally by missing
+`fastapi` for the contract test module.
+
+Docker stage totals fell from 8,153 to 3,470 ms for the overview, 258 to 75 ms
+for HB_NORTH, 94 to 46 ms for LZ_NORTH, and 10 to 2 ms for XLUREP.
+These are single runs, excluding serialization and network time.
+
+The unfiltered overview still
+aggregates every summary row; consider sharing geography/ranking aggregation
+or precomputing that overview if its measured latency remains too high.

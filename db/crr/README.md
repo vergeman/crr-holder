@@ -21,7 +21,11 @@ docker run --rm --user "$(id -u):$(id -g)" \
 
 This runs `prepare_dataset.py`: reads the four inputs, streams contracts from the
 ZIP, loads account and settlement-point enrichment, and calculates monthly MW/MWh.
+It also materializes `crr_summary_holdings` at report/account/source/sink/hedge
+grain, summing MWh across months for summary queries. Monthly matrices and
+individual contract queries retain their existing inputs.
 It compares raw counts, required TOU coverage, and monthly totals by report,
 hedge type, month, and TOU, with tolerance `1e-6 + 1e-10 * abs(expected)`.
+Summary path totals are compared with their monthly input using the same tolerance.
 On success, it replaces `db/crr/crr.sqlite` and prints counts, including missing
 account enrichment and coordinates.

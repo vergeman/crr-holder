@@ -1,11 +1,11 @@
 from time import perf_counter
 
-from filters import monthly_holdings_query
+from filters import summary_holdings_query
 
 
 def get_geographic_footprint(db, report_id, account_holder=None, settlement_point=None):
     # Filter inventory before expanding its two endpoint roles.
-    holdings_sql, parameters = monthly_holdings_query(
+    holdings_sql, parameters = summary_holdings_query(
         report_id, account_holder, settlement_point)
 
     # A self path participates once in each independent role.

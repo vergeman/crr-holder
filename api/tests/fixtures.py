@@ -38,4 +38,13 @@ def create_fixture_db():
         HOLDINGS,
     )
 
+    refresh_summary_holdings(db)
     return db
+
+
+def refresh_summary_holdings(db):
+    sql = Path(__file__).resolve().parents[2] / "db/crr/sql/summary_holdings.sql"
+    if not sql.exists():
+        sql = Path("/data/sql/summary_holdings.sql")
+    db.execute("DELETE FROM crr_summary_holdings")
+    db.executescript(sql.read_text())
