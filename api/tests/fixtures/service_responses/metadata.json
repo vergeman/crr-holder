@@ -1,0 +1,166 @@
+{
+  "market": {
+    "reportId": 2,
+    "reports": [
+      {
+        "reportId": 2,
+        "publicationDate": "2026-10-01"
+      },
+      {
+        "reportId": 1,
+        "publicationDate": "2026-09-01"
+      }
+    ],
+    "accountHolders": [
+      {
+        "accountHolder": "X",
+        "legalName": "Holder X"
+      },
+      {
+        "accountHolder": "Y",
+        "legalName": null
+      }
+    ],
+    "settlementPoints": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ]
+  },
+  "previous_report": {
+    "reportId": 1,
+    "reports": [
+      {
+        "reportId": 2,
+        "publicationDate": "2026-10-01"
+      },
+      {
+        "reportId": 1,
+        "publicationDate": "2026-09-01"
+      }
+    ],
+    "accountHolders": [
+      {
+        "accountHolder": "X",
+        "legalName": "Holder X"
+      },
+      {
+        "accountHolder": "Z",
+        "legalName": "Holder Z"
+      }
+    ],
+    "settlementPoints": [
+      "A",
+      "B",
+      "D"
+    ]
+  },
+  "account": {
+    "reportId": 2,
+    "reports": [
+      {
+        "reportId": 2,
+        "publicationDate": "2026-10-01"
+      },
+      {
+        "reportId": 1,
+        "publicationDate": "2026-09-01"
+      }
+    ],
+    "accountHolders": [
+      {
+        "accountHolder": "X",
+        "legalName": "Holder X"
+      },
+      {
+        "accountHolder": "Y",
+        "legalName": null
+      }
+    ],
+    "settlementPoints": [
+      "A",
+      "B"
+    ]
+  },
+  "point": {
+    "reportId": 2,
+    "reports": [
+      {
+        "reportId": 2,
+        "publicationDate": "2026-10-01"
+      },
+      {
+        "reportId": 1,
+        "publicationDate": "2026-09-01"
+      }
+    ],
+    "accountHolders": [
+      {
+        "accountHolder": "X",
+        "legalName": "Holder X"
+      },
+      {
+        "accountHolder": "Y",
+        "legalName": null
+      }
+    ],
+    "settlementPoints": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ]
+  },
+  "combined": {
+    "reportId": 2,
+    "reports": [
+      {
+        "reportId": 2,
+        "publicationDate": "2026-10-01"
+      },
+      {
+        "reportId": 1,
+        "publicationDate": "2026-09-01"
+      }
+    ],
+    "accountHolders": [
+      {
+        "accountHolder": "X",
+        "legalName": "Holder X"
+      },
+      {
+        "accountHolder": "Y",
+        "legalName": null
+      }
+    ],
+    "settlementPoints": [
+      "A",
+      "B"
+    ]
+  },
+  "empty": {
+    "reportId": 2,
+    "reports": [
+      {
+        "reportId": 2,
+        "publicationDate": "2026-10-01"
+      },
+      {
+        "reportId": 1,
+        "publicationDate": "2026-09-01"
+      }
+    ],
+    "accountHolders": [
+      {
+        "accountHolder": "X",
+        "legalName": "Holder X"
+      },
+      {
+        "accountHolder": "Y",
+        "legalName": null
+      }
+    ],
+    "settlementPoints": []
+  }
+}

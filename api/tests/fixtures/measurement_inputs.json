@@ -1,0 +1,8 @@
+{
+  "report_id": 1,
+  "account_holder": "XNRGLD",
+  "source": "HB_NORTH",
+  "sink": "LZ_NORTH",
+  "month": "2027-06-01",
+  "hedge_type": "OBL"
+}

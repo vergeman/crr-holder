@@ -1,0 +1,518 @@
+{
+  "market": {
+    "reportId": 2,
+    "deliveryMonths": [
+      "2026-10-01",
+      "2026-11-01"
+    ],
+    "holdingsRange": {
+      "firstMonth": "2026-10-01",
+      "lastMonth": "2026-11-01"
+    },
+    "sources": [
+      {
+        "source": "C",
+        "totalOptMwh": 60.0,
+        "totalOblMwh": 50.0,
+        "months": [
+          {
+            "deliveryMonth": "2026-10-01",
+            "OPT": 60.0,
+            "OBL": 50.0
+          },
+          {
+            "deliveryMonth": "2026-11-01",
+            "OPT": 0,
+            "OBL": 0
+          }
+        ]
+      },
+      {
+        "source": "A",
+        "totalOptMwh": 70.0,
+        "totalOblMwh": 0,
+        "months": [
+          {
+            "deliveryMonth": "2026-10-01",
+            "OPT": 50.0,
+            "OBL": 0
+          },
+          {
+            "deliveryMonth": "2026-11-01",
+            "OPT": 20.0,
+            "OBL": 0
+          }
+        ]
+      },
+      {
+        "source": "B",
+        "totalOptMwh": 0,
+        "totalOblMwh": 30.0,
+        "months": [
+          {
+            "deliveryMonth": "2026-10-01",
+            "OPT": 0,
+            "OBL": 30.0
+          },
+          {
+            "deliveryMonth": "2026-11-01",
+            "OPT": 0,
+            "OBL": 0
+          }
+        ]
+      }
+    ],
+    "nextOffset": null
+  },
+  "previous_report": {
+    "reportId": 1,
+    "deliveryMonths": [
+      "2026-10-01"
+    ],
+    "holdingsRange": {
+      "firstMonth": "2026-10-01",
+      "lastMonth": "2026-10-01"
+    },
+    "sources": [
+      {
+        "source": "D",
+        "totalOptMwh": 0,
+        "totalOblMwh": 20.0,
+        "months": [
+          {
+            "deliveryMonth": "2026-10-01",
+            "OPT": 0,
+            "OBL": 20.0
+          }
+        ]
+      },
+      {
+        "source": "A",
+        "totalOptMwh": 10.0,
+        "totalOblMwh": 0,
+        "months": [
+          {
+            "deliveryMonth": "2026-10-01",
+            "OPT": 10.0,
+            "OBL": 0
+          }
+        ]
+      }
+    ],
+    "nextOffset": null
+  },
+  "account": {
+    "reportId": 2,
+    "deliveryMonths": [
+      "2026-10-01",
+      "2026-11-01"
+    ],
+    "holdingsRange": {
+      "firstMonth": "2026-10-01",
+      "lastMonth": "2026-11-01"
+    },
+    "sources": [
+      {
+        "source": "A",
+        "totalOptMwh": 70.0,
+        "totalOblMwh": 0,
+        "months": [
+          {
+            "deliveryMonth": "2026-10-01",
+            "OPT": 50.0,
+            "OBL": 0
+          },
+          {
+            "deliveryMonth": "2026-11-01",
+            "OPT": 20.0,
+            "OBL": 0
+          }
+        ]
+      },
+      {
+        "source": "B",
+        "totalOptMwh": 0,
+        "totalOblMwh": 30.0,
+        "months": [
+          {
+            "deliveryMonth": "2026-10-01",
+            "OPT": 0,
+            "OBL": 30.0
+          },
+          {
+            "deliveryMonth": "2026-11-01",
+            "OPT": 0,
+            "OBL": 0
+          }
+        ]
+      }
+    ],
+    "nextOffset": null
+  },
+  "point": {
+    "reportId": 2,
+    "deliveryMonths": [
+      "2026-10-01",
+      "2026-11-01"
+    ],
+    "holdingsRange": {
+      "firstMonth": "2026-10-01",
+      "lastMonth": "2026-11-01"
+    },
+    "sources": [
+      {
+        "source": "A",
+        "totalOptMwh": 70.0,
+        "totalOblMwh": 0,
+        "months": [
+          {
+            "deliveryMonth": "2026-10-01",
+            "OPT": 50.0,
+            "OBL": 0
+          },
+          {
+            "deliveryMonth": "2026-11-01",
+            "OPT": 20.0,
+            "OBL": 0
+          }
+        ]
+      },
+      {
+        "source": "C",
+        "totalOptMwh": 60.0,
+        "totalOblMwh": 0,
+        "months": [
+          {
+            "deliveryMonth": "2026-10-01",
+            "OPT": 60.0,
+            "OBL": 0
+          },
+          {
+            "deliveryMonth": "2026-11-01",
+            "OPT": 0,
+            "OBL": 0
+          }
+        ]
+      },
+      {
+        "source": "B",
+        "totalOptMwh": 0,
+        "totalOblMwh": 30.0,
+        "months": [
+          {
+            "deliveryMonth": "2026-10-01",
+            "OPT": 0,
+            "OBL": 30.0
+          },
+          {
+            "deliveryMonth": "2026-11-01",
+            "OPT": 0,
+            "OBL": 0
+          }
+        ]
+      }
+    ],
+    "nextOffset": null
+  },
+  "combined": {
+    "reportId": 2,
+    "deliveryMonths": [
+      "2026-10-01",
+      "2026-11-01"
+    ],
+    "holdingsRange": {
+      "firstMonth": "2026-10-01",
+      "lastMonth": "2026-11-01"
+    },
+    "sources": [
+      {
+        "source": "A",
+        "totalOptMwh": 70.0,
+        "totalOblMwh": 0,
+        "months": [
+          {
+            "deliveryMonth": "2026-10-01",
+            "OPT": 50.0,
+            "OBL": 0
+          },
+          {
+            "deliveryMonth": "2026-11-01",
+            "OPT": 20.0,
+            "OBL": 0
+          }
+        ]
+      },
+      {
+        "source": "B",
+        "totalOptMwh": 0,
+        "totalOblMwh": 30.0,
+        "months": [
+          {
+            "deliveryMonth": "2026-10-01",
+            "OPT": 0,
+            "OBL": 30.0
+          },
+          {
+            "deliveryMonth": "2026-11-01",
+            "OPT": 0,
+            "OBL": 0
+          }
+        ]
+      }
+    ],
+    "nextOffset": null
+  },
+  "empty": {
+    "reportId": 2,
+    "deliveryMonths": [
+      "2026-10-01",
+      "2026-11-01"
+    ],
+    "holdingsRange": null,
+    "sources": [],
+    "nextOffset": null
+  },
+  "page_0": {
+    "reportId": 2,
+    "deliveryMonths": [
+      "2026-10-01",
+      "2026-11-01"
+    ],
+    "holdingsRange": {
+      "firstMonth": "2026-10-01",
+      "lastMonth": "2026-11-01"
+    },
+    "sources": [
+      {
+        "source": "C",
+        "totalOptMwh": 60.0,
+        "totalOblMwh": 50.0,
+        "months": [
+          {
+            "deliveryMonth": "2026-10-01",
+            "OPT": 60.0,
+            "OBL": 50.0
+          },
+          {
+            "deliveryMonth": "2026-11-01",
+            "OPT": 0,
+            "OBL": 0
+          }
+        ]
+      }
+    ],
+    "nextOffset": 1
+  },
+  "page_1": {
+    "reportId": 2,
+    "deliveryMonths": [
+      "2026-10-01",
+      "2026-11-01"
+    ],
+    "holdingsRange": {
+      "firstMonth": "2026-10-01",
+      "lastMonth": "2026-11-01"
+    },
+    "sources": [
+      {
+        "source": "A",
+        "totalOptMwh": 70.0,
+        "totalOblMwh": 0,
+        "months": [
+          {
+            "deliveryMonth": "2026-10-01",
+            "OPT": 50.0,
+            "OBL": 0
+          },
+          {
+            "deliveryMonth": "2026-11-01",
+            "OPT": 20.0,
+            "OBL": 0
+          }
+        ]
+      }
+    ],
+    "nextOffset": 2
+  },
+  "page_2": {
+    "reportId": 2,
+    "deliveryMonths": [
+      "2026-10-01",
+      "2026-11-01"
+    ],
+    "holdingsRange": {
+      "firstMonth": "2026-10-01",
+      "lastMonth": "2026-11-01"
+    },
+    "sources": [
+      {
+        "source": "B",
+        "totalOptMwh": 0,
+        "totalOblMwh": 30.0,
+        "months": [
+          {
+            "deliveryMonth": "2026-10-01",
+            "OPT": 0,
+            "OBL": 30.0
+          },
+          {
+            "deliveryMonth": "2026-11-01",
+            "OPT": 0,
+            "OBL": 0
+          }
+        ]
+      }
+    ],
+    "nextOffset": null
+  },
+  "page_3": {
+    "reportId": 2,
+    "deliveryMonths": [
+      "2026-10-01",
+      "2026-11-01"
+    ],
+    "holdingsRange": {
+      "firstMonth": "2026-10-01",
+      "lastMonth": "2026-11-01"
+    },
+    "sources": [],
+    "nextOffset": null
+  },
+  "timeline_gap": {
+    "reportId": 2,
+    "deliveryMonths": [
+      "2026-10-01",
+      "2026-11-01",
+      "2026-12-01",
+      "2027-01-01"
+    ],
+    "holdingsRange": {
+      "firstMonth": "2026-10-01",
+      "lastMonth": "2026-11-01"
+    },
+    "sources": [
+      {
+        "source": "A",
+        "totalOptMwh": 70.0,
+        "totalOblMwh": 0,
+        "months": [
+          {
+            "deliveryMonth": "2026-10-01",
+            "OPT": 50.0,
+            "OBL": 0
+          },
+          {
+            "deliveryMonth": "2026-11-01",
+            "OPT": 20.0,
+            "OBL": 0
+          },
+          {
+            "deliveryMonth": "2026-12-01",
+            "OPT": 0,
+            "OBL": 0
+          },
+          {
+            "deliveryMonth": "2027-01-01",
+            "OPT": 0,
+            "OBL": 0
+          }
+        ]
+      },
+      {
+        "source": "B",
+        "totalOptMwh": 0,
+        "totalOblMwh": 30.0,
+        "months": [
+          {
+            "deliveryMonth": "2026-10-01",
+            "OPT": 0,
+            "OBL": 30.0
+          },
+          {
+            "deliveryMonth": "2026-11-01",
+            "OPT": 0,
+            "OBL": 0
+          },
+          {
+            "deliveryMonth": "2026-12-01",
+            "OPT": 0,
+            "OBL": 0
+          },
+          {
+            "deliveryMonth": "2027-01-01",
+            "OPT": 0,
+            "OBL": 0
+          }
+        ]
+      }
+    ],
+    "nextOffset": null
+  },
+  "zero_exposure": {
+    "reportId": 2,
+    "deliveryMonths": [
+      "2026-10-01",
+      "2026-11-01",
+      "2026-12-01",
+      "2027-01-01"
+    ],
+    "holdingsRange": null,
+    "sources": [
+      {
+        "source": "A",
+        "totalOptMwh": 0.0,
+        "totalOblMwh": 0,
+        "months": [
+          {
+            "deliveryMonth": "2026-10-01",
+            "OPT": 0.0,
+            "OBL": 0
+          },
+          {
+            "deliveryMonth": "2026-11-01",
+            "OPT": 0.0,
+            "OBL": 0
+          },
+          {
+            "deliveryMonth": "2026-12-01",
+            "OPT": 0,
+            "OBL": 0
+          },
+          {
+            "deliveryMonth": "2027-01-01",
+            "OPT": 0,
+            "OBL": 0
+          }
+        ]
+      },
+      {
+        "source": "B",
+        "totalOptMwh": 0,
+        "totalOblMwh": 0.0,
+        "months": [
+          {
+            "deliveryMonth": "2026-10-01",
+            "OPT": 0,
+            "OBL": 0.0
+          },
+          {
+            "deliveryMonth": "2026-11-01",
+            "OPT": 0,
+            "OBL": 0
+          },
+          {
+            "deliveryMonth": "2026-12-01",
+            "OPT": 0,
+            "OBL": 0
+          },
+          {
+            "deliveryMonth": "2027-01-01",
+            "OPT": 0,
+            "OBL": 0
+          }
+        ]
+      }
+    ],
+    "nextOffset": null
+  }
+}
