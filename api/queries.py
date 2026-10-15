@@ -2,8 +2,8 @@ import sqlite3
 from time import perf_counter
 
 from filters import summary_holdings_query
-from geography import get_geographic_footprint
-from rankings import get_top_account_holders, get_top_settlement_points
+from geography import get_point_summary
+from rankings import get_top_account_holders
 
 
 def resolve_report(db: sqlite3.Connection, report_id: int | None) -> int:
@@ -103,22 +103,16 @@ def get_summary(db: sqlite3.Connection, report_id=None, account_holder=None,
 
     # Include query execution and result building in each helper's timing.
     started = perf_counter()
-    geographic_footprint = get_geographic_footprint(
+    geographic_footprint, top_settlement_points = get_point_summary(
         db, report_id, account_holder, settlement_point)
     elapsed_ms = (perf_counter() - started) * 1000
-    print(f"get_summary geography: {elapsed_ms:.2f} ms", flush=True)
+    print(f"get_summary geography and point rankings: {elapsed_ms:.2f} ms", flush=True)
 
     started = perf_counter()
     top_account_holders = get_top_account_holders(
         db, report_id, account_holder, settlement_point)
     elapsed_ms = (perf_counter() - started) * 1000
     print(f"get_summary account rankings: {elapsed_ms:.2f} ms", flush=True)
-
-    started = perf_counter()
-    top_settlement_points = get_top_settlement_points(
-        db, report_id, account_holder, settlement_point)
-    elapsed_ms = (perf_counter() - started) * 1000
-    print(f"get_summary settlement point rankings: {elapsed_ms:.2f} ms", flush=True)
 
     return {
         "reportId": report_id,

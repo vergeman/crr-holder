@@ -212,3 +212,31 @@ point/account filters. Measured stage sums remained comparable:
 These are single runs, excluding serialization and network time. Keep the
 override removed and retain build-time statistics. Next, test sharing geography
 and point-ranking aggregation to reduce repeated full-report work.
+
+## 10. Share geography and point-ranking aggregation
+
+Replaced separate geography and point-ranking queries with `get_point_summary`.
+One SQL aggregation calculates source, sink, and ranking MWh per point. Source
+contributions always enter the ranking; sink contributions enter only for
+non-self paths. This preserves self-path semantics without subtracting large
+floating-point totals. Python builds the map response and sorts the same point
+rows by descending ranking MWh, then identifier, taking the first 100.
+
+Single local complete-summary comparisons (milliseconds):
+
+| Filters | Separate queries | Shared aggregation |
+| --- | ---: | ---: |
+| Report only | 1,906 | 1,372 |
+| HB_NORTH | 60 | 51 |
+| LZ_NORTH | 35 | 32 |
+| XEDIS2 | 42 | 33 |
+| XEDIS2 + HB_NORTH | 33 | 26 |
+
+All five responses matched within tolerance, including ranking order.
+The 11 geography, ranking, source, and sink tests and whitespace checks passed.
+These are single local runs with differing cache states. Next, repeat in Docker;
+the combined helper logs `point summary SQL` and Python result-building times.
+
+Docker stage sums fell from 1,546 to 1,193 ms for the overview, 67 to 46 ms for
+HB_NORTH, and 39 to 27 ms for LZ_NORTH. XLUREP stayed around 2 ms. Geography
+and point rankings together fell from 801 to 497 ms in these individual runs.
