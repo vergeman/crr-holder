@@ -174,3 +174,15 @@ and network time. Next, test sharing geography and point-ranking aggregation.
 This forced scan is an
 experiment and may be less suitable when a report selects a small part of a
 database containing many reports.
+
+## 8. Persist optimizer statistics
+
+Ran `ANALYZE` on the existing database and added it to the end of the dataset
+build, after validation. Statistics persist in the published SQLite file.
+Without a hint, the basic report-only selection changed from a `summary_sink`
+index search to a table scan. Statistics show all 246,197 summary rows belong
+to one report. Full unhinted geography and point-ranking plans also chose
+table scans; totals retained some base-index reads in subqueries locally.
+
+The code still contains `NOT INDEXED`. Next, remove it and repeat the Docker
+profiling to compare planner-selected access with the forced scan.
