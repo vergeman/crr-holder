@@ -1,16 +1,17 @@
-from services.helpers import holdings_filter
+from services.helpers import summary_holdings_query
 
 
 def get_geographic_footprint(db, report_id, account_holder=None, settlement_point=None):
     # Filter inventory before expanding its two endpoint roles.
-    where, parameters = holdings_filter(report_id, account_holder, settlement_point)
+    holdings_sql, parameters = summary_holdings_query(
+        report_id, account_holder, settlement_point
+    )
 
     # A self path participates once in each independent role.
     rows = db.execute(f"""
         -- One publication and the shared portfolio predicates.
         WITH holdings AS (
-            SELECT source, sink, peak_wd_mwh + peak_we_mwh + off_peak_mwh AS mwh
-            FROM crr_monthly_holdings WHERE {where}
+            {holdings_sql}
         ), roles AS (
             SELECT source AS point, mwh AS source_mwh, 0 AS sink_mwh FROM holdings
             UNION ALL

@@ -88,6 +88,7 @@ References: `4c02819`, `6d7b7f3`.
 
 * Run `ANALYZE` after dataset validation and before publication. Let SQLite choose
   access paths; do not carry over the experiment's superseded `NOT INDEXED` hint.
+  Recheck the combined-filter regression identified in task 3.
 
 ### 6. Share point aggregation
 
@@ -231,3 +232,27 @@ Reference: `1b5b70f`.
   combined 141.93 / 141.43 ms. The larger filtered increases did not persist;
   timings vary between runs, and this preparatory task claims no speedup.
 * Diff check: passed.
+
+
+### Task 3 — aggregate summary queries
+
+* API suite: 20 tests passed, including exact committed response fixtures.
+* Four affected real-data responses match baseline and task 2 within MWh
+  tolerance; structure, identifiers, counts, ordering, and nulls are unchanged.
+  Maximum absolute MWh difference: `1.1920928955078125e-7`.
+* Fixtures accept final scenario data before building the aggregate once;
+  no refresh calls or expected-response changes were needed.
+* Medians (ms), with original baseline and preceding task for comparison:
+
+| Summary filter | Baseline | Task 2 | Task 3 |
+| --- | ---: | ---: | ---: |
+| Unfiltered | 9792.94 | 10740.05 | 3746.41 |
+| Account | 0.79 | 0.97 | 0.19 |
+| Settlement Point | 6072.56 | 6555.79 | 131.73 |
+| Combined | 0.54 | 0.60 | 22.88 |
+
+* Combined-filter regression reproduced at 30.71 ms median. Diagnostic selection
+  timings were 4.714 ms with the default access choice versus 0.058 ms through
+  the account primary key (same one returned row). This indicates an access-path
+  issue before build statistics; recheck in task 5. No index hint was added.
+* Captures: `/tmp/0013-query-performance/task-3/`. Diff check: passed.

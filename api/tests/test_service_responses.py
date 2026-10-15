@@ -4,11 +4,12 @@ Services run against small in-memory data. Their outputs must equal the JSON in
 api/tests/fixtures/service_responses/, including values, fields, and list order.
 """
 
+from contextlib import closing
 import json
 from pathlib import Path
 import unittest
 
-from fixtures import create_fixture_db
+from fixtures import HOLDINGS, create_fixture_db
 from services.holdings import get_contract_holdings, get_sink_holdings, get_source_holdings
 from services.metadata import get_metadata
 from services.summary import get_summary
@@ -54,18 +55,26 @@ def fixture_responses():
             results['sources'][f'page_{offset}'] = get_source_holdings(
                 db, limit=1, offset=offset)
 
-        # Sources: a later holding creates a timeline gap outside X's portfolio.
-        db.execute("""INSERT INTO crr_monthly_holdings
-            VALUES (2, 'Y', 'D', 'A', '2027-01-01', 'OBL', 0, 0, 0, 1, 0, 0)""")
-        results['sources']['timeline_gap'] = get_source_holdings(db, account_holder='X')
-
-        # Sources and summary: zero MWh retains rows, points, and the timeline.
-        db.execute("UPDATE crr_monthly_holdings SET peak_wd_mwh=0, "
-                   "peak_we_mwh=0, off_peak_mwh=0 WHERE account_holder='X'")
-        results['sources']['zero_exposure'] = get_source_holdings(db, account_holder='X')
-        results['summary']['zero_exposure'] = get_summary(db, account_holder='X')
     finally:
         db.close()
+
+    # Sources: a later holding creates a timeline gap outside X's portfolio.
+    gap_holdings = HOLDINGS + [
+        (2, 'Y', 'D', 'A', '2027-01-01', 'OBL', 1, 0, 0),
+    ]
+    with closing(create_fixture_db(holdings=gap_holdings)) as db:
+        results['sources']['timeline_gap'] = get_source_holdings(db, account_holder='X')
+
+    # Sources and summary: build a separate, complete zero-exposure portfolio.
+    zero_holdings = [row[:6] + (0, 0, 0) if row[1] == 'X' else row
+                     for row in gap_holdings]
+    with closing(create_fixture_db(holdings=zero_holdings)) as db:
+        db.executemany(
+            'UPDATE settlement_points SET longitude=?, latitude=? WHERE settlement_point=?',
+            [(-100, 32, 'A'), (-99, 31, 'B'), (-98, None, 'C')],
+        )
+        results['sources']['zero_exposure'] = get_source_holdings(db, account_holder='X')
+        results['summary']['zero_exposure'] = get_summary(db, account_holder='X')
 
     # Contracts: reuse original segments and their matching monthly holdings.
     contracts = test_contracts.ContractHoldingsTests()

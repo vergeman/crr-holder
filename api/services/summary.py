@@ -1,6 +1,6 @@
 import sqlite3
 
-from services.helpers import holdings_filter, resolve_report
+from services.helpers import summary_holdings_query, resolve_report
 from services.geography import get_geographic_footprint
 from services.rankings import get_top_account_holders, get_top_settlement_points
 from timing import timed
@@ -11,17 +11,16 @@ def get_summary(db: sqlite3.Connection, report_id=None, account_holder=None,
                 settlement_point=None) -> dict:
     report_id = resolve_report(db, report_id)
 
-    where, parameters = holdings_filter(report_id, account_holder, settlement_point)
+    holdings_sql, parameters = summary_holdings_query(
+        report_id, account_holder, settlement_point
+    )
 
     # Filter holdings for the Portfolio Summary panel's totals,
     # holder/point/source-sink counts, and OPT/OBL mix.
     row = db.execute(
         f"""
         WITH holdings AS (
-            SELECT account_holder, source, sink, hedge_type,
-                   peak_wd_mwh + peak_we_mwh + off_peak_mwh AS mwh
-            FROM crr_monthly_holdings
-            WHERE {where}
+            {holdings_sql}
         ), points AS (
             -- Unique endpoints across months and instruments.
             SELECT source AS point FROM holdings
