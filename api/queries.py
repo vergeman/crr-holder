@@ -1,6 +1,7 @@
 import sqlite3
+from time import perf_counter
 
-from filters import holdings_filter
+from filters import monthly_holdings_query
 from geography import get_geographic_footprint
 from rankings import get_top_account_holders, get_top_settlement_points
 
@@ -68,17 +69,14 @@ def get_summary(db: sqlite3.Connection, report_id=None, account_holder=None,
                 settlement_point=None) -> dict:
     report_id = resolve_report(db, report_id)
 
-    where, parameters = holdings_filter(report_id, account_holder, settlement_point)
+    holdings_sql, parameters = monthly_holdings_query(
+        report_id, account_holder, settlement_point)
 
     # Filter holdings for the Portfolio Summary panel's totals,
     # holder/point/source-sink counts, and OPT/OBL mix.
-    row = db.execute(
-        f"""
-        WITH holdings AS (
-            SELECT account_holder, source, sink, hedge_type,
-                   peak_wd_mwh + peak_we_mwh + off_peak_mwh AS mwh
-            FROM crr_monthly_holdings
-            WHERE {where}
+    sql = f"""
+        WITH holdings AS MATERIALIZED (
+            {holdings_sql}
         ), points AS (
             -- Unique endpoints across months and instruments.
             SELECT source AS point FROM holdings
@@ -92,21 +90,44 @@ def get_summary(db: sqlite3.Connection, report_id=None, account_holder=None,
                COALESCE(SUM(CASE WHEN hedge_type = 'OPT' THEN mwh ELSE 0 END), 0),
                COALESCE(SUM(CASE WHEN hedge_type = 'OBL' THEN mwh ELSE 0 END), 0)
         FROM holdings
-        """,
-        parameters,
-    ).fetchone()
+        """
+
+    print("get_summary totals query plan:", flush=True)
+    for step in db.execute("EXPLAIN QUERY PLAN " + sql, parameters).fetchall():
+        print(tuple(step), flush=True)
+
+    started = perf_counter()
+    row = db.execute(sql, parameters).fetchone()
+    elapsed_ms = (perf_counter() - started) * 1000
+    print(f"get_summary totals query: {elapsed_ms:.2f} ms", flush=True)
+
+    # Include query execution and result building in each helper's timing.
+    started = perf_counter()
+    geographic_footprint = get_geographic_footprint(
+        db, report_id, account_holder, settlement_point)
+    elapsed_ms = (perf_counter() - started) * 1000
+    print(f"get_summary geography: {elapsed_ms:.2f} ms", flush=True)
+
+    started = perf_counter()
+    top_account_holders = get_top_account_holders(
+        db, report_id, account_holder, settlement_point)
+    elapsed_ms = (perf_counter() - started) * 1000
+    print(f"get_summary account rankings: {elapsed_ms:.2f} ms", flush=True)
+
+    started = perf_counter()
+    top_settlement_points = get_top_settlement_points(
+        db, report_id, account_holder, settlement_point)
+    elapsed_ms = (perf_counter() - started) * 1000
+    print(f"get_summary settlement point rankings: {elapsed_ms:.2f} ms", flush=True)
 
     return {
         "reportId": report_id,
         "totalMwh": row[0],
-        "geographicFootprint": get_geographic_footprint(
-            db, report_id, account_holder, settlement_point),
+        "geographicFootprint": geographic_footprint,
         "accountHolderCount": row[1],
         "settlementPointCount": row[2],
         "directedPathCount": row[3],
         "hedgeTypeMwh": {"OPT": row[4], "OBL": row[5]},
-        "topAccountHolders": get_top_account_holders(
-            db, report_id, account_holder, settlement_point),
-        "topSettlementPoints": get_top_settlement_points(
-            db, report_id, account_holder, settlement_point),
+        "topAccountHolders": top_account_holders,
+        "topSettlementPoints": top_settlement_points,
     }

@@ -1,23 +1,23 @@
 # Imports
 import sqlite3
+from time import perf_counter
 
 
-from filters import holdings_filter
+from filters import monthly_holdings_query
 
 
 def get_top_account_holders(db: sqlite3.Connection, report_id, account_holder=None,
                             settlement_point=None) -> list[dict]:
     # Preparation
-    where, parameters = holdings_filter(report_id, account_holder, settlement_point)
+    holdings_sql, parameters = monthly_holdings_query(
+        report_id, account_holder, settlement_point)
 
     # Transformation: aggregate inventory before joining directory names.
     rows = db.execute(
         f"""
         -- Matching holdings from one publication snapshot.
         WITH holdings AS (
-            SELECT account_holder,
-                   peak_wd_mwh + peak_we_mwh + off_peak_mwh AS mwh
-            FROM crr_monthly_holdings WHERE {where}
+            {holdings_sql}
         ), totals AS (
             SELECT account_holder, SUM(mwh) AS total_mwh
             FROM holdings GROUP BY account_holder
@@ -38,15 +38,14 @@ def get_top_account_holders(db: sqlite3.Connection, report_id, account_holder=No
 def get_top_settlement_points(db: sqlite3.Connection, report_id, account_holder=None,
                               settlement_point=None) -> list[dict]:
     # Preparation
-    where, parameters = holdings_filter(report_id, account_holder, settlement_point)
+    holdings_sql, parameters = monthly_holdings_query(
+        report_id, account_holder, settlement_point)
 
     # Transformation: preserve each monthly contribution without doubling self paths.
-    rows = db.execute(
-        f"""
+    sql = f"""
         -- Matching holdings use the same inclusive point predicate as summary.
         WITH holdings AS (
-            SELECT source, sink, peak_wd_mwh + peak_we_mwh + off_peak_mwh AS mwh
-            FROM crr_monthly_holdings WHERE {where}
+            {holdings_sql}
         ), contributions AS (
             SELECT source AS point, mwh FROM holdings
             UNION ALL
@@ -57,8 +56,20 @@ def get_top_settlement_points(db: sqlite3.Connection, report_id, account_holder=
         FROM contributions GROUP BY point
         -- Compare unrounded totals first, identifiers resolve ties.
         ORDER BY total_mwh DESC, point ASC LIMIT 100
-        """, parameters,
-    ).fetchall()
+        """
+
+    print("settlement point rankings query plan:", flush=True)
+    for step in db.execute("EXPLAIN QUERY PLAN " + sql, parameters).fetchall():
+        print(tuple(step), flush=True)
+
+    started = perf_counter()
+    rows = db.execute(sql, parameters).fetchall()
+    elapsed_ms = (perf_counter() - started) * 1000
+    print(f"settlement point rankings SQL: {elapsed_ms:.2f} ms ({len(rows)} rows)", flush=True)
 
     # Output: point groups overlap; they are not a portfolio partition.
-    return [{"settlementPoint": row[0], "totalMwh": row[1]} for row in rows]
+    started = perf_counter()
+    result = [{"settlementPoint": row[0], "totalMwh": row[1]} for row in rows]
+    elapsed_ms = (perf_counter() - started) * 1000
+    print(f"settlement point rankings Python result building: {elapsed_ms:.2f} ms", flush=True)
+    return result
