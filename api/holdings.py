@@ -1,6 +1,6 @@
 from time import perf_counter
 
-from filters import holdings_filter
+from filters import holdings_filter, summary_holdings_query
 from queries import resolve_report
 
 
@@ -45,14 +45,15 @@ def get_source_holdings(db, report_id=None, account_holder=None,
     """, parameters)[0]
 
     # Transformation: rank complete sources before loading their monthly cells.
+    ranking_sql, _ = summary_holdings_query(report_id, account_holder, settlement_point)
     parameters.update(limit=limit + 1, offset=offset)
     ranked = profile_holdings_query(db, "source holdings rankings", f"""
+        -- Full-horizon totals are already summed across months.
+        WITH holdings AS ({ranking_sql})
         SELECT source,
-               SUM(CASE WHEN hedge_type = 'OPT'
-                   THEN peak_wd_mwh + peak_we_mwh + off_peak_mwh ELSE 0 END) AS total_opt_mwh,
-               SUM(CASE WHEN hedge_type = 'OBL'
-                   THEN peak_wd_mwh + peak_we_mwh + off_peak_mwh ELSE 0 END) AS total_obl_mwh
-        FROM crr_monthly_holdings WHERE {where}
+               SUM(CASE WHEN hedge_type = 'OPT' THEN mwh ELSE 0 END) AS total_opt_mwh,
+               SUM(CASE WHEN hedge_type = 'OBL' THEN mwh ELSE 0 END) AS total_obl_mwh
+        FROM holdings
         GROUP BY source
         ORDER BY total_opt_mwh + total_obl_mwh DESC, source ASC
         LIMIT :limit OFFSET :offset

@@ -334,3 +334,54 @@ returned 54 OPT rows in 1.30 + 0.25 ms and 410 OBL rows in 5.37 + 0.56 ms.
 Sink expansions remained around 25–30 ms across measured stages. These are
 individual runs excluding serialization and network time. Leave these queries
 unchanged and profile top-level source pagination next.
+
+## 15. Profile top-level source pagination in Docker
+
+Called `get_source_holdings` directly in the existing API container against its
+read-only database. Each case used report 1 and a page size of 20; no query
+changes were made. These sequential single runs exclude HTTP, serialization,
+and rendering. Function totals include query-plan logging overhead.
+
+| Stage, ms | First page | Second page | HB_NORTH | XEDIS2 |
+| --- | ---: | ---: | ---: | ---: |
+| Timeline | 0.21 | 0.19 | 0.27 | 0.28 |
+| Portfolio bounds | 235 | 252 | 28 | 43 |
+| Source rankings | 642 | 611 | 40 | 17 |
+| Monthly cells | 87 | 62 | 37 | 9 |
+| Complete function | 966 | 926 | 106 | 70 |
+
+Both unfiltered pages recompute report-wide bounds and rankings. Ranking uses
+`monthly_source` by report, then sorts aggregated source totals before applying
+LIMIT/OFFSET. Bounds scan the monthly table, checking nonzero MWh. Monthly cells
+use selective source lookups. Point-filtered plans now show `MULTI-INDEX OR`
+using both source and sink indexes, so the earlier OR-filter problem is not
+present in these plans. Account filters use account-prefix indexes.
+
+Next: test ranking sources from the existing month-free summary aggregate,
+while retaining monthly data for cells and nonzero-exposure date bounds.
+Ranking order can change slightly from floating-point regrouping and should
+be checked. The nonzero monthly bounds cannot be recovered from that aggregate
+because it discards month and may combine offsetting exposures.
+
+## 16. Rank sources from the summary aggregate
+
+Changed only top-level source rankings to use `summary_holdings_query` and sum
+its MWh by source and hedge type. Date bounds and monthly cells retain their
+monthly input. Fixtures that modify monthly holdings now rebuild the aggregate
+before querying, matching the dataset build lifecycle.
+
+Single-run comparisons in the existing API container (milliseconds):
+
+| Case | Ranking before | Ranking after | Function before | Function after |
+| --- | ---: | ---: | ---: | ---: |
+| First page | 642 | 116 | 966 | 449 |
+| Second page | 611 | 117 | 926 | 421 |
+| HB_NORTH | 40 | 7 | 106 | 78 |
+| XEDIS2 | 17 | 2 | 70 | 55 |
+
+Four full page responses matched the monthly implementation within floating-point
+tolerance, including source order and pagination. Seven source/sink tests and
+whitespace checks passed. These are sequential single runs, not medians, and
+exclude HTTP/serialization. Unfiltered bounds now dominate at about 242–247 ms.
+Next, investigate endpoint lookups for nonzero monthly exposure bounds using
+the existing report/month index before adding more stored aggregates.

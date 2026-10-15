@@ -1,7 +1,7 @@
 # Imports
 import unittest
 
-from fixtures import create_fixture_db
+from fixtures import create_fixture_db, refresh_summary_holdings
 from holdings import get_source_holdings
 from queries import get_summary
 
@@ -65,6 +65,8 @@ class HoldingsTests(unittest.TestCase):
         self.db.execute("""INSERT INTO crr_monthly_holdings
             VALUES (2, 'Y', 'D', 'A', '2027-01-01', 'OBL', 0, 0, 0, 1, 0, 0)""")
 
+        refresh_summary_holdings(self.db)
+
         # Execution
         page = get_source_holdings(self.db, account_holder='X')
         market = get_source_holdings(self.db, limit=1)
@@ -89,6 +91,8 @@ class HoldingsTests(unittest.TestCase):
         self.db.execute("UPDATE crr_monthly_holdings SET peak_wd_mwh=0, "
                         "peak_we_mwh=0, off_peak_mwh=0 WHERE account_holder='X'")
 
+        refresh_summary_holdings(self.db)
+
         # Execution
         page = get_source_holdings(self.db, account_holder='X')
 
@@ -104,6 +108,8 @@ class HoldingsTests(unittest.TestCase):
         self.db.executemany("""INSERT INTO crr_monthly_holdings
             VALUES (2, 'Y', ?, 'A', '2026-10-01', 'OPT', 0, 0, 0, 2, 0, 0)""",
             [(f'S{i:02}',) for i in range(23)])
+
+        refresh_summary_holdings(self.db)
 
         # Execution
         first = get_source_holdings(self.db)
