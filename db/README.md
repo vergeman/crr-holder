@@ -1,5 +1,106 @@
 # Summary query optimization experiments
 
+## Working recipe: apply the successful improvements in order
+
+These steps describe the final implementation. Linked experiment results record
+individual development runs, not guaranteed timings.
+
+1. **Measure where requests spend their time.**
+   - Time each query through fetching its results, then time Python response
+     assembly separately. Capture `EXPLAIN QUERY PLAN` to see how rows are read.
+   - SQL accounted for nearly all the initial nine-second summary request;
+     geography and settlement point rankings each took about three seconds.
+   - [1. Profiling results](#1-identify-the-expensive-work).
+
+2. **Build a table of exposure totals across all months.**
+   - Create the `crr_summary_holdings` table with one row per report, account, source, sink,
+     and hedge type. Sum monthly MWh into one `mwh` column.
+   - Populate it after monthly holdings in the dataset build. Add source/sink
+     indexes; the primary key supports report/account lookups. Validate its totals
+     against monthly holdings and refresh it in fixtures when monthly data changes.
+   - Summary queries can read 246,197 rows instead of 799,368 monthly rows.
+     The table occupies 11.9 MB; including its primary-key and source/sink indexes,
+     it adds 33.7 MB to the current 398.7 MB database: roughly a 9% increase
+     over its size without this table and its indexes (decimal MB).
+   - [6. Aggregate build and results](#6-build-and-query-the-month-free-aggregate).
+
+3. **Create `summary_holdings_query()` and use it throughout the summary.**
+   - Return SQL and bound parameters selecting the new summary table for a report,
+     optionally filtered by account or settlement point.
+   - For a settlement point filter, combine source matches and sink matches with `UNION ALL`.
+     Each branch can use its source or sink index. The sink branch excludes source
+     matches to keep the branches disjoint; no contracts in the current database
+     have equal source and sink values.
+   - Use this function in summary totals, geography, and account/point rankings,
+     replacing their monthly-table selections and repeated MWh calculations.
+   - With the aggregate and filtered-query improvements, measured summary stages
+     fell from 8,153 to 3,470 ms unfiltered, 258 to 75 ms for HB_NORTH, and
+     94 to 46 ms for LZ_NORTH.
+   - [3. Settlement-point filter rewrite](#3-make-the-point-filter-selective) and
+     [6. summary-table results](#6-build-and-query-the-month-free-aggregate).
+
+4. **Read filtered holdings once within totals and geography queries.**
+   - Mark each query's holdings CTE `AS MATERIALIZED`. Its branches and subqueries
+     reuse that temporary result instead of repeating the base-table selection.
+   - In the earlier monthly-table experiment, geography fell from about 1,820 to
+     1,005 ms for HB_NORTH; explicit totals materialization later reduced that
+     filtered totals query from 376 to 76 ms.
+   - [2. Geography reuse](#2-reuse-geographys-filtered-holdings) and
+     [5. totals reuse](#5-materialize-totals-holdings-explicitly).
+
+5. **Use `ANALYZE` so SQLite can choose when to skip an index.**
+   - Run `ANALYZE` after build validation and before publishing the database.
+     SQLite then chooses a table scan for the full-report summary without needing
+     `NOT INDEXED`; selective filters still use indexes.
+   - Overview stages measured about 1,546 ms, versus 3,470 ms when SQLite used
+     an index for the full-report queries. This matched the earlier forced scan
+     at about 1,510 ms, while letting SQLite make the choice.
+   - [8. Build statistics](#8-persist-optimizer-statistics) and
+     [9. planner-selected results](#9-remove-the-forced-scan-after-analyze).
+
+6. **Create `get_point_summary()` for geography and point rankings.**
+   - Replace the two separate query helpers with one function that sums source,
+     sink, and ranking exposure per point. Build both response lists from its rows.
+   - Combine each settlement point’s source and sink contributions for rankings;
+     keep those roles separate for geography. Keep points with zero exposure or
+     missing coordinates in the geography list.
+   - In `get_summary()`, use the geography list's length for the point count and
+     remove the separate point-count calculation from the totals query.
+   - Sharing geography/ranking work reduced overview stages from 1,546 to 1,193 ms;
+     reusing the point count brought them to about 1,008 ms.
+   - [10. Shared point function](#10-share-geography-and-point-ranking-aggregation) and
+     [11. point-count reuse](#11-reuse-the-participating-point-count).
+
+7. **Let `delivery_months()` find the first and last month through an index.**
+   - Add `monthly_report_month(report_id, delivery_month)` to the build indexes.
+     Include it in build-time `ANALYZE`.
+   - Replace the combined MIN/MAX query with separate scalar MIN and MAX queries,
+     then generate the continuous timeline between those dates as before.
+   - Each lookup can read an index endpoint; timeline SQL fell from 130 to 0.4 ms.
+   - [13. Timeline index and results](#13-index-report-delivery-months).
+
+8. **Use `summary_holdings_query()` to rank source pages.**
+   - In `get_source_holdings()`, rank sources from its month-free MWh totals.
+     Keep pagination unchanged and fetch the selected sources' cells from monthly
+     holdings as before.
+   - First/second page ranking fell from 642/611 to 116/117 ms.
+   - [16. Source ranking change](#16-rank-sources-from-the-summary-aggregate).
+
+9. **Stop date-bound queries at the first matching month.**
+   - In `get_source_holdings()`, find the earliest/latest nonzero monthly exposure
+     with ascending/descending month queries and LIMIT 1 for report-only and
+     account-filtered requests, including account-plus-settlement-point filters.
+   - Keep the existing combined MIN/MAX query for settlement-point-only filters; two ordered
+     lookups required two sorts and were slower there.
+   - Unfiltered bounds fell from about 300 to 0.07–0.17 ms using existing indexes.
+   - [17. Portfolio date-bound change](#17-seek-nonzero-portfolio-date-bounds).
+
+Keep monthly aggregates for matrix cells and original contracts for details.
+The measured sink/contract queries and source OFFSET pagination did not need
+further optimization.
+
+---
+
 The initial `/api/summary` request took about nine seconds. We considered
 query changes and build-time aggregates; first we measured the existing queries.
 
@@ -412,3 +513,29 @@ Seven source/sink tests and whitespace checks passed. Timings are sequential
 single runs in the existing API container, excluding HTTP and serialization;
 cache states differ. No new index or stored aggregate was needed. Next,
 checkpoint the query changes and use repeatable workloads for provider profiling.
+
+## 18. Check source pagination offset cost
+
+Profiled the source-ranking SQL used by
+`GET /api/holdings/sources?report_id=1&limit=20&offset=...`, with no account or
+settlement-point filter. This ranks sources, not source/sink pairs. Report 1
+has 1,000 distinct sources. The query fetches 21 rows to detect a next page.
+
+Measured five warm runs per offset in the existing API container, rotating
+execution order after warming each position:
+
+| Position | Offset | Returned rows | Median, ms | Range, ms |
+| --- | ---: | ---: | ---: | ---: |
+| First page | 0 | 21 | 113.63 | 110.17–118.38 |
+| Middle | 500 | 21 | 112.05 | 109.69–119.22 |
+| Last page | 980 | 20 | 114.12 | 108.79–127.62 |
+| Beyond end | 1,000 | 0 | 114.43 | 109.70–127.33 |
+
+Offset depth had no meaningful measured effect. Every page aggregates matching
+holdings and ranks the resulting source groups; skipping within only 1,000
+groups adds little compared with that aggregation. Timings exclude monthly
+cells, response assembly, HTTP, and rendering.
+
+Cursor pagination was not directly tested. Switching to a cursor alone would
+not eliminate the aggregation needed to order by calculated exposure, so these
+results give no performance reason to replace OFFSET for this workload.
