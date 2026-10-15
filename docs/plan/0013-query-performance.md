@@ -95,7 +95,7 @@ References: `4c02819`, `6d7b7f3`.
 Commit: `perf(api): share point aggregation and count`
 References: `fd438e1`, `ef1aeef`.
 
-* Introduce `get_point_summary()` for geography and point rankings. Preserve
+* Introduce `get_settlement_point_summary()` for geography and point rankings. Preserve
   separate source/sink exposure, count self paths once in rankings, and retain
   zero-exposure points and missing coordinates. Derive settlement-point count
   from the complete geography list and remove its separate totals calculation.
@@ -296,3 +296,19 @@ Reference: `1b5b70f`.
   Combined summary: 20.80 ms; statistics did not resolve its access-choice issue.
 * Captures: `/tmp/0013-query-performance/task-5/` and `task-5-recheck/` on host
   and API container. Diff check: passed.
+
+### Task 6 — shared point aggregation
+
+* API suite: 20 tests passed. Diff check: passed.
+* Four responses match task 5; baseline MWh differences remain within tolerance
+  (maximum `1.1920928955078125e-7`).
+* Medians in ms:
+
+| Summary filter | Baseline | Task 5 | Task 6 |
+| --- | ---: | ---: | ---: |
+| Unfiltered | 9792.94 | 1658.49 | 946.33 |
+| Account | 0.79 | 0.36 | 0.20 |
+| Settlement Point | 6072.56 | 46.75 | 25.02 |
+| Combined | 0.54 | 23.71 | 11.21 |
+
+* Captures: `/tmp/0013-query-performance/task-6/` on host and API container.
