@@ -1,8 +1,10 @@
 import sqlite3
 
 from services.helpers import resolve_report
+from timing import timed
 
 
+@timed
 def get_metadata(db: sqlite3.Connection, report_id=None, account_holder=None) -> dict:
     # Resolve one publication snapshot.
     report_id = resolve_report(db, report_id)

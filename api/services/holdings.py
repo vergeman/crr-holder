@@ -1,5 +1,6 @@
 # Imports
 from services.helpers import holdings_filter, resolve_report
+from timing import timed
 
 
 def delivery_months(db, report_id):
@@ -17,6 +18,7 @@ def delivery_months(db, report_id):
     """, (report_id,))]
 
 
+@timed
 def get_source_holdings(db, report_id=None, account_holder=None,
                         settlement_point=None, limit=20, offset=0):
     # Preparation: the report timeline remains independent of portfolio filters.
@@ -69,6 +71,7 @@ def get_source_holdings(db, report_id=None, account_holder=None,
             "nextOffset": offset + limit if len(ranked) > limit else None}
 
 
+@timed
 def get_sink_holdings(db, source, report_id=None, account_holder=None,
                       settlement_point=None):
     # Preparation: source restriction complements the inclusive portfolio filter.
@@ -110,6 +113,7 @@ def get_sink_holdings(db, source, report_id=None, account_holder=None,
             "deliveryMonths": months, "sinks": sinks}
 
 
+@timed
 def get_contract_holdings(db, source, sink, month, hedge_type, report_id=None,
                          account_holder=None, settlement_point=None):
     # Preparation: select original segments with the shared portfolio predicates.
