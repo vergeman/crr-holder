@@ -38,4 +38,10 @@ def create_fixture_db():
         HOLDINGS,
     )
 
+    # Materialize the summary once, as in the dataset build.
+    sql = Path(__file__).resolve().parents[2] / "db/crr/sql/summary_holdings.sql"
+    if not sql.exists():
+        sql = Path("/data/sql/summary_holdings.sql")
+    db.executescript(sql.read_text())
+
     return db

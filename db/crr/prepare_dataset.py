@@ -31,6 +31,8 @@ def build_dataset(data_dir, output):
             # Expand contracts into months, then create lookup indexes.
             print("Materializing monthly holdings...", flush=True)
             db.executescript(read_sql("monthly_holdings.sql"))
+            print("Materializing summary holdings...", flush=True)
+            db.executescript(read_sql("summary_holdings.sql"))
             db.executescript(read_sql("indexes.sql"))
 
             # Validate the temporary database before publishing it.

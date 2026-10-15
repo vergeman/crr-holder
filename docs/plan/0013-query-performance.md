@@ -61,7 +61,7 @@ Reference: `5928a37` (dataset and fixture changes).
 * Add `crr_summary_holdings` at report/account/source/sink/hedge-type grain with
   summed `mwh`, its composite primary key, and source/sink indexes. Populate it
   after monthly holdings via `db/crr/sql/summary_holdings.sql`; validate totals
-  against monthly data and refresh it in fixtures after monthly mutations.
+  against monthly data and materialize it once during fixture setup.
 
 ### 3. Use aggregate holdings for summary queries
 
@@ -206,3 +206,28 @@ Reference: `1b5b70f`.
 | sources | 2158.83 / 2193.36 | 138.01 / 124.61 | 1967.38 / 1728.54 | 133.13 / 163.13 |
 | sinks | 2423.01 | 158.61 | 2438.49 | 132.86 |
 | contracts | 9.99 | 4.44 | 9.50 | 3.93 |
+
+### Task 2 — summary aggregate
+
+* Dataset test: passed. API suite: 20 tests passed, including exact fixtures.
+* Documented Docker build and dataset rebuild: passed; all four validation
+  error counts are zero. Monthly rows: 799,368; summary rows: 246,197.
+* Service queries still use monthly holdings; aggregate adoption is task 3.
+* Real-data responses: all 22 match the original baseline exactly.
+* Raw responses/logs: `/tmp/0013-query-performance/task-2/`.
+* Medians below are ms, with percentage change from baseline (also the preceding
+  step). Source entries show offset 0 / offset 20.
+
+| Service | Unfiltered | Account | Settlement Point | Combined |
+| --- | ---: | ---: | ---: | ---: |
+| metadata | 744.20 (-15%) | 324.66 (-7%) | — | — |
+| summary | 10740.05 (+10%) | 0.97 (+23%) | 6555.79 (+8%) | 0.60 (+11%) |
+| sources | 2072.52 (-4%) / 2413.15 (+10%) | 184.71 (+34%) / 185.34 (+49%) | 2471.31 (+26%) / 2575.89 (+49%) | 199.25 (+50%) / 195.66 (+20%) |
+| sinks | 2577.12 (+6%) | 141.97 (-10%) | 2452.69 (+1%) | 138.86 (+5%) |
+| contracts | 10.51 (+5%) | 5.21 (+17%) | 10.40 (+9%) | 4.43 (+13%) |
+
+* Source timing recheck (`task-2-recheck/`): unfiltered 2432.80 / 2347.14 ms;
+  account 140.25 / 132.98 ms; settlement point 1830.70 / 1820.45 ms;
+  combined 141.93 / 141.43 ms. The larger filtered increases did not persist;
+  timings vary between runs, and this preparatory task claims no speedup.
+* Diff check: passed.

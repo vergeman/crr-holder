@@ -73,6 +73,8 @@ class MonthlyFixture(unittest.TestCase):
                 rows = list(db.execute("""SELECT delivery_month, hedge_type, peak_wd_mw, peak_we_mw,
                     off_peak_mw, peak_wd_mwh, peak_we_mwh, off_peak_mwh
                     FROM crr_monthly_holdings ORDER BY delivery_month, hedge_type"""))
+                summary_rows = list(db.execute("""SELECT hedge_type, mwh
+                    FROM crr_summary_holdings ORDER BY hedge_type"""))
 
             # Assert: inclusive months, separate hedges, and TOU MW/MWh.
             self.assertEqual(rows, [
@@ -81,3 +83,5 @@ class MonthlyFixture(unittest.TestCase):
                 ("2026-11-01", "OPT", 150, 0, 75, 48000, 0, 18075),
                 ("2026-12-01", "OPT", 150, 0, 0, 52800, 0, 0),
             ])
+            self.assertEqual(summary_rows, [("OBL", 320), ("OPT", 172675)])
+            self.assertEqual(results["summary_total_errors"], 0)
