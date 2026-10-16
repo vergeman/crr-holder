@@ -19,40 +19,37 @@ export function BenchmarkPage() {
   const [networkLabel, setNetworkLabel] = useState("Unshaped");
   const [progress, setProgress] = useState("");
   const [running, setRunning] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const controller = useRef();
 
   useEffect(() => () => controller.current?.abort(), []);
-
-  async function preloadDatabase() {
-    controller.current = new AbortController();
-    setRunning(true);
-    setProgress("Preloading WASM database without shaping");
-    try {
-      setPreloaded(await downloadDatabase(controller.current.signal));
-      setProgress("Database preloaded; ready to benchmark");
-    } catch (error) {
-      setProgress(error.message);
-    } finally {
-      setRunning(false);
-    }
-  }
 
   async function startBenchmark() {
     controller.current = new AbortController();
     setRunning(true);
     try {
+      let database = preloaded;
+      if (provider === "wasm" && !database) {
+        setDownloading(true);
+        setProgress("Downloading WASM database before benchmarking");
+        database = await downloadDatabase(controller.current.signal);
+        setPreloaded(database);
+        setDownloading(false);
+      }
+      controller.current.signal.throwIfAborted();
+
       const run = await runBenchmark({
         backend: provider,
         suite,
         httpProvider: createHttpProvider(latencyMs, true),
         createProvider: (backend) =>
-          createProvider(backend, preloaded, latencyMs, true),
+          createProvider(backend, database, latencyMs, true),
         preloadedDownload:
-          provider === "wasm" && preloaded
+          provider === "wasm" && database
             ? {
-                ...preloaded.download,
+                ...database.download,
                 estimated100MbpsMs:
-                  (preloaded.download.bytes * 8) / 100000 + latencyMs,
+                  (database.download.bytes * 8) / 100000 + latencyMs,
               }
             : undefined,
         networkLabel,
@@ -64,7 +61,14 @@ export function BenchmarkPage() {
       });
       setRuns((previous) => [...previous, run]);
       setProgress(run.status);
+    } catch (error) {
+      setProgress(
+        controller.current.signal.aborted
+          ? "Stopped"
+          : `Download failed: ${error.message}`
+      );
     } finally {
+      setDownloading(false);
       setRunning(false);
     }
   }
@@ -123,7 +127,6 @@ export function BenchmarkPage() {
             onChange={(event) => setNetworkLabel(event.target.value)}
           />
         </label>
-        <button onClick={preloadDatabase}>Preload WASM database</button>
         <button
           onClick={startBenchmark}
           disabled={
@@ -138,13 +141,15 @@ export function BenchmarkPage() {
         </button>
       </fieldset>
       <p>
-        API latency applies only to benchmark requests during a run. Normal app
-        requests and WASM preload have no added delay.
+        JSON responses and full database downloads use gzip; VFS range requests
+        are uncompressed. Warm results measure repeated queries after the first
+        pass and one warm-up pass.
       </p>
       <button disabled={!running} onClick={() => controller.current.abort()}>
         Stop
       </button>
       <p role="status">{progress}</p>
+      {downloading && <progress aria-label="Downloading WASM database" />}
       <BenchmarkResults runs={runs} preloaded={preloaded?.download} />
     </main>
   );

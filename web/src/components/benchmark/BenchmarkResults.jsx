@@ -32,11 +32,6 @@ export function BenchmarkResults({ runs, preloaded }) {
       <button disabled={!runs.length} onClick={downloadRuns}>
         Download JSON
       </button>
-      <p>
-        Fresh workers reset SQLite state, not server or OS caches. Network delay
-        is applied by the development proxy and does not limit bandwidth. Warm
-        statistics exclude first calls and warm-up passes.
-      </p>
       <div
         className="benchmark-table"
         tabIndex="0"
@@ -133,19 +128,6 @@ export function BenchmarkResults({ runs, preloaded }) {
           </tbody>
         </table>
       </div>
-      <p>
-        Totals include recorded initialization and first-pass calls. Warm median
-        and p95 pool all recorded warm query calls. Failed and skipped calls
-        have no query samples; compare runs with matching workload coverage.
-      </p>
-      <p>
-        Downloads count encoded API response-body bytes after compression,
-        excluding headers, protocol overhead, and HTTP correctness baselines.
-        Query traffic includes warm-up and measured passes. Each WASM comparison
-        includes one blob download, even when preloaded and reused. Interrupted
-        responses may be missing partial bytes. MB uses 1,000,000 bytes; worker
-        runtime and page assets are excluded.
-      </p>
       {runs.map((run, index) => (
         <article key={index} id={`run-${index}`}>
           <h2>
