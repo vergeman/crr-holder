@@ -7,23 +7,32 @@ import {
 } from "../generated/client";
 import { wasmProvider, vfsProvider } from "./wasmProvider";
 
-// HTTP details stay outside the query hooks and UI.
-function unwrap(response) {
-  if (response.status !== 200) {
-    throw new Error(`Request failed: ${response.status}`);
+export function createHttpProvider(latencyMs = 0, trackTransfer = false) {
+  let transfer = { requests: 0, downloadBytes: 0 };
+  function requestOptions(signal) {
+    if (trackTransfer) transfer.requests++;
+    return {
+      signal,
+      ...(trackTransfer && { cache: "no-store" }),
+      ...((latencyMs > 0 || trackTransfer) && {
+        headers: { "X-Benchmark-Latency-Ms": String(latencyMs) },
+      }),
+    };
   }
-  return response.data;
-}
 
-export function createHttpProvider(latencyMs = 0) {
-  const requestOptions = (signal) => ({
-    signal,
-    ...(latencyMs > 0 && {
-      headers: { "X-Benchmark-Latency-Ms": String(latencyMs) },
-    }),
-  });
+  function unwrap(response) {
+    if (trackTransfer)
+      transfer.downloadBytes += Number(response.headers.get("content-length"));
+    if (response.status !== 200)
+      throw new Error(`Request failed: ${response.status}`);
+    return response.data;
+  }
 
   return {
+    getTransferStats: () => ({ ...transfer }),
+    resetTransferStats() {
+      transfer = { requests: 0, downloadBytes: 0 };
+    },
     async getContractHoldings(
       {
         reportId,

@@ -16,7 +16,13 @@ export async function downloadDatabase(signal, latencyMs = 0) {
   };
 }
 
-export function createProvider(backend, preloaded, latencyMs = 0) {
+export function createProvider(
+  backend,
+  preloaded,
+  latencyMs = 0,
+  trackTransfer = false
+) {
+  const transferStats = { requests: 0, downloadBytes: 0 };
   let startup;
   let lastTimings;
   const lifetime = new AbortController();
@@ -30,7 +36,12 @@ export function createProvider(backend, preloaded, latencyMs = 0) {
     worker = new Worker(new URL("./sqlite.worker.js", import.meta.url), {
       type: "module",
     });
-    worker.onmessage = ({ data: { id, result, error, timings } }) => {
+    worker.onmessage = ({ data: { id, result, error, timings, transfer } }) => {
+      if (transfer) {
+        transferStats.requests += transfer.requests;
+        transferStats.downloadBytes += transfer.downloadBytes;
+        return;
+      }
       lastTimings = timings;
       const request = requests.get(id);
       if (!request) return;
@@ -86,16 +97,22 @@ export function createProvider(backend, preloaded, latencyMs = 0) {
   async function loadDatabase() {
     const initialized = performance.now();
     if (backend === "vfs") {
-      const workerTimings = await requestWorker({ backend, latencyMs });
+      const workerTimings = await requestWorker({
+        backend,
+        latencyMs,
+        trackTransfer,
+      });
       startup = {
         worker: workerTimings,
         totalMs: performance.now() - initialized,
       };
       return;
     }
+    if (!preloaded) transferStats.requests++;
     const { buffer, download } = preloaded
       ? { buffer: preloaded.buffer.slice(0), download: preloaded.download }
       : await downloadDatabase(lifetime.signal, latencyMs);
+    if (!preloaded) transferStats.downloadBytes += download.bytes;
     const workerTimings = await requestWorker(
       { buffer, backend },
       undefined,
@@ -127,6 +144,7 @@ export function createProvider(backend, preloaded, latencyMs = 0) {
       return database.then(() => startup);
     },
     getTimings: () => lastTimings,
+    getTransferStats: () => ({ ...transferStats }),
     dispose() {
       lifetime.abort();
       for (const request of requests.values())

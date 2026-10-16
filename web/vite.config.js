@@ -13,6 +13,8 @@ export default defineConfig({
           const latencyMs = Number(
             marked?.[1] ?? request.headers["x-benchmark-latency-ms"] ?? 0
           );
+          if (marked || request.headers["x-benchmark-latency-ms"] !== undefined)
+            response.setHeader("Cache-Control", "no-store");
           if (marked) request.url = request.url.replace(marked[0], "/api/");
           delete request.headers["x-benchmark-latency-ms"];
 

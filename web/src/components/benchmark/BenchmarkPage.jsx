@@ -44,9 +44,9 @@ export function BenchmarkPage() {
       const run = await runBenchmark({
         backend: provider,
         suite,
-        httpProvider: createHttpProvider(latencyMs),
+        httpProvider: createHttpProvider(latencyMs, true),
         createProvider: (backend) =>
-          createProvider(backend, preloaded, latencyMs),
+          createProvider(backend, preloaded, latencyMs, true),
         preloadedDownload:
           provider === "wasm" && preloaded
             ? {

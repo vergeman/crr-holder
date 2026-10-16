@@ -82,6 +82,11 @@ export async function runBenchmark({
     preloadedDownload,
     status: "running",
     startups: [],
+    transfer: {
+      requests: preloadedDownload ? 1 : 0,
+      downloadBytes: preloadedDownload?.bytes ?? 0,
+      startupBytes: preloadedDownload?.bytes ?? 0,
+    },
     results: suite.map((workload) => ({
       ...workload,
       status: "pending",
@@ -94,6 +99,16 @@ export async function runBenchmark({
   let startupIndex;
   let firstCall;
   let current;
+
+  function disposeProvider() {
+    const transfer = provider?.getTransferStats?.();
+    if (transfer) {
+      run.transfer.requests += transfer.requests;
+      run.transfer.downloadBytes += transfer.downloadBytes;
+    }
+    provider?.dispose?.();
+    provider = undefined;
+  }
 
   function skipService(service, reason) {
     skipped.add(service);
@@ -130,6 +145,9 @@ export async function runBenchmark({
       startup.status = "failed";
       startup.error = error.message;
       throw error;
+    } finally {
+      run.transfer.startupBytes +=
+        provider.getTransferStats?.().downloadBytes ?? 0;
     }
   }
 
@@ -155,6 +173,9 @@ export async function runBenchmark({
         skipService(current.service, "HTTP baseline unavailable");
       }
     }
+
+    // Baseline downloads are verification overhead, not provider traffic.
+    httpProvider.resetTransferStats?.();
 
     for (const phase of [
       "first",
@@ -200,8 +221,7 @@ export async function runBenchmark({
             current.service,
             "Service failed; remaining calls skipped"
           );
-          provider.dispose?.();
-          provider = undefined;
+          disposeProvider();
         }
       }
     }
@@ -210,7 +230,7 @@ export async function runBenchmark({
     run.status = signal.aborted ? "stopped" : "failed";
     run.error = error.message;
   } finally {
-    provider?.dispose?.();
+    disposeProvider();
     for (const result of run.results) {
       if (result.status === "pending") result.status = "skipped";
       result.warm = aggregate(

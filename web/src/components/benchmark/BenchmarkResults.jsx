@@ -1,6 +1,8 @@
 import React from "react";
 import { aggregate } from "./runner";
 
+const mb = (bytes) =>
+  bytes == null ? "—" : `${(bytes / 1_000_000).toFixed(3)} MB`;
 const ms = (value) => (value == null ? "—" : `${value.toFixed(1)} ms`);
 
 export function BenchmarkResults({ runs, preloaded }) {
@@ -53,6 +55,10 @@ export function BenchmarkResults({ runs, preloaded }) {
               <th>First-pass total</th>
               <th>Warm call median</th>
               <th>Warm call p95</th>
+              <th>API requests</th>
+              <th>Startup download</th>
+              <th>Query download</th>
+              <th>Total download</th>
             </tr>
           </thead>
           <tbody>
@@ -107,6 +113,18 @@ export function BenchmarkResults({ runs, preloaded }) {
                   </td>
                   <td>{ms(warm?.median)}</td>
                   <td>{ms(warm?.p95)}</td>
+                  <td>{run.transfer ? run.transfer.requests : "—"}</td>
+                  <td>{mb(run.transfer ? run.transfer.startupBytes : null)}</td>
+                  <td>
+                    {mb(
+                      run.transfer
+                        ? run.transfer.downloadBytes - run.transfer.startupBytes
+                        : null
+                    )}
+                  </td>
+                  <td>
+                    {mb(run.transfer ? run.transfer.downloadBytes : null)}
+                  </td>
                 </tr>
               );
             })}
@@ -117,6 +135,14 @@ export function BenchmarkResults({ runs, preloaded }) {
         Totals include recorded initialization and first-pass calls. Warm median
         and p95 pool all recorded warm query calls. Failed and skipped calls
         have no query samples; compare runs with matching workload coverage.
+      </p>
+      <p>
+        Downloads count API response-body bytes, excluding headers, protocol
+        overhead, and HTTP correctness baselines. Query traffic includes warm-up
+        and measured passes. Each WASM comparison includes one blob download,
+        even when preloaded and reused. Interrupted responses may be missing
+        partial bytes. MB uses 1,000,000 bytes; worker runtime and page assets
+        are excluded.
       </p>
       {runs.map((run, index) => (
         <article key={index} id={`run-${index}`}>

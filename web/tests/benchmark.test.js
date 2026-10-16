@@ -172,3 +172,77 @@ test("baseline failure skips that service before provider execution", async () =
   assert.equal(run.results[1].status, "skipped");
   assert.equal(run.results[2].status, "complete");
 });
+
+test("download accounting excludes baselines and includes warm-up traffic", async () => {
+  let transfer = { requests: 0, downloadBytes: 0 };
+  const httpProvider = {
+    async getMetadata() {
+      transfer.requests++;
+      transfer.downloadBytes += 10;
+      return { rows: [1] };
+    },
+    resetTransferStats() {
+      transfer = { requests: 0, downloadBytes: 0 };
+    },
+    getTransferStats: () => ({ ...transfer }),
+  };
+
+  const run = await runBenchmark(
+    options({ backend: "http", suite: [suite[0]], httpProvider, passes: 1 })
+  );
+
+  assert.deepEqual(run.transfer, {
+    requests: 3,
+    downloadBytes: 30,
+    startupBytes: 0,
+  });
+});
+
+test("download accounting survives worker timeouts and charges one preload", async () => {
+  const configuration = options();
+  const run = await runBenchmark(
+    options({
+      suite: [suite[0], suite[2]],
+      passes: 1,
+      createProvider: () => {
+        const transfer = { requests: 0, downloadBytes: 0 };
+        return {
+          async initialize() {
+            transfer.requests++;
+            transfer.downloadBytes += 100;
+          },
+          getMetadata() {
+            transfer.requests++;
+            transfer.downloadBytes += 50;
+            return new Promise(() => {});
+          },
+          async getSummary() {
+            transfer.requests++;
+            transfer.downloadBytes += 20;
+            return { rows: [1] };
+          },
+          getTransferStats: () => ({ ...transfer }),
+          dispose() {},
+        };
+      },
+    })
+  );
+
+  assert.deepEqual(run.transfer, {
+    requests: 6,
+    downloadBytes: 310,
+    startupBytes: 200,
+  });
+  const preloaded = await runBenchmark(
+    options({
+      ...configuration,
+      backend: "wasm",
+      preloadedDownload: { bytes: 1000 },
+    })
+  );
+  assert.deepEqual(preloaded.transfer, {
+    requests: 1,
+    downloadBytes: 1000,
+    startupBytes: 1000,
+  });
+});
