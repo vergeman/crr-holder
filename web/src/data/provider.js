@@ -15,7 +15,7 @@ function unwrap(response) {
   return response.data;
 }
 
-const httpProvider = {
+export const httpProvider = {
   async getContractHoldings(
     {
       reportId,

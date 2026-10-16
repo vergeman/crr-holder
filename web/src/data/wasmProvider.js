@@ -1,4 +1,7 @@
-function createProvider(backend) {
+export function createProvider(backend) {
+  let startup;
+  let lastTimings;
+  const lifetime = new AbortController();
   let worker;
   let database;
   let nextRequestId = 0;
@@ -9,11 +12,12 @@ function createProvider(backend) {
     worker = new Worker(new URL("./sqlite.worker.js", import.meta.url), {
       type: "module",
     });
-    worker.onmessage = ({ data: { id, result, error } }) => {
+    worker.onmessage = ({ data: { id, result, error, timings } }) => {
+      lastTimings = timings;
       const request = requests.get(id);
       if (!request) return;
       if (error) request.reject(new Error(error));
-      else request.resolve(result);
+      else request.resolve(result ?? timings);
     };
     worker.onerror = (event) => {
       for (const request of requests.values())
@@ -62,26 +66,43 @@ function createProvider(backend) {
   }
 
   async function loadDatabase() {
+    const initialized = performance.now();
     if (backend === "vfs") {
-      await requestWorker({ backend });
+      const workerTimings = await requestWorker({ backend });
+      startup = {
+        worker: workerTimings,
+        totalMs: performance.now() - initialized,
+      };
       return;
     }
     const started = performance.now();
-    const response = await fetch("/api/database", { cache: "no-store" });
+    const response = await fetch("/api/database", {
+      cache: "no-store",
+      signal: lifetime.signal,
+    });
     if (!response.ok)
       throw new Error(`Database download failed: ${response.status}`);
     const buffer = await response.arrayBuffer();
-    console.info("SQLite WASM download", {
+    const download = {
       bytes: buffer.byteLength,
       downloadMs: performance.now() - started,
-    });
-    await requestWorker({ buffer, backend }, undefined, Promise.resolve(), [
-      buffer,
-    ]);
+    };
+    const workerTimings = await requestWorker(
+      { buffer, backend },
+      undefined,
+      Promise.resolve(),
+      [buffer]
+    );
+    startup = {
+      download,
+      worker: workerTimings,
+      totalMs: performance.now() - initialized,
+    };
   }
 
   function execute(method, parameters, signal) {
     signal?.throwIfAborted();
+    lifetime.signal.throwIfAborted();
     database ??= loadDatabase().catch((error) => {
       database = undefined;
       throw error;
@@ -90,6 +111,20 @@ function createProvider(backend) {
   }
 
   return {
+    initialize() {
+      lifetime.signal.throwIfAborted();
+      database ??= loadDatabase();
+      return database.then(() => startup);
+    },
+    getTimings: () => lastTimings,
+    dispose() {
+      lifetime.abort();
+      for (const request of requests.values())
+        request.reject(lifetime.signal.reason);
+      worker?.terminate();
+      worker = undefined;
+      database = undefined;
+    },
     getSourceHoldings: (parameters, signal) =>
       execute("getSourceHoldings", parameters, signal),
     getMetadata: (parameters, signal) =>
