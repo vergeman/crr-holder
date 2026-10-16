@@ -2,7 +2,7 @@
 import unittest
 
 from fixtures import create_fixture_db
-from services.holdings import get_sink_holdings, get_source_holdings
+from services.crr_holdings import get_sink_holdings, get_source_holdings
 
 
 class SinkHoldingsTests(unittest.TestCase):

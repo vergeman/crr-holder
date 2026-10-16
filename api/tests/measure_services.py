@@ -22,7 +22,7 @@ os.environ['ENABLED_TIMED'] = '1'
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from database import open_database
-from services.holdings import get_contract_holdings, get_sink_holdings, get_source_holdings
+from services.crr_holdings import get_contract_holdings, get_sink_holdings, get_source_holdings
 from services.metadata import get_metadata
 from services.summary import get_summary
 

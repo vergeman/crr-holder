@@ -2,7 +2,7 @@
 import unittest
 
 from fixtures import HOLDINGS, POINTS, create_fixture_db
-from services.holdings import get_source_holdings
+from services.crr_holdings import get_source_holdings
 from services.summary import get_summary
 
 

@@ -10,7 +10,7 @@ from pathlib import Path
 import unittest
 
 from fixtures import HOLDINGS, create_fixture_db
-from services.holdings import get_contract_holdings, get_sink_holdings, get_source_holdings
+from services.crr_holdings import get_contract_holdings, get_sink_holdings, get_source_holdings
 from services.metadata import get_metadata
 from services.summary import get_summary
 import test_contracts

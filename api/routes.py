@@ -6,7 +6,7 @@ from pydantic import AfterValidator
 
 from database import open_database
 from models import Metadata, Summary, SourceHoldings, SinkHoldings, ContractHoldings
-from services.holdings import get_source_holdings, get_sink_holdings, get_contract_holdings
+from services.crr_holdings import get_source_holdings, get_sink_holdings, get_contract_holdings
 from services.metadata import get_metadata
 from services.summary import get_summary
 
