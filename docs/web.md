@@ -253,3 +253,48 @@ App
                     └── ContractRow
 
 ```
+
+## Browser services
+
+All five services are authored in `api/services/`, including inline SQL and
+response assembly. `bash scripts/generate-browser-services.sh` compiles them with
+Transcrypt 3.9.4 into ignored `web/src/generated/transcrypt/`. Run it after Python
+changes and before frontend development/build; Orval generation is separate.
+The compiler runs in the existing API container, with temporary build output.
+Only timing and SQLite connection annotations are stubbed.
+
+The worker invokes generated services through `sqliteAdapter.js` for both SQLite
+runtimes. Python compatibility changes use absolute imports, materialized
+enumeration, dictionary updates, and compensated contract totals. The worker makes
+Transcrypt's array extensions nonenumerable for SQLite 3.44 compatibility and
+normalizes generated dictionaries before transferring responses.
+
+The header defaults to WASM full download. `?provider=http|wasm|vfs` selects the
+backend; `metadata`, `summary`, `sources`, `sinks`, and `contracts` override
+individual methods. Changing the header clears overrides and reloads the page.
+Each browser provider uses one read-only database/worker per page session.
+Cancellation stops waiting for a response; synchronous SQLite work and a shared
+download may continue. No persistent database cache is used.
+
+`/api/database` supports GET, HEAD, and byte ranges. WASM uses SQLite
+3.53.4-build2; `sqlite-wasm-http` 1.2.0 bundles SQLite 3.44.2 for VFS. An indexed
+VFS contract query works, but the initial market-wide metadata scan previously
+failed to complete. The VFS page is not yet usable for ordinary startup.
+
+### Validation
+
+Use a local Chromium session with CDP enabled, then run:
+
+```sh
+python3 web/tests/check-browser-services.py --cdp http://localhost:9235
+```
+
+The checker uses the installed Python WebSocket client and running Compose
+services. It checks committed fixtures, real-data parity, desktop/narrow
+interactions, provider overrides/switching, cancellation, and one indexed VFS
+query. It records one warm-up and three measured samples per existing workload;
+SQL-adapter and orchestration timings are recorded separately;
+raw timings and browser events stay in `/tmp/0017-browser-services/`.
+API timings use `api/tests/measure_services.py --label 0017-transcrypt` inside
+the API container. Measurements and limitations are recorded in
+[plan 0017](plan/0017-transcrypt-browser-services.md).
