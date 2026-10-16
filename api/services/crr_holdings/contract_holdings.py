@@ -64,6 +64,21 @@ def _group_contract_segments(segments):
                   (-group['totalMwh'], group['accountHolder']))
 
 
+def _sum_holder_totals(account_holders):
+    # Preserve Python 3.12's compensated float sum in the generated runtime.
+    total = 0
+    correction = 0
+    for holder in account_holders:
+        value = holder['totalMwh']
+        following = total + value
+        if abs(total) >= abs(value):
+            correction += (total - following) + value
+        else:
+            correction += (value - following) + total
+        total = following
+    return total + correction
+
+
 @timed
 def get_contract_holdings(db, source, sink, month, hedge_type, report_id=None,
                          account_holder=None, settlement_point=None):
@@ -78,7 +93,7 @@ def get_contract_holdings(db, source, sink, month, hedge_type, report_id=None,
         db, report_id, account_holder, settlement_point, source, sink, month, hedge_type)
 
     account_holders = _group_contract_segments(segments)
-    total_mwh = sum(holder['totalMwh'] for holder in account_holders)
+    total_mwh = _sum_holder_totals(account_holders)
 
     return {"reportId": report_id, "source": source, "sink": sink,
             "deliveryMonth": month, "hedgeType": hedge_type,

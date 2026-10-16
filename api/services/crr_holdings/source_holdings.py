@@ -6,7 +6,7 @@ timeline, and the filtered portfolio's nonzero month bounds.
 from services.helpers import holdings_filter, resolve_report, summary_holdings_query
 from timing import timed
 
-from .helpers import delivery_months
+from services.crr_holdings.helpers import delivery_months
 
 
 def _query_portfolio_bounds(db, report_id, account_holder, settlement_point):
@@ -61,16 +61,18 @@ def _query_ranked_sources(db, report_id, account_holder, settlement_point, limit
 def _query_source_month_cells(db, report_id, account_holder, settlement_point, sources):
     """Return (source, delivery_month, hedge_type, mwh) for selected sources."""
     where, parameters = holdings_filter(report_id, account_holder, settlement_point)
-    source_parameters = {f"source_{i}": source for i, source in enumerate(sources)}
+    # Materialize enumeration for Transcrypt dictionary comprehensions.
+    source_parameters = {f"source_{i}": source for i, source in list(enumerate(sources))}
     placeholders = ', '.join(f":{key}" for key in source_parameters)
 
+    parameters.update(source_parameters)
     return db.execute(f"""
         -- Aggregate only the selected page, retaining the shared filters.
         SELECT source, delivery_month, hedge_type,
                SUM(peak_wd_mwh + peak_we_mwh + off_peak_mwh)
         FROM crr_monthly_holdings WHERE {where} AND source IN ({placeholders})
         GROUP BY source, delivery_month, hedge_type
-    """, parameters | source_parameters).fetchall()
+    """, parameters).fetchall()
 
 
 def _build_source_holdings(ranked_sources, months, monthly_totals):
