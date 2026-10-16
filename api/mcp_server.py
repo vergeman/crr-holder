@@ -2,6 +2,7 @@ from mcp.server import MCPServer
 from mcp.types import ToolAnnotations
 
 from database import open_database
+from mcp_usage import logged_tool
 from models import (Metadata, Summary, SourceHoldings, SinkHoldings, ContractHoldings,
                     DeliveryMonth, HedgeType, SourceLimit, SourceOffset)
 from services import crr_holdings, metadata, summary
@@ -13,6 +14,7 @@ read_only = ToolAnnotations(read_only_hint=True, open_world_hint=False)
 
 # SDK 2.3.0 offloads synchronous tools with anyio.to_thread.run_sync.
 @mcp.tool(annotations=read_only)
+@logged_tool
 def get_metadata(report_id: int | None = None,
                  account_holder: str | None = None) -> Metadata:
     """List reports, account holders, and settlement points for a portfolio."""
@@ -21,6 +23,7 @@ def get_metadata(report_id: int | None = None,
 
 
 @mcp.tool(annotations=read_only)
+@logged_tool
 def get_summary(report_id: int | None = None, account_holder: str | None = None,
                 settlement_point: str | None = None) -> Summary:
     """Summarize exposure, rankings, and geography for a portfolio."""
@@ -30,6 +33,7 @@ def get_summary(report_id: int | None = None, account_holder: str | None = None,
 
 
 @mcp.tool(annotations=read_only)
+@logged_tool
 def get_source_holdings(report_id: int | None = None,
                         account_holder: str | None = None,
                         settlement_point: str | None = None,
@@ -41,6 +45,7 @@ def get_source_holdings(report_id: int | None = None,
 
 
 @mcp.tool(annotations=read_only)
+@logged_tool
 def get_sink_holdings(source: str, report_id: int | None = None,
                       account_holder: str | None = None,
                       settlement_point: str | None = None) -> SinkHoldings:
@@ -51,6 +56,7 @@ def get_sink_holdings(source: str, report_id: int | None = None,
 
 
 @mcp.tool(annotations=read_only)
+@logged_tool
 def get_contract_holdings(source: str, sink: str, month: DeliveryMonth,
                           hedge_type: HedgeType, report_id: int | None = None,
                           account_holder: str | None = None,

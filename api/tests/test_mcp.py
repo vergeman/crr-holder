@@ -108,6 +108,7 @@ class McpTests(unittest.IsolatedAsyncioTestCase):
                 self.assertNotIn(event_loop_thread, database_threads)
 
                 await self.check_validation(client, http)
+                await self.check_usage(client)
 
                 # HTTP contracts remain accessible alongside the MCP mount.
                 with patch('routes.open_database', fixture_database):
@@ -134,7 +135,8 @@ class McpTests(unittest.IsolatedAsyncioTestCase):
                             valid | {field: value}))
 
         with patch('mcp_server.open_database') as database, \
-                patch('routes.open_database') as http_database:
+                patch('routes.open_database') as http_database, \
+                patch('mcp_usage.logger.info') as usage:
             for tool, route, parameters in invalid:
                 with self.subTest(tool=tool, parameters=parameters):
                     result = await client.call_tool(tool, parameters)
@@ -142,3 +144,43 @@ class McpTests(unittest.IsolatedAsyncioTestCase):
                     self.assertEqual((await http.get(route, params=parameters)).status_code, 422)
             database.assert_not_called()
             http_database.assert_not_called()
+            usage.assert_not_called()
+
+    async def check_usage(self, client):
+        with patch('mcp_usage.logger.info') as log:
+            success = await client.call_tool('get_metadata')
+            with patch('mcp_server.metadata.get_metadata', side_effect=RuntimeError('private')):
+                failure = await client.call_tool('get_metadata', {'account_holder': 'X'})
+
+        self.assertFalse(success.is_error)
+        self.assertTrue(failure.is_error)
+        records = [json.loads(call.args[0]) for call in log.call_args_list
+                   if call.args[0].startswith('{')]
+        self.assertEqual(len(records), 2)
+        for record, status in zip(records, ['success', 'error']):
+            self.assertEqual(set(record), {
+                'tool', 'parameters', 'status', 'elapsed_ms', 'cpu_ms',
+                'rss_before_bytes', 'rss_after_bytes',
+                'input_payload_bytes', 'output_payload_bytes',
+            } | ({'error_type'} if status == 'error' else set()))
+            self.assertEqual(record['tool'], 'get_metadata')
+            self.assertEqual(record['status'], status)
+            self.assertEqual(record['parameters'], {
+                'report_id': None, 'account_holder': 'X' if status == 'error' else None,
+            })
+            for field in ('elapsed_ms', 'cpu_ms'):
+                self.assertIsInstance(record[field], float)
+                self.assertGreaterEqual(record[field], 0)
+            for field in ('rss_before_bytes', 'rss_after_bytes'):
+                self.assertIsInstance(record[field], int)
+                self.assertGreater(record[field], 0)
+        self.assertEqual(records[1]['error_type'], 'RuntimeError')
+        self.assertEqual(records[0]['input_payload_bytes'],
+                         len(b'{"report_id":null,"account_holder":null}'))
+        self.assertEqual(records[1]['input_payload_bytes'],
+                         len(b'{"report_id":null,"account_holder":"X"}'))
+        expected = json.loads((RESPONSES / 'metadata.json').read_text())['market']
+        self.assertEqual(records[0]['output_payload_bytes'], len(json.dumps(
+            expected, ensure_ascii=False, separators=(',', ':')).encode('utf-8')))
+        self.assertIsNone(records[1]['output_payload_bytes'])
+        self.assertNotIn('private', json.dumps(records))
