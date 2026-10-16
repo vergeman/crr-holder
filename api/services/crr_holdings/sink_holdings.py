@@ -9,7 +9,7 @@ _query_sink_month_cells retrieves individual-month OPT/OBL totals for each sink.
 from services.helpers import holdings_filter, resolve_report
 from timing import timed
 
-from .helpers import delivery_months
+from services.crr_holdings.helpers import delivery_months
 
 
 def _query_ranked_sinks(db, report_id, account_holder, settlement_point, source):

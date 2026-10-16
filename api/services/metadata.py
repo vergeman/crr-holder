@@ -20,11 +20,14 @@ def _query_report_account_holders(db, report_id):
     """Return (account_holder, legal_name), ordered by holder identifier."""
     return db.execute(
         """
-        SELECT DISTINCT h.account_holder, a.legal_name
-        FROM crr_monthly_holdings h
-        JOIN account_holders a ON a.account_holder = h.account_holder
-        WHERE h.report_id = ?
-        ORDER BY h.account_holder
+        -- Seek one holding per directory account instead of scanning the report.
+        SELECT a.account_holder, a.legal_name
+        FROM account_holders a
+        WHERE EXISTS (
+            SELECT 1 FROM crr_monthly_holdings h
+            WHERE h.report_id = ? AND h.account_holder = a.account_holder
+        )
+        ORDER BY a.account_holder
         """,
         (report_id,),
     ).fetchall()

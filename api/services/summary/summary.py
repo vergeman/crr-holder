@@ -5,8 +5,8 @@ Top Settlement Points, and the map's geographic source/sink MWh totals.
 import sqlite3
 
 from services.helpers import summary_holdings_query, resolve_report
-from .top_settlement_points import get_settlement_point_summary
-from .top_account_holders import get_top_account_holders
+from services.summary.top_settlement_points import get_settlement_point_summary
+from services.summary.top_account_holders import get_top_account_holders
 from timing import timed
 
 
