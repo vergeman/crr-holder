@@ -3,7 +3,8 @@ from a CRR Holdings sink's monthly OPT/OBL cell. Show matching contract
 segments grouped by account holder and time of use, with MW, hours, and MWh.
 """
 
-from services.helpers import holdings_filter, resolve_report
+from services.helpers import resolve_report
+from sql import load_sql
 from timing import timed
 
 
@@ -14,27 +15,19 @@ def _query_contract_segments(db, report_id, account_holder, settlement_point,
     account_holder, legal_name, time_of_use, crr_id, segment_id, crr_type,
     start_date, end_date, mw, hours, month_mwh.
     """
-    where, parameters = holdings_filter(report_id, account_holder, settlement_point)
-    parameters.update(source=source, sink=sink, month=month, hedge_type=hedge_type)
-
-    return db.execute(f"""
-        -- Filter originals before enriching holders to keep predicates unambiguous.
-        WITH contracts AS (
-            SELECT * FROM crr_holdings WHERE {where}
-              AND source = :source AND sink = :sink AND hedge_type = :hedge_type
-        )
-        SELECT h.account_holder, a.legal_name, h.time_of_use,
-               h.crr_id, h.segment_id, h.crr_type, h.start_date, h.end_date,
-               h.mw, t.hours, h.mw * t.hours AS month_mwh
-        FROM contracts h
-        JOIN tou_hours t ON t.time_of_use = h.time_of_use
-                         AND t.delivery_month = :month
-                         -- Use the same inclusive month bounds as preparation.
-                         AND t.delivery_month BETWEEN h.start_date AND h.end_date
-        JOIN account_holders a ON a.account_holder = h.account_holder
-        -- Compare monthly MWh first, then contract and segment identifiers.
-        ORDER BY month_mwh DESC, h.crr_id ASC, h.segment_id ASC
-    """, parameters).fetchall()
+    parameters = {
+        "report_id": report_id,
+        "account_holder": account_holder or None,
+        "settlement_point": settlement_point or None,
+        "source": source,
+        "sink": sink,
+        "month": month,
+        "hedge_type": hedge_type,
+    }
+    statement = "crr_holdings/contract_segments.sql"
+    if account_holder:
+        statement = "crr_holdings/contract_segments_account.sql"
+    return db.execute(load_sql(statement), parameters).fetchall()
 
 
 def _group_contract_segments(segments):
