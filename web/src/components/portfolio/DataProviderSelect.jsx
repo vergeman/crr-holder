@@ -1,6 +1,6 @@
 export default function DataProviderSelect() {
   const parameters = new URLSearchParams(window.location.search);
-  const provider = parameters.get("provider") || "wasm";
+  const provider = parameters.get("provider") || "http";
 
   function changeProvider(event) {
     const url = new URL(window.location.href);

@@ -270,7 +270,7 @@ enumeration, dictionary updates, and compensated contract totals. The worker mak
 Transcrypt's array extensions nonenumerable for SQLite 3.44 compatibility and
 normalizes generated dictionaries before transferring responses.
 
-The header defaults to WASM full download. `?provider=http|wasm|vfs` selects the
+The header defaults to HTTP API. `?provider=http|wasm|vfs` selects the
 backend; `metadata`, `summary`, `sources`, `sinks`, and `contracts` override
 individual methods. Changing the header clears overrides and reloads the page.
 Each browser provider uses one read-only database/worker per page session.

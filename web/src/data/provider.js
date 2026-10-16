@@ -122,7 +122,7 @@ export const httpProvider = createHttpProvider();
 // Each data method can override the page's selected provider.
 const providers = new URLSearchParams(window.location.search);
 function selectProvider(parameter, method) {
-  const backend = providers.get(parameter) ?? providers.get("provider");
+  const backend = providers.get(parameter) ?? providers.get("provider") ?? "http";
   if (backend === "http") return httpProvider[method];
   if (backend === "vfs") return vfsProvider[method];
   return wasmProvider[method];
