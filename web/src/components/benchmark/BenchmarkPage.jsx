@@ -4,6 +4,8 @@ import { httpProvider } from "../../data/provider";
 import { createProvider, downloadDatabase } from "../../data/wasmProvider";
 import { createSuite } from "./suite";
 import { runBenchmark } from "./runner";
+import { BenchmarkResults } from "./BenchmarkResults";
+import "./benchmark.css";
 
 const suite = createSuite(inputs);
 
@@ -44,7 +46,13 @@ export function BenchmarkPage() {
         httpProvider,
         createProvider: (backend) => createProvider(backend, preloaded),
         preloadedDownload:
-          provider === "wasm" ? preloaded?.download : undefined,
+          provider === "wasm" && preloaded
+            ? {
+                ...preloaded.download,
+                estimated100Mbps50ms:
+                  (preloaded.download.bytes * 8) / 100000 + 50,
+              }
+            : undefined,
         networkLabel,
         timeoutMs: timeoutSeconds * 1000,
         passes,
@@ -116,7 +124,7 @@ export function BenchmarkPage() {
         Stop
       </button>
       <p role="status">{progress}</p>
-      <p>{runs.length} retained runs</p>
+      <BenchmarkResults runs={runs} preloaded={preloaded?.download} />
     </main>
   );
 }
