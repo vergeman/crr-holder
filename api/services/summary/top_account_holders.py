@@ -1,19 +1,16 @@
-# Imports
 import sqlite3
-
 
 from services.helpers import summary_holdings_query
 
 
-def get_top_account_holders(db: sqlite3.Connection, report_id, account_holder=None,
-                            settlement_point=None) -> list[dict]:
-    # Preparation
+def _query_top_account_holders(db, report_id, account_holder, settlement_point):
+    """Return (account_holder, legal_name, total_mwh), highest totals first."""
     holdings_sql, parameters = summary_holdings_query(
         report_id, account_holder, settlement_point
     )
 
-    # Transformation: aggregate inventory before joining directory names.
-    rows = db.execute(
+    # Aggregate inventory before joining directory names.
+    return db.execute(
         f"""
         -- Matching holdings from one publication snapshot.
         WITH holdings AS (
@@ -30,6 +27,11 @@ def get_top_account_holders(db: sqlite3.Connection, report_id, account_holder=No
         """, parameters,
     ).fetchall()
 
-    # Output
-    return [{"accountHolder": row[0], "legalName": row[1], "totalMwh": row[2]}
-            for row in rows]
+
+def get_top_account_holders(db: sqlite3.Connection, report_id, account_holder=None,
+                            settlement_point=None) -> list[dict]:
+    holder_totals = _query_top_account_holders(
+        db, report_id, account_holder, settlement_point)
+
+    return [{"accountHolder": holder, "legalName": legal_name, "totalMwh": total_mwh}
+            for holder, legal_name, total_mwh in holder_totals]
