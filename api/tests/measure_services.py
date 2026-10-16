@@ -36,7 +36,8 @@ SERVICES = {
     'contracts': get_contract_holdings,
 }
 # Fixed request inputs are versioned; large measured outputs stay outside Git.
-INPUTS_FILE = Path(__file__).resolve().parent / 'fixtures/measurement_inputs.json'
+# parents[2] is the repository root; the browser benchmark shares these inputs.
+INPUTS_FILE = Path(__file__).resolve().parents[2] / 'web/src/components/benchmark/measurement_inputs.json'
 OUTPUT_DIR = Path('/tmp/0013-query-performance')
 
 

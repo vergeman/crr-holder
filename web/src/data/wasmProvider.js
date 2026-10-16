@@ -1,4 +1,19 @@
-export function createProvider(backend) {
+export async function downloadDatabase(signal) {
+  const started = performance.now();
+  const response = await fetch("/api/database", { cache: "no-store", signal });
+  if (!response.ok)
+    throw new Error(`Database download failed: ${response.status}`);
+  const buffer = await response.arrayBuffer();
+  return {
+    buffer,
+    download: {
+      bytes: buffer.byteLength,
+      downloadMs: performance.now() - started,
+    },
+  };
+}
+
+export function createProvider(backend, preloaded) {
   let startup;
   let lastTimings;
   const lifetime = new AbortController();
@@ -75,18 +90,9 @@ export function createProvider(backend) {
       };
       return;
     }
-    const started = performance.now();
-    const response = await fetch("/api/database", {
-      cache: "no-store",
-      signal: lifetime.signal,
-    });
-    if (!response.ok)
-      throw new Error(`Database download failed: ${response.status}`);
-    const buffer = await response.arrayBuffer();
-    const download = {
-      bytes: buffer.byteLength,
-      downloadMs: performance.now() - started,
-    };
+    const { buffer, download } = preloaded
+      ? { buffer: preloaded.buffer.slice(0), download: preloaded.download }
+      : await downloadDatabase(lifetime.signal);
     const workerTimings = await requestWorker(
       { buffer, backend },
       undefined,
@@ -95,6 +101,7 @@ export function createProvider(backend) {
     );
     startup = {
       download,
+      preloaded: Boolean(preloaded),
       worker: workerTimings,
       totalMs: performance.now() - initialized,
     };
