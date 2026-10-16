@@ -1,8 +1,8 @@
-"""Shared report selection and portfolio SQL builders for metadata, holdings,
-and summary services. Query builders return SQL and bound values without executing.
-"""
+"""Shared report selection for service queries."""
 
 import sqlite3
+
+from sql import load_sql
 
 
 def resolve_report(db: sqlite3.Connection, report_id: int | None) -> int:
@@ -10,10 +10,7 @@ def resolve_report(db: sqlite3.Connection, report_id: int | None) -> int:
     if report_id is not None:
         return report_id
 
-    return db.execute(
-        "SELECT report_id FROM reports ORDER BY publication_date DESC, report_id DESC LIMIT 1"
-    ).fetchone()[0]
-
+    return db.execute(load_sql("resolve_report.sql")).fetchone()[0]
 
 def holdings_filter(report_id, account_holder=None, settlement_point=None):
     """Build optional portfolio predicates and bound values for holdings queries.
