@@ -11,7 +11,15 @@ from services.crr_holdings.helpers import delivery_months
 
 def _query_portfolio_bounds(db, report_id, account_holder, settlement_point):
     """Return (first_month, last_month) for nonzero portfolio inventory."""
-    where, parameters = holdings_filter(report_id, account_holder, settlement_point)
+    bounds_point = None if account_holder else settlement_point
+    where, parameters = holdings_filter(report_id, account_holder, bounds_point)
+    if account_holder:
+        # Keep the NULL guard for faster combined-filter bounds in browser SQLite.
+        where += (
+            " AND (:settlement_point IS NULL"
+            " OR source = :settlement_point OR sink = :settlement_point)"
+        )
+        parameters['settlement_point'] = settlement_point or None
 
     # Return the portfolio's first and last months with nonzero MWh.
     # Use date-ordered indexes to search from opposite ends, stopping at the

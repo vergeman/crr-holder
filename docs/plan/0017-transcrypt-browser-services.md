@@ -155,3 +155,16 @@ The indexed generated VFS contract query matched the API in 6.22 s. The initial
 market-wide metadata scan remains unresolved and was not repeated.
 Raw captures remain in `/tmp/0017-browser-services/` and API-container
 `/tmp/0013-query-performance/0017-transcrypt/`.
+
+## Follow-up: NULL-guard bounds
+
+Restored the optional settlement-point NULL guard in account-filtered source
+bounds. Combined-filter WASM pages improved from 26.5/26.4 ms to 4.2/3.2 ms.
+The predicate changes SQLite's query plan, making bounds lookups faster.
+
+## Follow-up: account-filter metadata
+
+Replaced the report-wide DISTINCT scan with indexed EXISTS lookups per account.
+Account-filtered metadata improved from 317.8 to 1.8 ms in the API and 452.1 to
+6.7 ms in WASM. The existing account index finds one matching holding per account
+instead of scanning every holding in the report.
