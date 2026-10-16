@@ -7,10 +7,12 @@
     "dev": "node scripts/dev.js"
   },
   "dependencies": {
+    "@sqlite.org/sqlite-wasm": "3.53.4-build2",
     "@tanstack/react-query": "5.104.2",
     "maplibre-gl": "6.14.0",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "sqlite-wasm-http": "1.2.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "6.1.2",

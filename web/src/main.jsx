@@ -1,4 +1,5 @@
 import {
+  DataProviderSelect,
   PortfolioOverview,
   PortfolioPanel,
   ReportSelector,
@@ -123,6 +124,7 @@ function CRRExplorer() {
           reportId={reportId}
           onReportSelect={changeReport}
         />
+        <DataProviderSelect />
       </header>
       {reportMetadata.isError && (
         <p role="alert">Unable to load report filters.</p>

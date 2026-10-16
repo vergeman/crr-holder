@@ -3,6 +3,9 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+  optimizeDeps: {
+    exclude: ["@sqlite.org/sqlite-wasm", "sqlite-wasm-http"],
+  },
   server: {
     proxy: {
       '/api': 'http://api:8000',
