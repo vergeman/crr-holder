@@ -16,7 +16,6 @@ export function BenchmarkPage() {
   const [passes, setPasses] = useState(3);
   const [runs, setRuns] = useState([]);
   const [preloaded, setPreloaded] = useState(null);
-  const [networkLabel, setNetworkLabel] = useState("Unshaped");
   const [progress, setProgress] = useState("");
   const [running, setRunning] = useState(false);
   const [downloading, setDownloading] = useState(false);
@@ -52,7 +51,6 @@ export function BenchmarkPage() {
                   (database.download.bytes * 8) / 100000 + latencyMs,
               }
             : undefined,
-        networkLabel,
         latencyMs,
         timeoutMs: timeoutSeconds * 1000,
         passes,
@@ -120,13 +118,6 @@ export function BenchmarkPage() {
             onChange={(event) => setLatencyMs(Number(event.target.value))}
           />
         </label>
-        <label>
-          Network profile
-          <input
-            value={networkLabel}
-            onChange={(event) => setNetworkLabel(event.target.value)}
-          />
-        </label>
         <button
           onClick={startBenchmark}
           disabled={
@@ -141,9 +132,11 @@ export function BenchmarkPage() {
         </button>
       </fieldset>
       <p>
-        JSON responses and full database downloads use gzip; VFS range requests
-        are uncompressed. Warm results measure repeated queries after the first
-        pass and one warm-up pass.
+        API latency is set above and applied in Vite’s proxy before each
+        benchmark request. JSON responses and full database downloads use gzip;
+        VFS range requests are uncompressed. Warm results measure repeated
+        queries after the first pass and one warm-up pass. VFS cannot finish
+        some endpoints within the timeout; those timeouts are expected.
       </p>
       <button disabled={!running} onClick={() => controller.current.abort()}>
         Stop

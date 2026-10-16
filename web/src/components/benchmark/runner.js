@@ -66,7 +66,6 @@ export async function runBenchmark({
   createProvider,
   timeoutMs = 10000,
   passes = 3,
-  networkLabel = "",
   latencyMs = 0,
   preloadedDownload,
   signal,
@@ -75,7 +74,6 @@ export async function runBenchmark({
   const run = {
     backend,
     timestamp: new Date().toISOString(),
-    networkLabel,
     latencyMs,
     timeoutMs,
     passes,

@@ -3,6 +3,7 @@ import { aggregate } from "./runner";
 
 const mb = (bytes) =>
   bytes == null ? "—" : `${(bytes / 1_000_000).toFixed(3)} MB`;
+const seconds = (value) => `${(value / 1000).toFixed(1)} s`;
 const ms = (value) => (value == null ? "—" : `${value.toFixed(1)} ms`);
 
 export function BenchmarkResults({ runs, preloaded }) {
@@ -21,12 +22,11 @@ export function BenchmarkResults({ runs, preloaded }) {
     <section aria-label="Benchmark results">
       {preloaded && (
         <p>
-          Downloaded {preloaded.bytes.toLocaleString()} bytes for the preload
+          WASM download: {mb(preloaded.bytes)} in{" "}
+          {seconds(preloaded.downloadMs)}
           {preloaded.databaseBytes != null &&
-            ` (${preloaded.databaseBytes.toLocaleString()} decoded database bytes)`}{" "}
-          in {ms(preloaded.downloadMs)}. Estimated transfer at 100 Mbit/s:{" "}
-          {ms((preloaded.bytes * 8) / 100000)} before added latency. Estimate
-          excludes protocol overhead and replaces no measured timing.
+            ` (${mb(preloaded.databaseBytes)} decoded)`}
+          .
         </p>
       )}
       <button disabled={!runs.length} onClick={downloadRuns}>
@@ -42,7 +42,6 @@ export function BenchmarkResults({ runs, preloaded }) {
           <thead>
             <tr>
               <th>Provider</th>
-              <th>Network</th>
               <th>API latency</th>
               <th>Status</th>
               <th>Completed</th>
@@ -77,7 +76,6 @@ export function BenchmarkResults({ runs, preloaded }) {
                       {run.backend} #{index + 1}
                     </a>
                   </td>
-                  <td>{run.networkLabel}</td>
                   <td>{ms(run.latencyMs ?? 0)}</td>
                   <td>{run.status}</td>
                   {["complete", "failed", "skipped"].map((status) => (
@@ -131,7 +129,7 @@ export function BenchmarkResults({ runs, preloaded }) {
       {runs.map((run, index) => (
         <article key={index} id={`run-${index}`}>
           <h2>
-            {run.backend} #{index + 1} · {run.networkLabel}
+            {run.backend} #{index + 1}
           </h2>
           <p>
             {run.timestamp} · {run.status}
@@ -139,14 +137,14 @@ export function BenchmarkResults({ runs, preloaded }) {
           </p>
           {run.preloadedDownload && (
             <p>
-              Used a preloaded database. Actual unshaped download:{" "}
-              {ms(run.preloadedDownload.downloadMs)}; estimated transfer at 100
+              WASM download: {mb(run.preloadedDownload.bytes)} in{" "}
+              {seconds(run.preloadedDownload.downloadMs)}. Estimate at 100
               Mbit/s + {run.latencyMs ?? 0} ms:{" "}
-              {ms(
+              {seconds(
                 (run.preloadedDownload.bytes * 8) / 100000 +
                   (run.latencyMs ?? 0)
               )}
-              . Download estimate is excluded from measured initialization.
+              .
             </p>
           )}
           <div
@@ -161,7 +159,7 @@ export function BenchmarkResults({ runs, preloaded }) {
                   <th>Before workload</th>
                   <th>Status</th>
                   <th>Initialization</th>
-                  <th>Download bytes / time</th>
+                  <th>Download / time</th>
                   <th>Runtime / DB open</th>
                   <th>Startup + first call</th>
                 </tr>
@@ -187,7 +185,7 @@ export function BenchmarkResults({ runs, preloaded }) {
                         {startup.timings?.preloaded
                           ? "Preloaded"
                           : startup.timings?.download
-                          ? `${startup.timings.download.bytes.toLocaleString()} / ${ms(
+                          ? `${mb(startup.timings.download.bytes)} / ${seconds(
                               startup.timings.download.downloadMs
                             )}`
                           : "—"}
