@@ -413,9 +413,3 @@ we have our original records:
 | XMEA1   | A      | B    | Nov   | OPT   |       150 |         0 |          75 |
 | XMEA1   | A      | B    | Dec   | OPT   |       150 |         0 |           0 |
 ```
-
-* Can profile and discuss whether this is in fact better, versus a raw query -
-  which we need to display the actual trades.
-
-* how to rationalize data column types (int, etc)
-* how to handle changes
