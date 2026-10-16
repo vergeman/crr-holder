@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import inputs from "./measurement_inputs.json";
-import { httpProvider } from "../../data/provider";
+import { createHttpProvider } from "../../data/provider";
 import { createProvider, downloadDatabase } from "../../data/wasmProvider";
 import { createSuite } from "./suite";
 import { runBenchmark } from "./runner";
@@ -12,6 +12,7 @@ const suite = createSuite(inputs);
 export function BenchmarkPage() {
   const [provider, setProvider] = useState("http");
   const [timeoutSeconds, setTimeoutSeconds] = useState(10);
+  const [latencyMs, setLatencyMs] = useState(50);
   const [passes, setPasses] = useState(3);
   const [runs, setRuns] = useState([]);
   const [preloaded, setPreloaded] = useState(null);
@@ -28,7 +29,7 @@ export function BenchmarkPage() {
     setProgress("Preloading WASM database without shaping");
     try {
       setPreloaded(await downloadDatabase(controller.current.signal));
-      setProgress("Database preloaded; shaping can now be enabled");
+      setProgress("Database preloaded; ready to benchmark");
     } catch (error) {
       setProgress(error.message);
     } finally {
@@ -43,17 +44,19 @@ export function BenchmarkPage() {
       const run = await runBenchmark({
         backend: provider,
         suite,
-        httpProvider,
-        createProvider: (backend) => createProvider(backend, preloaded),
+        httpProvider: createHttpProvider(latencyMs),
+        createProvider: (backend) =>
+          createProvider(backend, preloaded, latencyMs),
         preloadedDownload:
           provider === "wasm" && preloaded
             ? {
                 ...preloaded.download,
-                estimated100Mbps50ms:
-                  (preloaded.download.bytes * 8) / 100000 + 50,
+                estimated100MbpsMs:
+                  (preloaded.download.bytes * 8) / 100000 + latencyMs,
               }
             : undefined,
         networkLabel,
+        latencyMs,
         timeoutMs: timeoutSeconds * 1000,
         passes,
         signal: controller.current.signal,
@@ -104,6 +107,16 @@ export function BenchmarkPage() {
           />
         </label>
         <label>
+          API latency (ms)
+          <input
+            type="number"
+            min="0"
+            step="1"
+            value={latencyMs}
+            onChange={(event) => setLatencyMs(Number(event.target.value))}
+          />
+        </label>
+        <label>
           Network profile
           <input
             value={networkLabel}
@@ -114,12 +127,20 @@ export function BenchmarkPage() {
         <button
           onClick={startBenchmark}
           disabled={
-            timeoutSeconds < 1 || passes < 1 || !Number.isInteger(passes)
+            timeoutSeconds < 1 ||
+            passes < 1 ||
+            !Number.isInteger(passes) ||
+            latencyMs < 0 ||
+            !Number.isSafeInteger(latencyMs)
           }
         >
           Run benchmark
         </button>
       </fieldset>
+      <p>
+        API latency applies only to benchmark requests during a run. Normal app
+        requests and WASM preload have no added delay.
+      </p>
       <button disabled={!running} onClick={() => controller.current.abort()}>
         Stop
       </button>

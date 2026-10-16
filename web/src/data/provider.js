@@ -15,89 +15,100 @@ function unwrap(response) {
   return response.data;
 }
 
-export const httpProvider = {
-  async getContractHoldings(
-    {
-      reportId,
-      accountHolder,
-      settlementPoint,
-      source,
-      sink,
-      deliveryMonth,
-      hedgeType,
-    },
-    signal
-  ) {
-    return unwrap(
-      await getContractHoldings(
-        {
-          report_id: reportId,
-          source,
-          sink,
-          month: deliveryMonth,
-          hedge_type: hedgeType,
-          ...(accountHolder && { account_holder: accountHolder }),
-          ...(settlementPoint && { settlement_point: settlementPoint }),
-        },
-        { signal }
-      )
-    );
-  },
-  async getSinkHoldings(
-    { reportId, accountHolder, settlementPoint, source },
-    signal
-  ) {
-    return unwrap(
-      await getSinkHoldings(
+export function createHttpProvider(latencyMs = 0) {
+  const requestOptions = (signal) => ({
+    signal,
+    ...(latencyMs > 0 && {
+      headers: { "X-Benchmark-Latency-Ms": String(latencyMs) },
+    }),
+  });
+
+  return {
+    async getContractHoldings(
+      {
+        reportId,
+        accountHolder,
+        settlementPoint,
         source,
+        sink,
+        deliveryMonth,
+        hedgeType,
+      },
+      signal
+    ) {
+      return unwrap(
+        await getContractHoldings(
+          {
+            report_id: reportId,
+            source,
+            sink,
+            month: deliveryMonth,
+            hedge_type: hedgeType,
+            ...(accountHolder && { account_holder: accountHolder }),
+            ...(settlementPoint && { settlement_point: settlementPoint }),
+          },
+          requestOptions(signal)
+        )
+      );
+    },
+    async getSinkHoldings(
+      { reportId, accountHolder, settlementPoint, source },
+      signal
+    ) {
+      return unwrap(
+        await getSinkHoldings(
+          source,
+          {
+            report_id: reportId,
+            ...(accountHolder && { account_holder: accountHolder }),
+            ...(settlementPoint && { settlement_point: settlementPoint }),
+          },
+          requestOptions(signal)
+        )
+      );
+    },
+    async getSourceHoldings(
+      { reportId, accountHolder, settlementPoint, offset },
+      signal
+    ) {
+      return unwrap(
+        await getSourceHoldings(
+          {
+            report_id: reportId,
+            offset,
+            limit: 20,
+            ...(accountHolder && { account_holder: accountHolder }),
+            ...(settlementPoint && { settlement_point: settlementPoint }),
+          },
+          requestOptions(signal)
+        )
+      );
+    },
+    async getMetadata({ reportId, accountHolder }, signal) {
+      const response = await getMetadata(
+        {
+          ...(reportId != null && { report_id: reportId }),
+          ...(accountHolder && { account_holder: accountHolder }),
+        },
+        requestOptions(signal)
+      );
+      return unwrap(response);
+    },
+    async getSummary({ reportId, accountHolder, settlementPoint }, signal) {
+      const response = await getSummary(
         {
           report_id: reportId,
           ...(accountHolder && { account_holder: accountHolder }),
           ...(settlementPoint && { settlement_point: settlementPoint }),
         },
-        { signal }
-      )
-    );
-  },
-  async getSourceHoldings(
-    { reportId, accountHolder, settlementPoint, offset },
-    signal
-  ) {
-    return unwrap(
-      await getSourceHoldings(
-        {
-          report_id: reportId,
-          offset,
-          limit: 20,
-          ...(accountHolder && { account_holder: accountHolder }),
-          ...(settlementPoint && { settlement_point: settlementPoint }),
-        },
-        { signal }
-      )
-    );
-  },
-  async getMetadata({ reportId, accountHolder }, signal) {
-    const response = await getMetadata(
-      {
-        ...(reportId != null && { report_id: reportId }),
-        ...(accountHolder && { account_holder: accountHolder }),
-      },
-      { signal }
-    );
-    return unwrap(response);
-  },
-  async getSummary({ reportId, accountHolder, settlementPoint }, signal) {
-    const response = await getSummary(
-      {
-        report_id: reportId,
-        ...(accountHolder && { account_holder: accountHolder }),
-        ...(settlementPoint && { settlement_point: settlementPoint }),
-      },
-      { signal }
-    );
-    return unwrap(response);
-  },
-};
+        requestOptions(signal)
+      );
+      return unwrap(response);
+    },
+  };
+}
+
+export const httpProvider = createHttpProvider();
 
 // Each data method can override the page's selected provider.
 const providers = new URLSearchParams(window.location.search);

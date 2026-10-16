@@ -1,4 +1,5 @@
 import React from "react";
+import { aggregate } from "./runner";
 
 const ms = (value) => (value == null ? "—" : `${value.toFixed(1)} ms`);
 
@@ -20,7 +21,7 @@ export function BenchmarkResults({ runs, preloaded }) {
         <p>
           Preloaded {preloaded.bytes.toLocaleString()} bytes in{" "}
           {ms(preloaded.downloadMs)}. Estimated transfer at 100 Mbit/s:{" "}
-          {ms((preloaded.bytes * 8) / 100000)} plus 50 ms added delay. Estimate
+          {ms((preloaded.bytes * 8) / 100000)} before added latency. Estimate
           excludes protocol overhead and replaces no measured timing.
         </p>
       )}
@@ -28,9 +29,9 @@ export function BenchmarkResults({ runs, preloaded }) {
         Download JSON
       </button>
       <p>
-        Fresh workers reset SQLite state, not server or OS caches. Network
-        shaping is external. Warm statistics exclude first calls and warm-up
-        passes.
+        Fresh workers reset SQLite state, not server or OS caches. Network delay
+        is applied by the development proxy and does not limit bandwidth. Warm
+        statistics exclude first calls and warm-up passes.
       </p>
       <div
         className="benchmark-table"
@@ -43,35 +44,80 @@ export function BenchmarkResults({ runs, preloaded }) {
             <tr>
               <th>Provider</th>
               <th>Network</th>
+              <th>API latency</th>
               <th>Status</th>
               <th>Completed</th>
               <th>Failed</th>
               <th>Skipped</th>
+              <th>Total initialization</th>
+              <th>First-pass total</th>
+              <th>Warm call median</th>
+              <th>Warm call p95</th>
             </tr>
           </thead>
           <tbody>
-            {runs.map((run, index) => (
-              <tr key={index}>
-                <td>
-                  <a href={`#run-${index}`}>
-                    {run.backend} #{index + 1}
-                  </a>
-                </td>
-                <td>{run.networkLabel}</td>
-                <td>{run.status}</td>
-                {["complete", "failed", "skipped"].map((status) => (
-                  <td key={status}>
-                    {
-                      run.results.filter((result) => result.status === status)
-                        .length
-                    }
+            {runs.map((run, index) => {
+              const samples = run.results.flatMap((result) => result.samples);
+              const firstPass = samples.filter((sample) =>
+                ["first", "first-call"].includes(sample.phase)
+              );
+              const warm = aggregate(
+                samples
+                  .filter((sample) => typeof sample.phase === "number")
+                  .map((sample) => sample.clientMs)
+              );
+
+              return (
+                <tr key={index}>
+                  <td>
+                    <a href={`#run-${index}`}>
+                      {run.backend} #{index + 1}
+                    </a>
                   </td>
-                ))}
-              </tr>
-            ))}
+                  <td>{run.networkLabel}</td>
+                  <td>{ms(run.latencyMs ?? 0)}</td>
+                  <td>{run.status}</td>
+                  {["complete", "failed", "skipped"].map((status) => (
+                    <td key={status}>
+                      {
+                        run.results.filter((result) => result.status === status)
+                          .length
+                      }
+                    </td>
+                  ))}
+                  <td>
+                    {ms(
+                      run.startups.length
+                        ? run.startups.reduce(
+                            (total, startup) => total + startup.totalMs,
+                            0
+                          )
+                        : null
+                    )}
+                  </td>
+                  <td>
+                    {ms(
+                      firstPass.length
+                        ? firstPass.reduce(
+                            (total, sample) => total + sample.clientMs,
+                            0
+                          )
+                        : null
+                    )}
+                  </td>
+                  <td>{ms(warm?.median)}</td>
+                  <td>{ms(warm?.p95)}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
+      <p>
+        Totals include recorded initialization and first-pass calls. Warm median
+        and p95 pool all recorded warm query calls. Failed and skipped calls
+        have no query samples; compare runs with matching workload coverage.
+      </p>
       {runs.map((run, index) => (
         <article key={index} id={`run-${index}`}>
           <h2>
@@ -85,9 +131,12 @@ export function BenchmarkResults({ runs, preloaded }) {
             <p>
               Used a preloaded database. Actual unshaped download:{" "}
               {ms(run.preloadedDownload.downloadMs)}; estimated transfer at 100
-              Mbit/s + 50 ms:{" "}
-              {ms((run.preloadedDownload.bytes * 8) / 100000 + 50)}. Download
-              estimate is excluded from measured initialization.
+              Mbit/s + {run.latencyMs ?? 0} ms:{" "}
+              {ms(
+                (run.preloadedDownload.bytes * 8) / 100000 +
+                  (run.latencyMs ?? 0)
+              )}
+              . Download estimate is excluded from measured initialization.
             </p>
           )}
           <div

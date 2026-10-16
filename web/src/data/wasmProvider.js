@@ -1,6 +1,9 @@
-export async function downloadDatabase(signal) {
+export async function downloadDatabase(signal, latencyMs = 0) {
   const started = performance.now();
-  const response = await fetch("/api/database", { cache: "no-store", signal });
+  const response = await fetch(
+    latencyMs > 0 ? `/api/_benchmark/${latencyMs}/database` : "/api/database",
+    { cache: "no-store", signal }
+  );
   if (!response.ok)
     throw new Error(`Database download failed: ${response.status}`);
   const buffer = await response.arrayBuffer();
@@ -13,7 +16,7 @@ export async function downloadDatabase(signal) {
   };
 }
 
-export function createProvider(backend, preloaded) {
+export function createProvider(backend, preloaded, latencyMs = 0) {
   let startup;
   let lastTimings;
   const lifetime = new AbortController();
@@ -83,7 +86,7 @@ export function createProvider(backend, preloaded) {
   async function loadDatabase() {
     const initialized = performance.now();
     if (backend === "vfs") {
-      const workerTimings = await requestWorker({ backend });
+      const workerTimings = await requestWorker({ backend, latencyMs });
       startup = {
         worker: workerTimings,
         totalMs: performance.now() - initialized,
@@ -92,7 +95,7 @@ export function createProvider(backend, preloaded) {
     }
     const { buffer, download } = preloaded
       ? { buffer: preloaded.buffer.slice(0), download: preloaded.download }
-      : await downloadDatabase(lifetime.signal);
+      : await downloadDatabase(lifetime.signal, latencyMs);
     const workerTimings = await requestWorker(
       { buffer, backend },
       undefined,
