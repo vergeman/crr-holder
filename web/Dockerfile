@@ -6,4 +6,4 @@ RUN npm ci && chown -R node:node /app/node_modules
 
 COPY . .
 USER node
-CMD ["npm", "run", "dev"]
+CMD ["sh", "-c", "npm ci && exec npm run dev"]
