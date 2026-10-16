@@ -14,20 +14,43 @@ for (const name of Object.keys(Array.prototype)) {
 
 async function initializeSQLite(backend) {
   if (backend === "vfs") {
-    const { initSyncSQLite, createHttpBackend } =
-      await import("sqlite-wasm-http");
+    const { initSyncSQLite, createHttpBackend } = await import(
+      "sqlite-wasm-http"
+    );
     return initSyncSQLite({ http: createHttpBackend({ backendType: "sync" }) });
   }
   return sqlite3InitModule({ locateFile: () => sqliteWasmUrl });
 }
 
-async function loadDatabase(buffer, backend) {
+async function loadDatabase(
+  buffer,
+  backend,
+  latencyMs = 0,
+  trackTransfer = false
+) {
   const started = performance.now();
+  if (backend === "vfs" && trackTransfer) {
+    // Report completed range bytes while synchronous SQL is still running.
+    self.XMLHttpRequest = class extends XMLHttpRequest {
+      send(body) {
+        self.postMessage({ transfer: { requests: 1, downloadBytes: 0 } });
+        super.send(body);
+        if (this.response instanceof ArrayBuffer)
+          self.postMessage({
+            transfer: { requests: 0, downloadBytes: this.response.byteLength },
+          });
+      }
+    };
+  }
   const sqlite3 = await initializeSQLite(backend);
   const openStarted = performance.now();
   let db;
   if (backend === "vfs") {
-    const url = new URL("/api/database", self.location.origin).href;
+    const path =
+      latencyMs > 0 || trackTransfer
+        ? `/api/_benchmark/${latencyMs}/database`
+        : "/api/database";
+    const url = new URL(path, self.location.origin).href;
     db = new sqlite3.oo1.DB(`file:${encodeURI(url)}`, "r", "http");
   } else {
     const bytes = new Uint8Array(buffer);
@@ -103,11 +126,16 @@ function execute(
 }
 
 self.onmessage = async ({
-  data: { id, buffer, backend, method, parameters },
+  data: { id, buffer, backend, method, parameters, latencyMs, trackTransfer },
 }) => {
   try {
     if (backend) {
-      const timings = await loadDatabase(buffer, backend);
+      const timings = await loadDatabase(
+        buffer,
+        backend,
+        latencyMs,
+        trackTransfer
+      );
       self.postMessage({ id, timings });
       return;
     }

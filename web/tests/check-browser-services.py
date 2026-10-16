@@ -186,7 +186,7 @@ def check_fixtures(browser):
 
 
 def check_real_data(browser):
-    inputs = json.loads((ROOT / 'api/tests/fixtures/measurement_inputs.json').read_text())
+    inputs = json.loads((ROOT / 'web/src/components/benchmark/measurement_inputs.json').read_text())
     result = browser.evaluate('''(async () => {
   const inputs = INPUTS;
   const methods = METHODS;
@@ -344,7 +344,7 @@ def check_real_data(browser):
 
 
 def check_vfs(browser):
-    inputs = json.loads((ROOT / 'api/tests/fixtures/measurement_inputs.json').read_text())
+    inputs = json.loads((ROOT / 'web/src/components/benchmark/measurement_inputs.json').read_text())
     result = browser.evaluate('''(async () => {
   const inputs = INPUTS;
   const equal = (actual, expected, name) => {

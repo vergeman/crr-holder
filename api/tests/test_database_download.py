@@ -1,6 +1,8 @@
 """Check the database transport needed by SQLite's HTTP VFS."""
 
 import asyncio
+import gzip
+import json
 from pathlib import Path
 import tempfile
 import unittest
@@ -20,7 +22,7 @@ class DatabaseDownloadTests(unittest.TestCase):
         environment.start()
         self.addCleanup(environment.stop)
 
-    def request(self, method, headers=()):
+    def request(self, method, headers=(), path="/api/database"):
         async def execute():
             messages = []
 
@@ -33,7 +35,7 @@ class DatabaseDownloadTests(unittest.TestCase):
             await app({
                 "type": "http", "http_version": "1.1", "method": method,
                 "asgi": {"spec_version": "2.4"},
-                "scheme": "http", "path": "/api/database", "query_string": b"",
+                "scheme": "http", "path": path, "query_string": b"",
                 "headers": list(headers), "server": ("test", 80),
                 "client": ("test", 1), "root_path": "",
             }, receive, send)
@@ -45,20 +47,24 @@ class DatabaseDownloadTests(unittest.TestCase):
         return asyncio.run(execute())
 
     def test_head_reports_file_size_without_body(self):
-        status, headers, body = self.request("HEAD")
+        status, headers, body = self.request("HEAD", [(b"accept-encoding", b"gzip")])
 
         self.assertEqual(status, 200)
         self.assertEqual(headers[b"content-length"], b"256")
         self.assertEqual(headers[b"accept-ranges"], b"bytes")
         self.assertEqual(body, b"")
+        self.assertNotIn(b"content-encoding", headers)
 
     def test_range_returns_exact_file_bytes(self):
-        status, headers, body = self.request("GET", [(b"range", b"bytes=16-31")])
+        status, headers, body = self.request("GET", [
+            (b"range", b"bytes=16-31"), (b"accept-encoding", b"gzip"),
+        ])
 
         self.assertEqual(status, 206)
         self.assertEqual(headers[b"content-range"], b"bytes 16-31/256")
         self.assertEqual(headers[b"content-length"], b"16")
         self.assertEqual(body, self.contents[16:32])
+        self.assertNotIn(b"content-encoding", headers)
 
     def test_unsatisfiable_range_reports_file_size(self):
         status, headers, body = self.request("GET", [(b"range", b"bytes=256-300")])
@@ -66,3 +72,24 @@ class DatabaseDownloadTests(unittest.TestCase):
         self.assertEqual(status, 416)
         self.assertEqual(headers[b"content-range"], b"bytes */256")
         self.assertEqual(body, b"")
+
+    def test_full_database_download_is_gzipped(self):
+        contents = self.contents * 32
+        self.path.write_bytes(contents)
+
+        status, headers, body = self.request("GET", [(b"accept-encoding", b"gzip")])
+
+        self.assertEqual(status, 200)
+        self.assertEqual(headers[b"content-encoding"], b"gzip")
+        self.assertEqual(gzip.decompress(body), contents)
+        self.assertLess(len(body), len(contents))
+
+    def test_json_response_is_gzipped(self):
+        status, headers, body = self.request(
+            "GET", [(b"accept-encoding", b"gzip")], path="/openapi.json",
+        )
+
+        self.assertEqual(status, 200)
+        self.assertEqual(headers[b"content-encoding"], b"gzip")
+        self.assertIn("openapi", json.loads(gzip.decompress(body)))
+        self.assertEqual(int(headers[b"content-length"]), len(body))

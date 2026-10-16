@@ -1,0 +1,88 @@
+body {
+  margin: 0;
+  background: #f5f7fa;
+  color: #172b45;
+  font: 14px/1.4 system-ui, sans-serif;
+}
+main {
+  max-width: 1500px;
+  padding: 20px;
+  margin: auto;
+}
+fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  margin-bottom: 12px;
+  border: 1px solid #bac6d4;
+}
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+input,
+select,
+button {
+  padding: 6px 10px;
+  font: inherit;
+}
+input {
+  width: 150px;
+}
+button {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: default;
+}
+article {
+  margin-top: 22px;
+  border-top: 2px solid #bac6d4;
+}
+.benchmark-table {
+  overflow-x: auto;
+  margin: 12px 0;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+caption {
+  text-align: left;
+  font-weight: bold;
+  padding: 6px 0;
+}
+th,
+td {
+  padding: 7px;
+  border: 1px solid #d3dce6;
+  text-align: left;
+  vertical-align: top;
+}
+th {
+  background: #e8eef6;
+}
+pre {
+  max-width: 360px;
+  max-height: 300px;
+  overflow: auto;
+}
+@media (max-width: 600px) {
+  main {
+    padding: 12px;
+  }
+  fieldset {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  input {
+    width: auto;
+    min-width: 0;
+  }
+  h1 {
+    font-size: 1.45rem;
+  }
+}
