@@ -1,22 +1,11 @@
-from datetime import date
-from typing import Annotated, Literal
-
-from fastapi import APIRouter, Query
-from pydantic import AfterValidator
+from fastapi import APIRouter
 
 from database import open_database
-from models import Metadata, Summary, SourceHoldings, SinkHoldings, ContractHoldings
+from models import (Metadata, Summary, SourceHoldings, SinkHoldings, ContractHoldings,
+                    DeliveryMonth, HedgeType, SourceLimit, SourceOffset)
 from services.crr_holdings import get_source_holdings, get_sink_holdings, get_contract_holdings
 from services.metadata import get_metadata
 from services.summary import get_summary
-
-
-def validate_delivery_month(value):
-    # Accept only real first-of-month ISO dates.
-    parsed = date.fromisoformat(value)
-    if parsed.day != 1 or parsed.isoformat() != value:
-        raise ValueError('Use a first-of-month ISO date (YYYY-MM-01).')
-    return value
 
 
 router = APIRouter()
@@ -41,8 +30,8 @@ def summary(report_id: int | None = None, account_holder: str | None = None,
 def source_holdings(report_id: int | None = None,
                     account_holder: str | None = None,
                     settlement_point: str | None = None,
-                    limit: int = Query(20, ge=1, le=100),
-                    offset: int = Query(0, ge=0)):
+                    limit: SourceLimit = 20,
+                    offset: SourceOffset = 0):
     with open_database() as db:
         return get_source_holdings(db, report_id, account_holder,
                                    settlement_point, limit, offset)
@@ -62,9 +51,8 @@ def sink_holdings(source: str, report_id: int | None = None,
 @router.get("/api/holdings/contracts", response_model=ContractHoldings,
          operation_id="getContractHoldings")
 def contract_holdings(source: str, sink: str,
-                      month: Annotated[str, Query(pattern=r'^\d{4}-\d{2}-01$'),
-                                       AfterValidator(validate_delivery_month)],
-                      hedge_type: Literal['OPT', 'OBL'],
+                      month: DeliveryMonth,
+                      hedge_type: HedgeType,
                       report_id: int | None = None,
                       account_holder: str | None = None,
                       settlement_point: str | None = None):

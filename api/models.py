@@ -1,6 +1,22 @@
-from typing import Literal
+from datetime import date
+from typing import Annotated, Literal
 
-from pydantic import BaseModel
+from pydantic import AfterValidator, BaseModel, Field
+
+
+def validate_delivery_month(value):
+    # Accept only real first-of-month ISO dates.
+    parsed = date.fromisoformat(value)
+    if parsed.day != 1 or parsed.isoformat() != value:
+        raise ValueError('Use a first-of-month ISO date (YYYY-MM-01).')
+    return value
+
+
+DeliveryMonth = Annotated[str, Field(pattern=r'^\d{4}-\d{2}-01$'),
+                          AfterValidator(validate_delivery_month)]
+SourceLimit = Annotated[int, Field(ge=1, le=100)]
+SourceOffset = Annotated[int, Field(ge=0)]
+HedgeType = Literal['OPT', 'OBL']
 
 
 # Response models also define the generated HTTP contract.
