@@ -61,7 +61,7 @@ Depends on: [0013 - Query Performance](0013-query-performance.md)
   optimized SQL strategies, and timing annotations.
 
 * SQL extraction and cross-runtime parameter handling belong to
-  [0015 - Shared Service SQL](0015-shared-service-sql.md). Add no ORM, browser
+  [0015 - Experimental Shared Service SQL](0015-experimental-shared-service-sql.md). Add no ORM, browser
   implementation, schema changes, dependencies, or generic query framework here.
 
 * Treat acceptance and verification as closed lists. Ask before adding unplanned

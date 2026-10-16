@@ -21,8 +21,16 @@ The web development command waits for the API and generates HTTP code/types in
 `web/src/generated/` before starting Vite. It checks the OpenAPI schema every
 two seconds and regenerates on changes; failures are printed and retried.
 Keep handwritten provider and query hooks in `web/src/data/`, outside the
-replaceable generated directory. The provider selection is the swap point for
-future browser SQLite and VFS access.
+replaceable generated directory.
+
+This branch retains the [shared SQL experiment](docs/plan/0015-experimental-shared-service-sql.md).
+Browser execution duplicates Python service orchestration, and the initial
+real-market VFS metadata scan did not complete before testing was canceled.
+The provider selection is the swap point for
+browser SQLite and VFS access. All five query methods use a shared WASM worker;
+open `/?provider=http` for the HTTP comparison or `/?provider=vfs` for the
+HTTP range-reading VFS experiment. See
+[the data-access notes](web/src/README.md) for download and timing details.
 After dependency changes, rebuild and refresh the frontend dependency volume:
 
 ```sh
