@@ -37,6 +37,12 @@ def main():
 
         with tarfile.open(fileobj=sys.stdout.buffer, mode="w|") as archive:
             for module in sorted((stage / "__target__").glob("*.js")):
+                # Transcrypt emits map references even when maps are disabled.
+                lines = module.read_text().splitlines()
+                module.write_text("\n".join(
+                    line for line in lines
+                    if not line.startswith("//# sourceMappingURL=")
+                ) + "\n")
                 archive.add(module, arcname=module.name)
 
 
