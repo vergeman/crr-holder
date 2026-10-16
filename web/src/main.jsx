@@ -1,4 +1,5 @@
 import {
+  DataProviderSelect,
   PortfolioOverview,
   PortfolioPanel,
   ReportSelector,
@@ -118,6 +119,7 @@ function CRRExplorer() {
           loading={portfolioLoading}
         />
         <Legend />
+        <DataProviderSelect />
         <ReportSelector
           reportMetadata={reportMetadata}
           reportId={reportId}

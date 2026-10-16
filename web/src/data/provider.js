@@ -1,4 +1,3 @@
-// Imports
 import {
   getMetadata,
   getSummary,
@@ -6,6 +5,7 @@ import {
   getSinkHoldings,
   getContractHoldings,
 } from "../generated/client";
+import { wasmProvider, vfsProvider } from "./wasmProvider";
 
 // Transformation: HTTP details stay outside the query hooks and UI.
 function unwrap(response) {
@@ -99,5 +99,20 @@ const httpProvider = {
   },
 };
 
-// Output: swap the HTTP provider here for browser SQLite or VFS in Sprint 5.
-export const dataProvider = httpProvider;
+// Each data method can override the page's selected provider.
+const providers = new URLSearchParams(window.location.search);
+function selectProvider(parameter, method) {
+  const backend = providers.get(parameter) ?? providers.get("provider");
+  if (backend === "http") return httpProvider[method];
+  if (backend === "vfs") return vfsProvider[method];
+  return wasmProvider[method];
+}
+
+export const dataProvider = {
+  ...httpProvider,
+  getSourceHoldings: selectProvider("sources", "getSourceHoldings"),
+  getMetadata: selectProvider("metadata", "getMetadata"),
+  getSummary: selectProvider("summary", "getSummary"),
+  getSinkHoldings: selectProvider("sinks", "getSinkHoldings"),
+  getContractHoldings: selectProvider("contracts", "getContractHoldings"),
+};
