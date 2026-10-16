@@ -257,10 +257,11 @@ App
 ## Browser services
 
 All five services are authored in `api/services/`, including inline SQL and
-response assembly. `bash scripts/generate-browser-services.sh` compiles them with
-Transcrypt 3.9.4 into ignored `web/src/generated/transcrypt/`. Run it after Python
-changes and before frontend development/build; Orval generation is separate.
-The compiler runs in the existing API container, with temporary build output.
+response assembly. The API startup script compiles them with Transcrypt 3.9.4
+into a Docker volume mounted at `web/src/generated/transcrypt/` in the web
+container. After Python changes, run `bash scripts/generate-browser-services.sh`
+or restart the API container. Orval generation runs separately during web startup.
+The compiler runs in the API container, with temporary build output.
 Only timing and SQLite connection annotations are stubbed.
 
 The worker invokes generated services through `sqliteAdapter.js` for both SQLite
