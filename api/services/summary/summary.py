@@ -4,36 +4,27 @@ Top Settlement Points, and the map's geographic source/sink MWh totals.
 
 import sqlite3
 
-from services.helpers import summary_holdings_query, resolve_report
-from .top_settlement_points import get_settlement_point_summary
-from .top_account_holders import get_top_account_holders
+from services.helpers import resolve_report
+from sql import load_sql
 from timing import timed
+
+from .top_account_holders import get_top_account_holders
+from .top_settlement_points import get_settlement_point_summary
 
 
 def _query_portfolio_metrics(db, report_id, account_holder, settlement_point):
     """Return (total_mwh, holder_count, directed_path_count, opt_mwh, obl_mwh)."""
-    holdings_sql, parameters = summary_holdings_query(
-        report_id, account_holder, settlement_point
-    )
-
-    # Filter holdings for the Portfolio Summary panel's totals,
-    # holder/source-sink counts, and OPT/OBL mix.
-    return db.execute(
-        f"""
-        WITH holdings AS MATERIALIZED (
-            {holdings_sql}
-        ), source_sink AS (
-            -- Count A-to-B and B-to-A as distinct ordered source-sink pairs.
-            SELECT DISTINCT source, sink FROM holdings
-        )
-        SELECT COALESCE(SUM(mwh), 0), COUNT(DISTINCT account_holder),
-               (SELECT COUNT(*) FROM source_sink),
-               COALESCE(SUM(CASE WHEN hedge_type = 'OPT' THEN mwh ELSE 0 END), 0),
-               COALESCE(SUM(CASE WHEN hedge_type = 'OBL' THEN mwh ELSE 0 END), 0)
-        FROM holdings
-        """,
-        parameters,
-    ).fetchone()
+    parameters = {
+        "report_id": report_id,
+        "account_holder": account_holder or None,
+        "settlement_point": settlement_point or None,
+    }
+    statement = "summary/portfolio_metrics.sql"
+    if settlement_point:
+        statement = "summary/portfolio_metrics_point.sql"
+    if account_holder:
+        statement = statement.removesuffix(".sql") + "_account.sql"
+    return db.execute(load_sql(statement), parameters).fetchone()
 
 
 @timed

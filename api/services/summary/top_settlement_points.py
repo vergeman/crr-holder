@@ -1,4 +1,4 @@
-from services.helpers import summary_holdings_query
+from sql import load_sql
 
 
 def _query_settlement_point_totals(db, report_id, account_holder, settlement_point):
@@ -6,34 +6,17 @@ def _query_settlement_point_totals(db, report_id, account_holder, settlement_poi
 
     Rows are ordered by point; total_mwh counts a self path once for rankings.
     """
-    # Filter inventory before expanding its two endpoint roles.
-    holdings_sql, parameters = summary_holdings_query(
-        report_id, account_holder, settlement_point
-    )
-
-    return db.execute(f"""
-        -- One publication and the shared portfolio predicates.
-        WITH holdings AS MATERIALIZED (
-            SELECT source, sink, mwh FROM ({holdings_sql})
-        ), roles AS (
-            SELECT source AS point, mwh AS source_mwh, 0 AS sink_mwh,
-                   mwh AS ranking_mwh FROM holdings
-            UNION ALL
-            -- Self paths count in both geographic roles, but once in rankings.
-            SELECT sink AS point, 0 AS source_mwh, mwh AS sink_mwh,
-                   CASE WHEN source != sink THEN mwh ELSE 0 END AS ranking_mwh
-            FROM holdings
-        ), totals AS (
-            SELECT point, SUM(source_mwh) AS source_mwh, SUM(sink_mwh) AS sink_mwh,
-                   SUM(ranking_mwh) AS total_mwh
-            FROM roles GROUP BY point
-        )
-        SELECT t.point, s.longitude, s.latitude, t.source_mwh, t.sink_mwh, t.total_mwh
-        FROM totals t
-        LEFT JOIN settlement_points s ON s.settlement_point = t.point
-        -- Compare identifiers for stable, complete output.
-        ORDER BY t.point
-    """, parameters).fetchall()
+    parameters = {
+        "report_id": report_id,
+        "account_holder": account_holder or None,
+        "settlement_point": settlement_point or None,
+    }
+    statement = "summary/settlement_point_totals.sql"
+    if settlement_point:
+        statement = "summary/settlement_point_totals_point.sql"
+    if account_holder:
+        statement = statement.removesuffix(".sql") + "_account.sql"
+    return db.execute(load_sql(statement), parameters).fetchall()
 
 
 def _build_settlement_point_summary(point_totals):
