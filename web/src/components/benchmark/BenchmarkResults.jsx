@@ -138,13 +138,7 @@ export function BenchmarkResults({ runs, preloaded }) {
           {run.preloadedDownload && (
             <p>
               WASM download: {mb(run.preloadedDownload.bytes)} in{" "}
-              {seconds(run.preloadedDownload.downloadMs)}. Estimate at 100
-              Mbit/s + {run.latencyMs ?? 0} ms:{" "}
-              {seconds(
-                (run.preloadedDownload.bytes * 8) / 100000 +
-                  (run.latencyMs ?? 0)
-              )}
-              .
+              {seconds(run.preloadedDownload.downloadMs)}.
             </p>
           )}
           <div

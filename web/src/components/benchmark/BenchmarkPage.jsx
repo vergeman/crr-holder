@@ -43,14 +43,7 @@ export function BenchmarkPage() {
         httpProvider: createHttpProvider(latencyMs, true),
         createProvider: (backend) =>
           createProvider(backend, database, latencyMs, true),
-        preloadedDownload:
-          provider === "wasm" && database
-            ? {
-                ...database.download,
-                estimated100MbpsMs:
-                  (database.download.bytes * 8) / 100000 + latencyMs,
-              }
-            : undefined,
+        preloadedDownload: provider === "wasm" ? database.download : undefined,
         latencyMs,
         timeoutMs: timeoutSeconds * 1000,
         passes,
