@@ -1,42 +1,33 @@
 # CRR holdings explorer development
 
-Use the existing `db/crr/crr.sqlite`. If absent, run the Docker preparation
-commands in [the dataset README](db/crr/README.md) once.
+Prerequisite: ports 8000 and 5173 must be available.
 
-From the repository root:
+1. Install Docker with Docker Compose and start Docker.
+2. Clone this repository and open Bash in the repository root.
+3. Prepare the database (skip if `db/crr/crr.sqlite` already exists):
 
-```sh
-docker compose up --remove-orphans
-```
+   The database build step is defined in [db/crr/Dockerfile](db/crr/Dockerfile),
+   which runs `prepare_dataset.py` to create `crr.sqlite`.
 
-Use the installed modern Compose command. Legacy `docker-compose` can fail with
-`ContainerConfig` on recent Docker Engines when recreating existing containers.
+   ```sh
+   docker build -t crr-dataset db/crr
+   docker run --rm --user "$(id -u):$(id -g)" \
+     --mount type=bind,src="$(pwd)/data",dst=/data,readonly \
+     --mount type=bind,src="$(pwd)/db/crr",dst=/output \
+     crr-dataset --data-dir /data --output /output/crr.sqlite
+   ```
 
-With the services running, install frontend dependencies and generate browser
-services before opening the app:
+4. Build and start the app:
 
-```sh
-docker compose exec -T web npm ci
-bash scripts/generate-browser-services.sh
-```
+   ```sh
+   docker compose ps
+   docker compose build
+   docker compose up --remove-orphans
+   ```
 
-Regenerate after changing Python services and before `npx vite build`. The script
-installs the pinned compiler in the API container and exports ignored JavaScript
-artifacts; do not edit those artifacts.
+5. Wait for Vite to report ready, then open http://localhost:5173.
+6. Stop with Ctrl+C, then remove the containers:
 
-Open http://localhost:5173 to explore report and portfolio summaries.
-The API endpoints are http://localhost:8000/api/metadata and
-http://localhost:8000/api/summary.
-
-Host source edits reload FastAPI and update React automatically.
-The web development command waits for the API and generates HTTP code/types in
-`web/src/generated/` before starting Vite. It checks the OpenAPI schema every
-two seconds and regenerates on changes; failures are printed and retried.
-Keep handwritten provider and query hooks in `web/src/data/`, outside the
-replaceable generated directory. The header selects WASM (default), HTTP API, or
-HTTP range VFS. WASM downloads the database once per page session; VFS's market-wide startup scan remains
-unusable. See [browser services](docs/web.md#browser-services).
-After frontend dependency changes, run `docker compose exec -T web npm ci`.
-Inspect `docker compose ps` and reuse running services; rebuild only when needed.
-
-Stop with Ctrl+C, then remove the containers with `docker compose down`.
+   ```sh
+   docker compose down
+   ```

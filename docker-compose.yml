@@ -11,6 +11,7 @@ services:
     volumes:
       - ./api:/app
       - ./db/crr:/data:ro
+      - browser_services:/browser-services
 
   web:
     build: ./web
@@ -19,6 +20,8 @@ services:
     volumes:
       - ./web:/app
       - web_node_modules:/app/node_modules
+      - browser_services:/app/src/generated/transcrypt:ro
 
 volumes:
   web_node_modules:
+  browser_services:

@@ -10,5 +10,8 @@ JavaScript.
   It removes unused source-map references and streams the generated JavaScript
   modules as a tar archive for the generation script to unpack.
 
-Run `./scripts/generate-browser-services.sh` from the repository root to build
-and copy the JavaScript into `web/src/generated/transcrypt/`.
+The API startup script compiles these modules automatically into the Docker volume
+mounted at `web/src/generated/transcrypt/` in the web container.
+
+Run `bash scripts/generate-browser-services.sh` from the repository root to
+regenerate them while the services are running.
