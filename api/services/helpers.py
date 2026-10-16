@@ -1,7 +1,12 @@
+"""Shared report selection and portfolio SQL builders for metadata, holdings,
+and summary services. Query builders return SQL and bound values without executing.
+"""
+
 import sqlite3
 
 
 def resolve_report(db: sqlite3.Connection, report_id: int | None) -> int:
+    """Use the requested report, or select the latest for service entry points."""
     if report_id is not None:
         return report_id
 
@@ -10,9 +15,12 @@ def resolve_report(db: sqlite3.Connection, report_id: int | None) -> int:
     ).fetchone()[0]
 
 
-# Preparation: shared bound predicates for summary and ranking queries.
 def holdings_filter(report_id, account_holder=None, settlement_point=None):
-    # Preparation: use identical bound predicates for metrics and both rankings.
+    """Build optional portfolio predicates and bound values for holdings queries.
+
+    Used by source, sink, and contract queries, and summary_holdings_query.
+    A settlement point matches either endpoint; omitted filters impose no limit.
+    """
     filters = ["report_id = :report_id"]
     if account_holder:
         filters.append("account_holder = :account_holder")
@@ -26,7 +34,17 @@ def holdings_filter(report_id, account_holder=None, settlement_point=None):
 
 
 def summary_holdings_query(report_id, account_holder=None, settlement_point=None):
-    """Return aggregate holdings SQL and bound portfolio parameters."""
+    """Build filtered holdings SQL for summary metrics and rankings.
+
+    Used by summary.py, top_account_holders.py, top_settlement_points.py,
+    and source_holdings.py's source ranking query.
+
+    Read preaggregated MWh from crr_summary_holdings, where months and TOU
+    are already collapsed. Point filters use separate source and sink lookups
+    so each branch can use its index. UNION ALL avoids deduplication work;
+    excluding self paths from the sink branch counts each holding once.
+    Return SQL and bound parameters for the caller to embed and execute.
+    """
     where, parameters = holdings_filter(report_id, account_holder)
     parameters['settlement_point'] = settlement_point or None
     sql = f"""

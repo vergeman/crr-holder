@@ -1,13 +1,17 @@
 from services.helpers import summary_holdings_query
 
 
-def get_settlement_point_summary(db, report_id, account_holder=None, settlement_point=None):
+def _query_settlement_point_totals(db, report_id, account_holder, settlement_point):
+    """Return (point, longitude, latitude, source_mwh, sink_mwh, total_mwh).
+
+    Rows are ordered by point; total_mwh counts a self path once for rankings.
+    """
     # Filter inventory before expanding its two endpoint roles.
     holdings_sql, parameters = summary_holdings_query(
         report_id, account_holder, settlement_point
     )
 
-    rows = db.execute(f"""
+    return db.execute(f"""
         -- One publication and the shared portfolio predicates.
         WITH holdings AS MATERIALIZED (
             SELECT source, sink, mwh FROM ({holdings_sql})
@@ -31,11 +35,27 @@ def get_settlement_point_summary(db, report_id, account_holder=None, settlement_
         ORDER BY t.point
     """, parameters).fetchall()
 
+
+def _build_settlement_point_summary(point_totals):
+    """Build complete geography and the top 100 rankings from shared point rows."""
     # Missing coordinates do not remove inventory from reconciliation.
-    geography = [dict(zip(('settlementPoint', 'longitude', 'latitude', 'sourceMwh', 'sinkMwh'), row))
-                 for row in rows]
+    geography = [
+        {"settlementPoint": point, "longitude": longitude, "latitude": latitude,
+         "sourceMwh": source_mwh, "sinkMwh": sink_mwh}
+        for point, longitude, latitude, source_mwh, sink_mwh, total_mwh in point_totals
+    ]
 
     # Rank the same points by MWh, then identifier to resolve ties.
-    ranked_rows = sorted(rows, key=lambda row: (-row[5], row[0]))[:100]
-    rankings = [{"settlementPoint": row[0], "totalMwh": row[5]} for row in ranked_rows]
+    ranked_points = sorted(point_totals, key=lambda row: (-row[5], row[0]))[:100]
+    rankings = [
+        {"settlementPoint": point, "totalMwh": total_mwh}
+        for point, longitude, latitude, source_mwh, sink_mwh, total_mwh in ranked_points
+    ]
     return geography, rankings
+
+
+def get_settlement_point_summary(db, report_id, account_holder=None, settlement_point=None):
+    point_totals = _query_settlement_point_totals(
+        db, report_id, account_holder, settlement_point)
+
+    return _build_settlement_point_summary(point_totals)
