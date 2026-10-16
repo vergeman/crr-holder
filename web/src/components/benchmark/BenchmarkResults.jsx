@@ -21,8 +21,10 @@ export function BenchmarkResults({ runs, preloaded }) {
     <section aria-label="Benchmark results">
       {preloaded && (
         <p>
-          Preloaded {preloaded.bytes.toLocaleString()} bytes in{" "}
-          {ms(preloaded.downloadMs)}. Estimated transfer at 100 Mbit/s:{" "}
+          Downloaded {preloaded.bytes.toLocaleString()} bytes for the preload
+          {preloaded.databaseBytes != null &&
+            ` (${preloaded.databaseBytes.toLocaleString()} decoded database bytes)`}{" "}
+          in {ms(preloaded.downloadMs)}. Estimated transfer at 100 Mbit/s:{" "}
           {ms((preloaded.bytes * 8) / 100000)} before added latency. Estimate
           excludes protocol overhead and replaces no measured timing.
         </p>
@@ -137,12 +139,12 @@ export function BenchmarkResults({ runs, preloaded }) {
         have no query samples; compare runs with matching workload coverage.
       </p>
       <p>
-        Downloads count API response-body bytes, excluding headers, protocol
-        overhead, and HTTP correctness baselines. Query traffic includes warm-up
-        and measured passes. Each WASM comparison includes one blob download,
-        even when preloaded and reused. Interrupted responses may be missing
-        partial bytes. MB uses 1,000,000 bytes; worker runtime and page assets
-        are excluded.
+        Downloads count encoded API response-body bytes after compression,
+        excluding headers, protocol overhead, and HTTP correctness baselines.
+        Query traffic includes warm-up and measured passes. Each WASM comparison
+        includes one blob download, even when preloaded and reused. Interrupted
+        responses may be missing partial bytes. MB uses 1,000,000 bytes; worker
+        runtime and page assets are excluded.
       </p>
       {runs.map((run, index) => (
         <article key={index} id={`run-${index}`}>

@@ -1,19 +1,37 @@
 export async function downloadDatabase(signal, latencyMs = 0) {
   const started = performance.now();
-  const response = await fetch(
-    latencyMs > 0 ? `/api/_benchmark/${latencyMs}/database` : "/api/database",
-    { cache: "no-store", signal }
-  );
-  if (!response.ok)
-    throw new Error(`Database download failed: ${response.status}`);
-  const buffer = await response.arrayBuffer();
-  return {
-    buffer,
-    download: {
-      bytes: buffer.byteLength,
-      downloadMs: performance.now() - started,
-    },
-  };
+  const path =
+    latencyMs > 0 ? `/api/_benchmark/${latencyMs}/database` : "/api/database";
+  const url = new URL(path, window.location.origin).href;
+  let recordTransfer;
+  const transferred = new Promise((resolve) => {
+    recordTransfer = resolve;
+  });
+  const observer = new PerformanceObserver((list) => {
+    const entry = list
+      .getEntries()
+      .find((entry) => entry.name === url && entry.startTime >= started);
+    if (entry) recordTransfer(entry.encodedBodySize);
+  });
+  // Streaming gzip has no Content-Length; the browser records encoded body bytes.
+  observer.observe({ type: "resource" });
+
+  try {
+    const response = await fetch(url, { cache: "no-store", signal });
+    if (!response.ok)
+      throw new Error(`Database download failed: ${response.status}`);
+    const buffer = await response.arrayBuffer();
+    return {
+      buffer,
+      download: {
+        bytes: await transferred,
+        databaseBytes: buffer.byteLength,
+        downloadMs: performance.now() - started,
+      },
+    };
+  } finally {
+    observer.disconnect();
+  }
 }
 
 export function createProvider(
