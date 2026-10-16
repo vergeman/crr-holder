@@ -6,7 +6,8 @@ _query_ranked_sinks retrieves OPT/OBL totals across all months for ranking;
 _query_sink_month_cells retrieves individual-month OPT/OBL totals for each sink.
 """
 
-from services.helpers import holdings_filter, resolve_report
+from services.helpers import resolve_report
+from sql import load_sql
 from timing import timed
 
 from .helpers import delivery_months
@@ -17,21 +18,16 @@ def _query_ranked_sinks(db, report_id, account_holder, settlement_point, source)
 
     Return (sink, total_opt_mwh, total_obl_mwh), highest combined totals first.
     """
-    where, parameters = holdings_filter(report_id, account_holder, settlement_point)
-    where += " AND source = :source"
-    parameters['source'] = source
-
-    return db.execute(f"""
-        -- Rank full-horizon sinks by combined MWh, then identifier for ties.
-        SELECT sink,
-               SUM(CASE WHEN hedge_type = 'OPT'
-                   THEN peak_wd_mwh + peak_we_mwh + off_peak_mwh ELSE 0 END) AS total_opt_mwh,
-               SUM(CASE WHEN hedge_type = 'OBL'
-                   THEN peak_wd_mwh + peak_we_mwh + off_peak_mwh ELSE 0 END) AS total_obl_mwh
-        FROM crr_monthly_holdings WHERE {where}
-        GROUP BY sink
-        ORDER BY total_opt_mwh + total_obl_mwh DESC, sink ASC
-    """, parameters).fetchall()
+    parameters = {
+        "report_id": report_id,
+        "account_holder": account_holder or None,
+        "settlement_point": settlement_point or None,
+        "source": source,
+    }
+    statement = "crr_holdings/ranked_sinks.sql"
+    if account_holder:
+        statement = "crr_holdings/ranked_sinks_account.sql"
+    return db.execute(load_sql(statement), parameters).fetchall()
 
 
 def _query_sink_month_cells(db, report_id, account_holder, settlement_point, source):
@@ -39,17 +35,16 @@ def _query_sink_month_cells(db, report_id, account_holder, settlement_point, sou
 
     Return (sink, delivery_month, hedge_type, mwh) for monthly table cells.
     """
-    where, parameters = holdings_filter(report_id, account_holder, settlement_point)
-    where += " AND source = :source"
-    parameters['source'] = source
-
-    return db.execute(f"""
-        -- Keep the same predicates for monthly cells and full-horizon totals.
-        SELECT sink, delivery_month, hedge_type,
-               SUM(peak_wd_mwh + peak_we_mwh + off_peak_mwh)
-        FROM crr_monthly_holdings WHERE {where}
-        GROUP BY sink, delivery_month, hedge_type
-    """, parameters).fetchall()
+    parameters = {
+        "report_id": report_id,
+        "account_holder": account_holder or None,
+        "settlement_point": settlement_point or None,
+        "source": source,
+    }
+    statement = "crr_holdings/sink_month_cells.sql"
+    if account_holder:
+        statement = "crr_holdings/sink_month_cells_account.sql"
+    return db.execute(load_sql(statement), parameters).fetchall()
 
 
 def _build_sink_holdings(ranked_sinks, months, monthly_totals):
