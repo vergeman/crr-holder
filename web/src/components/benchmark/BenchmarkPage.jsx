@@ -131,13 +131,24 @@ export function BenchmarkPage() {
           Run benchmark
         </button>
       </fieldset>
-      <p>
-        API latency is set above and applied in Vite’s proxy before each
-        benchmark request. JSON responses and full database downloads use gzip;
-        VFS range requests are uncompressed. Warm results measure repeated
-        queries after the first pass and one warm-up pass. VFS cannot finish
-        some endpoints within the timeout; those timeouts are expected.
-      </p>
+      <ul>
+        <li>
+          API latency is set above and applied in Vite’s proxy before each
+          benchmark request.
+        </li>
+        <li>
+          JSON responses and full database downloads use gzip; VFS range
+          requests are uncompressed.
+        </li>
+        <li>
+          Warm results measure repeated queries after the first pass and one
+          warm-up pass.
+        </li>
+        <li>
+          VFS cannot finish some endpoints within the timeout; those timeouts
+          are expected.
+        </li>
+      </ul>
       <button disabled={!running} onClick={() => controller.current.abort()}>
         Stop
       </button>
