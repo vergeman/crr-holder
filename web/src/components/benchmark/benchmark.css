@@ -2,19 +2,19 @@ body {
   margin: 0;
   background: #f5f7fa;
   color: #172b45;
-  font: 16px/1.5 system-ui, sans-serif;
+  font: 14px/1.4 system-ui, sans-serif;
 }
 main {
   max-width: 1500px;
-  padding: 24px;
+  padding: 20px;
   margin: auto;
 }
 fieldset {
   display: flex;
   flex-wrap: wrap;
   align-items: end;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 12px;
+  margin-bottom: 12px;
   border: 1px solid #bac6d4;
 }
 label {
@@ -25,11 +25,11 @@ label {
 input,
 select,
 button {
-  padding: 8px 12px;
+  padding: 6px 10px;
   font: inherit;
 }
 input {
-  width: 180px;
+  width: 150px;
 }
 button {
   cursor: pointer;
@@ -38,12 +38,12 @@ button:disabled {
   cursor: default;
 }
 article {
-  margin-top: 28px;
+  margin-top: 22px;
   border-top: 2px solid #bac6d4;
 }
 .benchmark-table {
   overflow-x: auto;
-  margin: 16px 0;
+  margin: 12px 0;
 }
 table {
   width: 100%;
@@ -53,11 +53,11 @@ table {
 caption {
   text-align: left;
   font-weight: bold;
-  padding: 8px 0;
+  padding: 6px 0;
 }
 th,
 td {
-  padding: 10px;
+  padding: 7px;
   border: 1px solid #d3dce6;
   text-align: left;
   vertical-align: top;
@@ -83,6 +83,6 @@ pre {
     min-width: 0;
   }
   h1 {
-    font-size: 1.65rem;
+    font-size: 1.45rem;
   }
 }
